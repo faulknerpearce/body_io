@@ -43,20 +43,36 @@ async function handleAuthorizationCode(env: OAuthEnv, params: URLSearchParams): 
 
   const payload = await verifyPayload<AuthCodePayload>(env.OAUTH_SIGNING_SECRET, code)
   if (!payload || payload.typ !== 'auth_code') {
-    return Response.json({ error: 'invalid_grant', error_description: 'Invalid or expired code' }, { status: 400 })
+    return Response.json(
+      { error: 'invalid_grant', error_description: 'Invalid or expired code' },
+      { status: 400 },
+    )
   }
 
   if (payload.client_id !== clientId) {
-    return Response.json({ error: 'invalid_grant', error_description: 'client_id mismatch' }, { status: 400 })
+    return Response.json(
+      { error: 'invalid_grant', error_description: 'client_id mismatch' },
+      { status: 400 },
+    )
   }
 
   if (!redirectUriMatches(payload.redirect_uri, redirectUri)) {
-    return Response.json({ error: 'invalid_grant', error_description: 'redirect_uri mismatch' }, { status: 400 })
+    return Response.json(
+      { error: 'invalid_grant', error_description: 'redirect_uri mismatch' },
+      { status: 400 },
+    )
   }
 
-  const pkceOk = await verifyPkce(codeVerifier, payload.code_challenge, payload.code_challenge_method)
+  const pkceOk = await verifyPkce(
+    codeVerifier,
+    payload.code_challenge,
+    payload.code_challenge_method,
+  )
   if (!pkceOk) {
-    return Response.json({ error: 'invalid_grant', error_description: 'PKCE verification failed' }, { status: 400 })
+    return Response.json(
+      { error: 'invalid_grant', error_description: 'PKCE verification failed' },
+      { status: 400 },
+    )
   }
 
   return tokenResponse(payload.access_token, payload.refresh_token)
@@ -93,7 +109,10 @@ export async function handleToken(request: Request, env: OAuthEnv): Promise<Resp
   }
 
   if (!env.OAUTH_SIGNING_SECRET) {
-    return Response.json({ error: 'server_error', error_description: 'OAuth not configured' }, { status: 500 })
+    return Response.json(
+      { error: 'server_error', error_description: 'OAuth not configured' },
+      { status: 500 },
+    )
   }
 
   const params = await parseTokenBody(request)

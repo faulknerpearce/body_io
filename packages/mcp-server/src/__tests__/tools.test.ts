@@ -6,9 +6,10 @@ describe('MCP tool schemas', () => {
   it('validates every tool against the MCP ToolSchema', () => {
     for (const tool of tools) {
       const result = ToolSchema.safeParse(tool)
-      expect(result.success, JSON.stringify(result.success ? null : result.error.issues, null, 2)).toBe(
-        true,
-      )
+      expect(
+        result.success,
+        JSON.stringify(result.success ? null : result.error.issues, null, 2),
+      ).toBe(true)
     }
   })
 

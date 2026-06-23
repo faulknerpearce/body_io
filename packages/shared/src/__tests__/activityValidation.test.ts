@@ -22,8 +22,8 @@ describe('validateActivity', () => {
   it('requires name, activityType, and movingTimeSeconds', () => {
     expect(validateActivity({}).ok).toBe(false)
     expect(validateActivity({ name: 'Run', activityType: 'Run' }).ok).toBe(false)
-    expect(
-      validateActivity({ name: 'Run', activityType: 'Run', movingTimeSeconds: 0 }).ok,
-    ).toBe(false)
+    expect(validateActivity({ name: 'Run', activityType: 'Run', movingTimeSeconds: 0 }).ok).toBe(
+      false,
+    )
   })
 })

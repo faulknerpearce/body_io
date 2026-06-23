@@ -9,8 +9,9 @@
   "scripts": {
     "build:shared": "npm run build -w @nutrition-tracker/shared",
     "build:mcp-server": "npm run build -w @nutrition-tracker/mcp-server",
+    "setup:env": "node -e \"const fs=require('fs'),path=require('path');const dest=path.join('packages','mcp-server','.env');if(!fs.existsSync(dest)){fs.copyFileSync(path.join('packages','mcp-server','.env.example'),dest);console.log('Created '+dest+' from .env.example. Fill in your Supabase credentials before running dev:mcp.');}\"",
     "dev": "npm run build:shared && npm run dev -w @nutrition-tracker/web",
-    "dev:mcp": "npm run build:shared && npm run dev -w @nutrition-tracker/mcp-server",
+    "dev:mcp": "npm run setup:env && npm run build:shared && npm run dev -w @nutrition-tracker/mcp-server",
     "prebuild": "npm run build:shared && npm run build:mcp-server",
     "build": "npm run build -w @nutrition-tracker/web",
     "pretypecheck": "npm run build:shared",

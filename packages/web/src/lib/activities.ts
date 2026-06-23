@@ -79,12 +79,7 @@ export async function addActivity(input: NewActivity): Promise<Activity> {
   const parsed = parseActivityInput(input as Record<string, unknown>)
   if (!parsed.ok) throw new Error(parsed.error)
 
-  const activity = buildActivityInsertPayload(
-    parsed.value,
-    crypto.randomUUID(),
-    userId,
-    todayISO(),
-  )
+  const activity = buildActivityInsertPayload(parsed.value, crypto.randomUUID(), userId, todayISO())
   const { data, error } = await supabase.from('activities').insert(activity).select().single()
   if (error) throw new Error(error.message)
   return mapActivityRow(data)

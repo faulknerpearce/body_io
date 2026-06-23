@@ -138,9 +138,21 @@ describe('handleMcp HTTP integration', () => {
     expect((toolsListBody as { error?: unknown }).error).toBeUndefined()
 
     const tools = (toolsListBody as { result: { tools: { name: string }[] } }).result.tools
-    expect(tools).toHaveLength(10)
-
-
+    const toolNames = tools.map((t) => t.name)
+    expect(toolNames).toEqual(
+      expect.arrayContaining([
+        'list_food_entries',
+        'add_food_entry',
+        'update_food_entry',
+        'delete_food_entry',
+        'get_daily_totals',
+        'list_activities',
+        'add_activity',
+        'update_activity',
+        'delete_activity',
+        'get_activity_totals',
+      ]),
+    )
   })
 
   it('returns 401 when Authorization header is missing', async () => {

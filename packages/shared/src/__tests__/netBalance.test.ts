@@ -16,20 +16,20 @@ describe('computeNetBalance', () => {
     const balance = computeNetBalance(2000, 0, low, high)
     expect(balance.status).toBe('under')
     expect(balance.remainingToLow).toBe(800)
-    expect(balance.contextMessage).toContain('800')
+    expect(balance.contextMessage).toMatch(/800/)
   })
 
   it('reports in range when net is between low and high', () => {
     const balance = computeNetBalance(3000, 0, low, high)
     expect(balance.status).toBe('in_range')
-    expect(balance.contextMessage).toContain('Within')
+    expect(balance.contextMessage).toMatch(/Within/)
   })
 
   it('reports over target when net exceeds high', () => {
     const balance = computeNetBalance(3500, 0, low, high)
     expect(balance.status).toBe('over')
     expect(balance.overHighBy).toBe(300)
-    expect(balance.contextMessage).toContain('300')
+    expect(balance.contextMessage).toMatch(/300/)
   })
 
   it('handles no activities logged', () => {

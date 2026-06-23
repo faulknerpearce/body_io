@@ -133,7 +133,10 @@ async function issueAuthCode(
 
 export async function handleAuthorize(request: Request, env: OAuthEnv): Promise<Response> {
   if (!env.OAUTH_SIGNING_SECRET) {
-    return Response.json({ error: 'server_error', error_description: 'OAuth not configured' }, { status: 500 })
+    return Response.json(
+      { error: 'server_error', error_description: 'OAuth not configured' },
+      { status: 500 },
+    )
   }
 
   if (request.method === 'GET') {

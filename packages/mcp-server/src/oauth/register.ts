@@ -11,7 +11,10 @@ export async function handleRegister(request: Request, _env: OAuthEnv): Promise<
   try {
     body = (await request.json()) as Partial<RegisteredClient>
   } catch {
-    return Response.json({ error: 'invalid_request', error_description: 'Invalid JSON' }, { status: 400 })
+    return Response.json(
+      { error: 'invalid_request', error_description: 'Invalid JSON' },
+      { status: 400 },
+    )
   }
 
   const redirectUris = body.redirect_uris ?? []

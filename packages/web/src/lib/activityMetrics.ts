@@ -14,7 +14,9 @@ export interface ActivityMetricConfig {
   iconClass: string
 }
 
-export function buildActivityMetricConfigs(activities: readonly Activity[]): ActivityMetricConfig[] {
+export function buildActivityMetricConfigs(
+  activities: readonly Activity[],
+): ActivityMetricConfig[] {
   const totals = sumActivityTotals(activities)
   const count = activities.length
 
@@ -22,7 +24,10 @@ export function buildActivityMetricConfigs(activities: readonly Activity[]): Act
     {
       label: 'Calories Burned',
       value: totals.calories > 0 ? totals.calories.toLocaleString() : '0',
-      detail: count > 0 ? `from ${count} ${count === 1 ? 'activity' : 'activities'}` : 'no activities logged',
+      detail:
+        count > 0
+          ? `from ${count} ${count === 1 ? 'activity' : 'activities'}`
+          : 'no activities logged',
       color: '#ea580c',
       iconBg: '#fed7aa',
       iconClass: 'fa-fire',
