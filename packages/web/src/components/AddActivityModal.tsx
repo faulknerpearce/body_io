@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { validateActivity, type Activity, type NewActivity } from '@nutrition-tracker/shared'
 import { inputBase, labelBase } from '../lib/styles'
+import Modal from './Modal'
 
 const ACTIVITY_TYPES = ['Run', 'Ride', 'Swim', 'Walk', 'Hike', 'Workout', 'Other'] as const
 
@@ -138,32 +139,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="activity-form-title"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-      }}
-      onClick={close}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: 24,
-          padding: 32,
-          width: '90%',
-          maxWidth: 480,
-          boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal titleId="activity-form-title" onClose={close}>
         <h3
           id="activity-form-title"
           style={{
@@ -229,7 +205,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
           </select>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <div className="modal-form-grid" style={{ marginBottom: 16 }}>
           <div>
             <label htmlFor="activity-duration" style={labelBase}>
               Duration (min)
@@ -345,7 +321,6 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
                 : 'Log Activity'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }

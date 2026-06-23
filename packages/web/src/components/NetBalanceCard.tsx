@@ -189,16 +189,7 @@ export default function NetBalanceCard({ balance, hasActivities }: NetBalanceCar
             >
               <i className="fa-solid fa-bolt" style={{ color, fontSize: 16 }}></i>
             </div>
-            <span
-              style={{
-                fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                fontSize: 52,
-                fontWeight: 600,
-                lineHeight: 1,
-                color,
-                letterSpacing: '-0.03em',
-              }}
-            >
+            <span className="net-balance-value" style={{ color }}>
               {balance.net.toLocaleString()}
             </span>
             <span style={{ fontSize: 16, fontWeight: 500, color: '#71717a' }}>kcal net</span>

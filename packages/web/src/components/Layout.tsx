@@ -41,10 +41,10 @@ export default function Layout({ children, activeTab }: LayoutProps) {
   }, [menuOpen])
 
   return (
-    <div className="min-h-screen" style={{ background: '#fafafa' }}>
-      <nav style={{ background: 'white', borderBottom: '1px solid #e4e4e7', padding: '20px 0' }}>
-        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div className="min-h-screen overflow-x-clip" style={{ background: '#fafafa' }}>
+      <nav style={{ background: 'white', borderBottom: '1px solid #e4e4e7', padding: '16px 0' }}>
+        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between gap-3 min-w-0">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
             <div
               style={{
                 width: 36,
@@ -58,16 +58,7 @@ export default function Layout({ children, activeTab }: LayoutProps) {
             >
               <i className="fa-solid fa-chart-line" style={{ color: 'white', fontSize: 18 }}></i>
             </div>
-            <span
-              style={{
-                fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                fontSize: 24,
-                fontWeight: 600,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Nutrition Tracker
-            </span>
+            <span className="app-nav-title truncate">Nutrition Tracker</span>
           </div>
           <div ref={menuRef} style={{ position: 'relative' }}>
             <button
@@ -152,7 +143,7 @@ export default function Layout({ children, activeTab }: LayoutProps) {
           </div>
         </div>
         <div className="max-w-4xl mx-auto px-4" style={{ marginTop: 12 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="app-tab-row">
             {tabs.map((tab) => {
               const active = activeTab === tab.route
               return (

@@ -1,6 +1,6 @@
 import { formatDayLabel, sumTotals, todayISO } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { sectionHeader as sectionLabelStyle } from '../lib/styles'
 import FoodLogSection from '../components/FoodLogSection'
 import MetricCard from '../components/MetricCard'
 import {
@@ -105,7 +105,7 @@ export default function InputsPage() {
     <div>
       <div style={{ marginBottom: 32 }}>
         <p style={sectionLabelStyle}>Food Logs</p>
-        <h2 style={pageTitle}>Inputs</h2>
+        <h2 className="page-title">Inputs</h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           Expand a day to view, add, or edit its food log entries.
         </p>
@@ -165,16 +165,8 @@ export default function InputsPage() {
               </button>
 
               {expanded && (
-                <div style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                      gap: 16,
-                      paddingTop: 20,
-                      marginBottom: 24,
-                    }}
-                  >
+                <div style={{ padding: '0 20px 20px', borderTop: '1px solid #f4f4f5' }}>
+                  <div className="metric-grid-auto" style={{ paddingTop: 20, marginBottom: 24 }}>
                     {buildMetricConfigs(day.entries).map((m) => (
                       <MetricCard key={m.label} config={m} />
                     ))}

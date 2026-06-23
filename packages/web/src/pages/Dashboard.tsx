@@ -7,7 +7,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
 import MetricCard from '../components/MetricCard'
@@ -77,12 +77,6 @@ function SectionHeader({
   )
 }
 
-const gridStyle = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  gap: 16,
-} as const
-
 export default function Dashboard() {
   const [entries, setEntries] = useState<FoodEntry[]>([])
   const [activities, setActivities] = useState<Activity[]>([])
@@ -146,7 +140,7 @@ export default function Dashboard() {
     <div>
       <div style={{ marginBottom: 32 }}>
         <p style={sectionLabelStyle}>Overview</p>
-        <h2 style={pageTitle}>Dashboard</h2>
+        <h2 className="page-title">Dashboard</h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           {todayISO()} · Target: {formatRange(goals.calories.low, goals.calories.high, 'kcal')} •{' '}
           {formatRange(goals.protein.low, goals.protein.high, 'g protein')} • ~{goals.carbs.value}g
@@ -163,7 +157,7 @@ export default function Dashboard() {
           href={routeHref('inputs')}
           linkLabel="View Inputs"
         />
-        <div style={gridStyle}>
+        <div className="metric-grid-2">
           {inputMetrics.map((m) => (
             <MetricCard key={m.label} config={m} />
           ))}
@@ -199,7 +193,7 @@ export default function Dashboard() {
             </p>
           </div>
         ) : (
-          <div style={gridStyle}>
+          <div className="metric-grid-2">
             {outputMetrics.map((metric) => (
               <ActivityMetricCard key={metric.label} config={metric} />
             ))}
@@ -214,13 +208,7 @@ export default function Dashboard() {
           href={routeHref('inputs')}
           linkLabel="View all"
         />
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 16,
-          }}
-        >
+        <div className="metric-grid-auto">
           <DashboardPreviewList
             title="Recent Food"
             viewAllHref={routeHref('inputs')}

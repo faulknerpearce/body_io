@@ -49,14 +49,6 @@ export const sectionHeader: CSSProperties = {
   margin: '0 0 4px 0',
 }
 
-export const pageTitle: CSSProperties = {
-  fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-  fontSize: 36,
-  margin: 0,
-  fontWeight: 600,
-  letterSpacing: '-0.03em',
-}
-
 export const pill: CSSProperties = {
   padding: '8px 16px',
   borderRadius: 9999,

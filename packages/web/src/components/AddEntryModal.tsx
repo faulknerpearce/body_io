@@ -7,6 +7,7 @@ import {
   type NewFoodEntry,
 } from '@nutrition-tracker/shared'
 import { inputBase, labelBase } from '../lib/styles'
+import Modal from './Modal'
 
 interface AddEntryModalProps {
   entry?: FoodEntry
@@ -130,32 +131,7 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="entry-form-title"
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-      }}
-      onClick={close}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: 24,
-          padding: 32,
-          width: '90%',
-          maxWidth: 480,
-          boxShadow: '0 25px 50px rgba(0,0,0,0.15)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal titleId="entry-form-title" onClose={close}>
         <h3
           id="entry-form-title"
           style={{
@@ -260,7 +236,7 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <div className="modal-form-grid" style={{ marginBottom: 24 }}>
           <div>
             <label htmlFor="entry-calories" style={labelBase}>
               Calories
@@ -354,7 +330,6 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
             {adding ? (isEdit ? 'Saving...' : 'Adding...') : isEdit ? 'Save Changes' : 'Add Entry'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
