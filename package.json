@@ -14,7 +14,7 @@
     "dev:mcp": "npm run setup:env && npm run build:shared && npm run dev -w @nutrition-tracker/mcp-server",
     "prebuild": "npm run build:shared && npm run build:mcp-server",
     "build": "npm run build -w @nutrition-tracker/web",
-    "pretypecheck": "npm run build:shared",
+    "pretypecheck": "npm run build:shared && npm run build:mcp-server",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint -w @nutrition-tracker/web",
     "format": "prettier --write .",
