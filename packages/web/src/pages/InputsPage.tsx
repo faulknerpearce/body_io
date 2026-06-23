@@ -171,7 +171,7 @@ export default function InputsPage() {
                   className="log-section-content"
                   style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}
                 >
-                  <div className="metric-grid-auto" style={{ paddingTop: 20, marginBottom: 24 }}>
+                  <div className="metric-grid-2" style={{ paddingTop: 20, marginBottom: 24 }}>
                     {buildMetricConfigs(day.entries).map((m) => (
                       <MetricCard key={m.label} config={m} />
                     ))}
