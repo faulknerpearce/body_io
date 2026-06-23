@@ -1,11 +1,27 @@
+import { useEffect, useState } from 'react'
 import Layout from './components/Layout'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
+import { parseHashRoute } from './lib/routing'
 import AuthPage from './pages/AuthPage'
 import Dashboard from './pages/Dashboard'
+import HistoryPage from './pages/HistoryPage'
+
+function useHashRoute() {
+  const [route, setRoute] = useState(() => parseHashRoute())
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(parseHashRoute())
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  return route
+}
 
 function AppContent() {
   const { session, loading } = useAuth()
+  const route = useHashRoute()
 
   if (loading) {
     return (
@@ -27,8 +43,8 @@ function AppContent() {
   }
 
   return (
-    <Layout>
-      <Dashboard />
+    <Layout activeTab={route}>
+      {route === 'history' ? <HistoryPage /> : <Dashboard />}
     </Layout>
   )
 }

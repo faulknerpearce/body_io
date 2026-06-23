@@ -4,16 +4,29 @@ import AddEntryModal from './AddEntryModal'
 
 interface FoodLogSectionProps {
   entries: FoodEntry[]
-  onAdd: (entry: Omit<FoodEntry, 'id'>) => Promise<void>
-  onDelete: (id: string) => Promise<void>
+  onAdd?: (entry: Omit<FoodEntry, 'id'>) => Promise<void>
+  onDelete?: (id: string) => Promise<void>
+  readOnly?: boolean
+  title?: string
+  subtitle?: string
+  defaultExpanded?: boolean
 }
 
-export default function FoodLogSection({ entries, onAdd, onDelete }: FoodLogSectionProps) {
-  const [expanded, setExpanded] = useState(false)
+export default function FoodLogSection({
+  entries,
+  onAdd,
+  onDelete,
+  readOnly = false,
+  title = "Today's Food Log",
+  subtitle,
+  defaultExpanded = false,
+}: FoodLogSectionProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
   const [showForm, setShowForm] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const removeEntry = async (id: string) => {
+    if (!onDelete) return
     setDeleting(id)
     try {
       await onDelete(id)
@@ -70,10 +83,10 @@ export default function FoodLogSection({ entries, onAdd, onDelete }: FoodLogSect
         >
           <div>
             <div style={{ fontSize: 13, color: '#71717a', fontWeight: 500, marginBottom: 4 }}>
-              Today's Food Log
+              {title}
             </div>
             <div style={{ fontSize: 12, color: '#a1a1aa' }}>
-              Chronological order (earliest → latest) • {entryCount}{' '}
+              {subtitle ?? 'Chronological order (earliest → latest)'} • {entryCount}{' '}
               {entryCount === 1 ? 'entry' : 'entries'}
             </div>
           </div>
@@ -89,30 +102,32 @@ export default function FoodLogSection({ entries, onAdd, onDelete }: FoodLogSect
             }}
           />
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setShowForm(true)
-            setExpanded(true)
-          }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '8px 16px',
-            background: '#134e4b',
-            color: 'white',
-            border: 'none',
-            borderRadius: 9999,
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        >
-          <i className="fa-solid fa-plus" style={{ fontSize: 11 }}></i>
-          Add Entry
-        </button>
+        {!readOnly && onAdd && (
+          <button
+            type="button"
+            onClick={() => {
+              setShowForm(true)
+              setExpanded(true)
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 16px',
+              background: '#134e4b',
+              color: 'white',
+              border: 'none',
+              borderRadius: 9999,
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <i className="fa-solid fa-plus" style={{ fontSize: 11 }}></i>
+            Add Entry
+          </button>
+        )}
       </div>
 
       {expanded && (
@@ -208,23 +223,25 @@ export default function FoodLogSection({ entries, onAdd, onDelete }: FoodLogSect
                           <span style={{ color: '#a1a1aa' }}>caffeine</span>
                         </span>
                       )}
-                      <button
-                        onClick={() => removeEntry(item.id)}
-                        disabled={deleting === item.id}
-                        aria-label="Remove entry"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: '#a1a1aa',
-                          padding: 0,
-                          fontSize: 13,
-                          marginLeft: 'auto',
-                        }}
-                        title="Remove entry"
-                      >
-                        <i className="fa-regular fa-trash-can"></i>
-                      </button>
+                      {!readOnly && onDelete && (
+                        <button
+                          onClick={() => removeEntry(item.id)}
+                          disabled={deleting === item.id}
+                          aria-label="Remove entry"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#a1a1aa',
+                            padding: 0,
+                            fontSize: 13,
+                            marginLeft: 'auto',
+                          }}
+                          title="Remove entry"
+                        >
+                          <i className="fa-regular fa-trash-can"></i>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -318,7 +335,7 @@ export default function FoodLogSection({ entries, onAdd, onDelete }: FoodLogSect
         </div>
       )}
 
-      {showForm && <AddEntryModal onAdd={onAdd} onClose={() => setShowForm(false)} />}
+      {showForm && onAdd && <AddEntryModal onAdd={onAdd} onClose={() => setShowForm(false)} />}
     </div>
   )
 }

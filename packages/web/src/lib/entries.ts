@@ -7,15 +7,23 @@ import {
   caffeineGoal,
   goals,
   todayISO,
+  offsetDateISO,
   buildInsertPayload,
   parseEntryInput,
   type FoodEntry,
   type NewFoodEntry,
+  type Totals,
 } from '@nutrition-tracker/shared'
 import { supabase } from './supabase'
 
-export { sumTotals, calGoal, proGoal, carbGoal, caffeineGoal, goals, todayISO }
+export { sumTotals, calGoal, proGoal, carbGoal, caffeineGoal, goals, todayISO, offsetDateISO }
 export type { FoodEntry, NewFoodEntry }
+
+export interface DaySummary {
+  date: string
+  entries: FoodEntry[]
+  totals: Totals
+}
 
 async function requireUserId(): Promise<string> {
   const {
@@ -27,8 +35,7 @@ async function requireUserId(): Promise<string> {
   return user.id
 }
 
-export async function fetchEntries(): Promise<FoodEntry[]> {
-  const date = todayISO()
+export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry[]> {
   const { data, error } = await supabase
     .from('food_entries')
     .select('*')
@@ -36,6 +43,34 @@ export async function fetchEntries(): Promise<FoodEntry[]> {
     .order('created_at', { ascending: true })
   if (error) throw new Error(error.message)
   return (data ?? []).map(mapRow)
+}
+
+export async function fetchPriorDaySummaries(daysBack = 30): Promise<DaySummary[]> {
+  const today = todayISO()
+  const startDate = offsetDateISO(daysBack)
+
+  const { data, error } = await supabase
+    .from('food_entries')
+    .select('*')
+    .gte('entry_date', startDate)
+    .lt('entry_date', today)
+    .order('entry_date', { ascending: false })
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(error.message)
+
+  const byDate = new Map<string, FoodEntry[]>()
+  for (const row of data ?? []) {
+    const date = row.entry_date
+    const list = byDate.get(date) ?? []
+    list.push(mapRow(row))
+    byDate.set(date, list)
+  }
+
+  return [...byDate.entries()].map(([date, entries]) => ({
+    date,
+    entries,
+    totals: sumTotals(entries),
+  }))
 }
 
 export async function addEntry(input: NewFoodEntry): Promise<FoodEntry> {

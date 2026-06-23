@@ -1,10 +1,17 @@
 import { useAuth } from '../context/useAuth'
+import { type AppRoute, routeHref } from '../lib/routing'
 
 interface LayoutProps {
   children: React.ReactNode
+  activeTab: AppRoute
 }
 
-export default function Layout({ children }: LayoutProps) {
+const tabs: { route: AppRoute; label: string }[] = [
+  { route: 'today', label: 'Today' },
+  { route: 'history', label: 'History' },
+]
+
+export default function Layout({ children, activeTab }: LayoutProps) {
   const { user, signOut } = useAuth()
   const displayLabel =
     (user?.user_metadata?.display_name as string | undefined) ?? user?.email ?? 'Account'
@@ -56,6 +63,31 @@ export default function Layout({ children }: LayoutProps) {
             >
               Log out
             </button>
+          </div>
+        </div>
+        <div className="max-w-4xl mx-auto px-4" style={{ marginTop: 12 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {tabs.map((tab) => {
+              const active = activeTab === tab.route
+              return (
+                <a
+                  key={tab.route}
+                  href={routeHref(tab.route)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 9999,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    color: active ? 'white' : '#52525b',
+                    background: active ? '#134e4b' : 'transparent',
+                    border: active ? '1px solid #134e4b' : '1px solid #e4e4e7',
+                  }}
+                >
+                  {tab.label}
+                </a>
+              )
+            })}
           </div>
         </div>
       </nav>
