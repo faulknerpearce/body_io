@@ -20,7 +20,7 @@ nutrition_tracker/
 ├── package.json              # npm workspaces root
 ├── tsconfig.base.json        # shared compiler options (strict)
 ├── .env.example              # Supabase URL + anon key
-├── AUDIT.md                  # code-audit report
+├── AUDIT.md                  # code-audit report (Phase 6)
 ├── packages/
 │   ├── shared/               # types, validation, transforms (no Supabase dep)
 │   │   ├── src/              # source
@@ -52,25 +52,19 @@ nutrition_tracker/
    npm install
    ```
 
-2. Build the shared package (and the mcp-server, since the web Pages Functions import from it):
-
-   ```sh
-   npm run build:shared
-   npm run build -w @nutrition-tracker/mcp-server
-   ```
-
-3. Run migrations in the Supabase SQL editor (in order):
+2. Run migrations in the Supabase SQL editor (in order):
 
    ```
    packages/shared/migrations/0001_add_entry_date.sql
    packages/shared/migrations/0002_auth_and_user_scoping.sql
+   packages/shared/migrations/0003_activities.sql
    ```
 
-4. In the Supabase dashboard → **Authentication** → **Providers**, enable **Email**.
+3. In the Supabase dashboard → **Authentication** → **Providers**, enable **Email**.
 
-5. Set **Site URL** and redirect URLs (`http://localhost:5173`, your production Pages URL).
+4. Set **Site URL** and redirect URLs (`http://localhost:5173`, your production Pages URL).
 
-6. Create `packages/mcp-server/.env` (see `.env.example`):
+5. Create `packages/mcp-server/.env` (see `.env.example`):
 
    ```ini
    SUPABASE_URL=https://<your-project>.supabase.co
@@ -78,6 +72,8 @@ nutrition_tracker/
    VITE_SUPABASE_URL=https://<your-project>.supabase.co
    VITE_SUPABASE_ANON_KEY=<same-anon-key>
    ```
+
+   `npm run dev` and `npm run dev:mcp` auto-build the shared + mcp-server packages (see `prebuild`/`pretypecheck` scripts), so no manual build step is needed for normal development.
 
    The anon key is public by design; **RLS** enforces per-user data isolation.
 
@@ -145,11 +141,11 @@ npx wrangler pages deploy packages/web/dist --project-name nutrition-tracker --b
 
 ### Routes exposed
 
-| Path   | Purpose                                                        |
-| ------ | -------------------------------------------------------------- |
-| `/`    | Static React dashboard (sign-in required)                      |
-| `/mcp` | MCP HTTP endpoint — requires `Authorization: Bearer <jwt>`     |
-| `/authorize`, `/token`, `/register`, `/.well-known/*` | OAuth for Grok and other MCP clients |
+| Path                                                  | Purpose                                                    |
+| ----------------------------------------------------- | ---------------------------------------------------------- |
+| `/`                                                   | Static React dashboard (sign-in required)                  |
+| `/mcp`                                                | MCP HTTP endpoint — requires `Authorization: Bearer <jwt>` |
+| `/authorize`, `/token`, `/register`, `/.well-known/*` | OAuth for Grok and other MCP clients                       |
 
 ### Local Pages preview
 

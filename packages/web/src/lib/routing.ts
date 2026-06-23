@@ -1,8 +1,8 @@
 export type AppRoute = 'dashboard' | 'inputs' | 'outputs'
 
-export function parseHashRoute(hash: string = window.location.hash): AppRoute {
+export function parseHashRoute(hash: string): AppRoute {
   const path = hash.replace(/^#/, '').replace(/^\//, '')
-  if (path === 'inputs' || path === 'history') return 'inputs'
+  if (path === 'inputs') return 'inputs'
   if (path === 'outputs') return 'outputs'
   return 'dashboard'
 }

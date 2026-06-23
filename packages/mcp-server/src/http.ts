@@ -6,7 +6,7 @@ export interface McpEnv {
   SUPABASE_URL: string
   SUPABASE_ANON_KEY: string
   /** Public origin for OAuth metadata, e.g. https://nutrition-tracker.pages.dev */
-  MCP_PUBLIC_URL?: string
+  MCP_PUBLIC_URL: string
   OAUTH_SIGNING_SECRET?: string
 }
 

@@ -9,10 +9,10 @@ import InputsPage from './pages/InputsPage'
 import OutputsPage from './pages/OutputsPage'
 
 function useHashRoute() {
-  const [route, setRoute] = useState(() => parseHashRoute())
+  const [route, setRoute] = useState(() => parseHashRoute(window.location.hash))
 
   useEffect(() => {
-    const onHashChange = () => setRoute(parseHashRoute())
+    const onHashChange = () => setRoute(parseHashRoute(window.location.hash))
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
@@ -26,10 +26,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div
-        role="status"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
+      <div role="status" style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}>
         <i
           className="fa-solid fa-spinner fa-spin"
           style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
@@ -45,13 +42,7 @@ function AppContent() {
 
   return (
     <Layout activeTab={route}>
-      {route === 'inputs' ? (
-        <InputsPage />
-      ) : route === 'outputs' ? (
-        <OutputsPage />
-      ) : (
-        <Dashboard />
-      )}
+      {route === 'inputs' ? <InputsPage /> : route === 'outputs' ? <OutputsPage /> : <Dashboard />}
     </Layout>
   )
 }

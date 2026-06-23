@@ -5,36 +5,43 @@ Summary of the Cloudflare Pages setup and deploy steps after multi-user auth.
 ## What's in place
 
 ### Web app (`packages/web/`)
+
 - Supabase Auth (email/password) with sign-in, sign-up, and log out
 - Direct Supabase client queries with anon key + session JWT
 - RLS scopes `food_entries` per user — no `/api/entries` proxy
 
 ### MCP server (`packages/mcp-server/`)
+
 - `src/server.ts` — shared tool definitions; inserts include `user_id` from JWT
 - `src/stdio.ts` — local stdio MCP; requires `SUPABASE_ACCESS_TOKEN`
 - `src/http.ts` — JWT auth via `Authorization: Bearer`; uses anon key + user token
 - `src/oauth/` — OAuth 2.1 + PKCE for Grok and other MCP clients
 
 ### Pages Functions (`packages/web/functions/`)
+
 - `mcp/[[path]].ts` — wraps `handleMcp` from `@nutrition-tracker/mcp-server/http`
 - `authorize.ts`, `token.ts`, `register.ts` — OAuth endpoints
 - `.well-known/oauth-*` — MCP OAuth metadata
+- `.well-known/mcp.ts` — non-standard MCP discovery probe (returns the public tool manifest)
 
 ### Cloudflare config (`packages/web/wrangler.toml`)
+
 - `pages_build_output_dir = "./dist"`
 - Secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OAUTH_SIGNING_SECRET`
 
 ## Routes exposed
 
-| Path                                        | Purpose                                     |
-| ------------------------------------------- | ------------------------------------------- |
-| `/`                                         | Static React dashboard (auth required)      |
-| `/mcp`                                      | MCP HTTP endpoint (Bearer JWT required)     |
-| `/.well-known/oauth-authorization-server`   | OAuth metadata for MCP clients (Grok, etc.) |
-| `/.well-known/oauth-protected-resource`     | Protected resource metadata                 |
-| `/authorize`                                | OAuth authorization + sign-in               |
-| `/token`                                    | OAuth token exchange + refresh              |
-| `/register`                                 | Dynamic client registration                 |
+| Path                                      | Purpose                                     |
+| ----------------------------------------- | ------------------------------------------- |
+| `/`                                       | Static React dashboard (auth required)      |
+| `/mcp`                                    | MCP HTTP endpoint (Bearer JWT required)     |
+| `/.well-known/oauth-authorization-server` | OAuth metadata for MCP clients (Grok, etc.) |
+| `/.well-known/oauth-protected-resource`   | Protected resource metadata                 |
+| `/.well-known/openid-configuration`       | OpenID Connect discovery                    |
+| `/.well-known/mcp`                        | MCP connector probe (public tool manifest)  |
+| `/authorize`                              | OAuth authorization + sign-in               |
+| `/token`                                  | OAuth token exchange + refresh              |
+| `/register`                               | Dynamic client registration                 |
 
 ## Verification
 
@@ -50,13 +57,13 @@ npm run build -w @nutrition-tracker/mcp-server
 
 Connect `faulknerpearce/nutrition_tracker` with these build settings (repo root):
 
-| Setting | Value |
-| ------- | ----- |
-| Framework preset | None |
-| Root directory | *(blank)* |
-| Build command | `npm run build` |
-| Build output directory | `packages/web/dist` *(or leave blank — root `wrangler.toml` sets this)* |
-| Node.js version | `20` |
+| Setting                | Value                                                                   |
+| ---------------------- | ----------------------------------------------------------------------- |
+| Framework preset       | None                                                                    |
+| Root directory         | _(blank)_                                                               |
+| Build command          | `npm run build`                                                         |
+| Build output directory | `packages/web/dist` _(or leave blank — root `wrangler.toml` sets this)_ |
+| Node.js version        | `20`                                                                    |
 
 The repo-root `wrangler.toml` and `functions/` wrappers exist so Git builds find Pages Functions (`/mcp`, OAuth) without changing the monorepo layout.
 
