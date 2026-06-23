@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react'
-import FoodLogSection from '../components/FoodLogSection'
 import MetricCard from '../components/MetricCard'
-import {
-  type FoodEntry,
-  fetchEntries,
-  addEntry,
-  updateEntry,
-  deleteEntry,
-  goals,
-} from '../lib/entries'
+import { type FoodEntry, fetchEntries, goals } from '../lib/entries'
 import { buildMetricConfigs } from '../lib/metrics'
 
 function formatRange(low: number, high: number, unit: string): string {
@@ -35,21 +27,6 @@ export default function Dashboard() {
         setLoading(false)
       })
   }, [])
-
-  async function persistAdd(input: Omit<FoodEntry, 'id'>) {
-    const entry = await addEntry(input)
-    setEntries((prev) => [...prev, entry])
-  }
-
-  async function persistUpdate(id: string, input: Omit<FoodEntry, 'id'>) {
-    const entry = await updateEntry(id, input)
-    setEntries((prev) => prev.map((e) => (e.id === id ? entry : e)))
-  }
-
-  async function persistDelete(id: string) {
-    await deleteEntry(id)
-    setEntries((prev) => prev.filter((e) => e.id !== id))
-  }
 
   if (loading) {
     return (
@@ -110,7 +87,7 @@ export default function Dashboard() {
               letterSpacing: '-0.03em',
             }}
           >
-            Today's Intake
+            Dashboard
           </h2>
           <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
             Target: {formatRange(goals.calories.low, goals.calories.high, 'kcal')} •{' '}
@@ -131,13 +108,6 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-
-      <FoodLogSection
-        entries={entries}
-        onAdd={persistAdd}
-        onEdit={persistUpdate}
-        onDelete={persistDelete}
-      />
 
       <div style={{ marginTop: 32, textAlign: 'center' }}>
         <p style={{ fontSize: 10, color: '#a1a1aa' }}>

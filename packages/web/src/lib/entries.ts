@@ -47,6 +47,12 @@ export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry
 }
 
 export async function fetchPriorDaySummaries(daysBack = 30): Promise<DaySummary[]> {
+  const summaries = await fetchDaySummaries(daysBack)
+  const today = todayISO()
+  return summaries.filter((day) => day.date !== today)
+}
+
+export async function fetchDaySummaries(daysBack = 30): Promise<DaySummary[]> {
   const today = todayISO()
   const startDate = offsetDateISO(daysBack)
 
@@ -54,7 +60,7 @@ export async function fetchPriorDaySummaries(daysBack = 30): Promise<DaySummary[
     .from('food_entries')
     .select('*')
     .gte('entry_date', startDate)
-    .lt('entry_date', today)
+    .lte('entry_date', today)
     .order('entry_date', { ascending: false })
     .order('created_at', { ascending: true })
   if (error) throw new Error(error.message)
@@ -67,11 +73,17 @@ export async function fetchPriorDaySummaries(daysBack = 30): Promise<DaySummary[
     byDate.set(date, list)
   }
 
-  return [...byDate.entries()].map(([date, entries]) => ({
-    date,
-    entries,
-    totals: sumTotals(entries),
-  }))
+  if (!byDate.has(today)) {
+    byDate.set(today, [])
+  }
+
+  return [...byDate.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([date, entries]) => ({
+      date,
+      entries,
+      totals: sumTotals(entries),
+    }))
 }
 
 export async function addEntry(input: NewFoodEntry): Promise<FoodEntry> {

@@ -1,10 +1,11 @@
-export type AppRoute = 'today' | 'history'
+export type AppRoute = 'dashboard' | 'inputs'
 
 export function parseHashRoute(hash: string = window.location.hash): AppRoute {
   const path = hash.replace(/^#/, '').replace(/^\//, '')
-  return path === 'history' ? 'history' : 'today'
+  if (path === 'inputs' || path === 'history') return 'inputs'
+  return 'dashboard'
 }
 
 export function routeHref(route: AppRoute): string {
-  return route === 'history' ? '#/history' : '#/'
+  return route === 'inputs' ? '#/inputs' : '#/'
 }

@@ -5,7 +5,7 @@ import { useAuth } from './context/useAuth'
 import { parseHashRoute } from './lib/routing'
 import AuthPage from './pages/AuthPage'
 import Dashboard from './pages/Dashboard'
-import HistoryPage from './pages/HistoryPage'
+import InputsPage from './pages/InputsPage'
 
 function useHashRoute() {
   const [route, setRoute] = useState(() => parseHashRoute())
@@ -44,7 +44,7 @@ function AppContent() {
 
   return (
     <Layout activeTab={route}>
-      {route === 'history' ? <HistoryPage /> : <Dashboard />}
+      {route === 'inputs' ? <InputsPage /> : <Dashboard />}
     </Layout>
   )
 }

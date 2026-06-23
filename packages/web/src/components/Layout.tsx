@@ -7,8 +7,8 @@ interface LayoutProps {
 }
 
 const tabs: { route: AppRoute; label: string }[] = [
-  { route: 'today', label: 'Today' },
-  { route: 'history', label: 'History' },
+  { route: 'dashboard', label: 'Dashboard' },
+  { route: 'inputs', label: 'Inputs' },
 ]
 
 export default function Layout({ children, activeTab }: LayoutProps) {
