@@ -9,6 +9,7 @@ import {
   todayISO,
   offsetDateISO,
   buildInsertPayload,
+  buildUpdatePayload,
   parseEntryInput,
   type FoodEntry,
   type NewFoodEntry,
@@ -83,6 +84,20 @@ export async function addEntry(input: NewFoodEntry): Promise<FoodEntry> {
     entry_date: todayISO(),
   }
   const { data, error } = await supabase.from('food_entries').insert(entry).select().single()
+  if (error) throw new Error(error.message)
+  return mapRow(data)
+}
+
+export async function updateEntry(id: string, input: NewFoodEntry): Promise<FoodEntry> {
+  const parsed = parseEntryInput(input as Record<string, unknown>)
+  if (!parsed.ok) throw new Error(parsed.error)
+
+  const { data, error } = await supabase
+    .from('food_entries')
+    .update(buildUpdatePayload(parsed.value))
+    .eq('id', id)
+    .select()
+    .single()
   if (error) throw new Error(error.message)
   return mapRow(data)
 }

@@ -60,6 +60,30 @@ export function buildNewEntry(input: ParsedEntryInput): EntryInput {
   }
 }
 
+export function buildUpdatePayload(input: ParsedEntryInput): {
+  icon: string
+  icon_bg: string
+  icon_color: string
+  name: string
+  description: string
+  calories: number
+  protein: number
+  carbs: number
+  caffeine: number
+} {
+  return {
+    icon: input.icon,
+    icon_bg: input.iconBg,
+    icon_color: input.iconColor,
+    name: input.name,
+    description: input.description,
+    calories: input.calories,
+    protein: input.protein,
+    carbs: input.carbs,
+    caffeine: input.caffeine,
+  }
+}
+
 export function buildInsertPayload(
   input: ParsedEntryInput,
   id: string | undefined,

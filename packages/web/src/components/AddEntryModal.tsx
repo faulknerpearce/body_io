@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import {
   iconOptions,
   validateEntry,
+  type FoodEntry,
   type IconOption,
   type NewFoodEntry,
 } from '@nutrition-tracker/shared'
 
 interface AddEntryModalProps {
+  entry?: FoodEntry
   onAdd: (entry: NewFoodEntry) => Promise<void>
   onClose: () => void
 }
@@ -29,9 +31,34 @@ const EMPTY_FORM: FormState = {
   caffeine: '',
 }
 
-export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM)
-  const [selectedIcon, setSelectedIcon] = useState<IconOption>(iconOptions[0])
+function iconFromEntry(entry: FoodEntry): IconOption {
+  return (
+    iconOptions.find((opt) => opt.icon === entry.icon) ?? {
+      icon: entry.icon,
+      label: 'Custom',
+      bg: entry.iconBg,
+      color: entry.iconColor,
+    }
+  )
+}
+
+function formFromEntry(entry: FoodEntry): FormState {
+  return {
+    name: entry.name,
+    description: entry.description,
+    calories: String(entry.calories),
+    protein: String(entry.protein),
+    carbs: String(entry.carbs),
+    caffeine: String(entry.caffeine),
+  }
+}
+
+export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalProps) {
+  const isEdit = entry !== undefined
+  const [form, setForm] = useState<FormState>(() => (entry ? formFromEntry(entry) : EMPTY_FORM))
+  const [selectedIcon, setSelectedIcon] = useState<IconOption>(() =>
+    entry ? iconFromEntry(entry) : iconOptions[0],
+  )
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement | null>(null)
@@ -64,8 +91,8 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
   }
 
   const close = () => {
-    setForm(EMPTY_FORM)
-    setSelectedIcon(iconOptions[0])
+    setForm(entry ? formFromEntry(entry) : EMPTY_FORM)
+    setSelectedIcon(entry ? iconFromEntry(entry) : iconOptions[0])
     setError(null)
     onClose()
   }
@@ -97,7 +124,7 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
       })
       close()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add entry')
+      setError(err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'add'} entry`)
     } finally {
       setAdding(false)
     }
@@ -107,7 +134,7 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="add-entry-title"
+      aria-labelledby="entry-form-title"
       style={{
         position: 'fixed',
         inset: 0,
@@ -131,7 +158,7 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <h3
-          id="add-entry-title"
+          id="entry-form-title"
           style={{
             fontFamily: "'Space Grotesk','Inter',sans-serif",
             fontSize: 22,
@@ -139,10 +166,12 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
             margin: '0 0 4px 0',
           }}
         >
-          Add Entry
+          {isEdit ? 'Edit Entry' : 'Add Entry'}
         </h3>
         <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 24px 0' }}>
-          Log a new food item to today's entries.
+          {isEdit
+            ? 'Update this food item, including its icon and nutrition values.'
+            : "Log a new food item to today's entries."}
         </p>
 
         {error && (
@@ -424,7 +453,7 @@ export default function AddEntryModal({ onAdd, onClose }: AddEntryModalProps) {
               cursor: 'pointer',
             }}
           >
-            {adding ? 'Adding...' : 'Add Entry'}
+            {adding ? (isEdit ? 'Saving...' : 'Adding...') : isEdit ? 'Save Changes' : 'Add Entry'}
           </button>
         </div>
       </div>

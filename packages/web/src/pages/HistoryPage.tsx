@@ -1,8 +1,13 @@
-import { formatDayLabel, goals } from '@nutrition-tracker/shared'
+import { formatDayLabel, goals, sumTotals } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
 import FoodLogSection from '../components/FoodLogSection'
 import MetricCard from '../components/MetricCard'
-import { fetchPriorDaySummaries, type DaySummary } from '../lib/entries'
+import {
+  fetchPriorDaySummaries,
+  updateEntry,
+  type DaySummary,
+  type NewFoodEntry,
+} from '../lib/entries'
 import { buildMetricConfigs } from '../lib/metrics'
 
 function formatRange(low: number, high: number, unit: string): string {
@@ -19,6 +24,16 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedDate, setExpandedDate] = useState<string | null>(null)
+
+  async function persistUpdate(id: string, input: NewFoodEntry) {
+    const updated = await updateEntry(id, input)
+    setDays((prev) =>
+      prev.map((day) => {
+        const entries = day.entries.map((entry) => (entry.id === id ? updated : entry))
+        return entries === day.entries ? day : { ...day, entries, totals: sumTotals(entries) }
+      }),
+    )
+  }
 
   useEffect(() => {
     fetchPriorDaySummaries()
@@ -195,9 +210,10 @@ export default function HistoryPage() {
                     </div>
                     <FoodLogSection
                       entries={day.entries}
+                      onEdit={persistUpdate}
                       readOnly
                       title={`${formatDayLabel(day.date)} Food Log`}
-                      subtitle="Read-only history"
+                      subtitle="Tap edit to update entries from this day"
                       defaultExpanded
                     />
                   </div>

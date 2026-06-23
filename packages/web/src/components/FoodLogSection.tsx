@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import type { FoodEntry } from '../lib/entries'
+import type { FoodEntry, NewFoodEntry } from '../lib/entries'
 import AddEntryModal from './AddEntryModal'
 
 interface FoodLogSectionProps {
   entries: FoodEntry[]
-  onAdd?: (entry: Omit<FoodEntry, 'id'>) => Promise<void>
+  onAdd?: (entry: NewFoodEntry) => Promise<void>
+  onEdit?: (id: string, entry: NewFoodEntry) => Promise<void>
   onDelete?: (id: string) => Promise<void>
   readOnly?: boolean
   title?: string
@@ -15,6 +16,7 @@ interface FoodLogSectionProps {
 export default function FoodLogSection({
   entries,
   onAdd,
+  onEdit,
   onDelete,
   readOnly = false,
   title = "Today's Food Log",
@@ -22,7 +24,8 @@ export default function FoodLogSection({
   defaultExpanded = false,
 }: FoodLogSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
-  const [showForm, setShowForm] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<FoodEntry | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const removeEntry = async (id: string) => {
@@ -106,7 +109,7 @@ export default function FoodLogSection({
           <button
             type="button"
             onClick={() => {
-              setShowForm(true)
+              setShowAddForm(true)
               setExpanded(true)
             }}
             style={{
@@ -223,24 +226,53 @@ export default function FoodLogSection({
                           <span style={{ color: '#a1a1aa' }}>caffeine</span>
                         </span>
                       )}
-                      {!readOnly && onDelete && (
-                        <button
-                          onClick={() => removeEntry(item.id)}
-                          disabled={deleting === item.id}
-                          aria-label="Remove entry"
+                      {(onEdit || (!readOnly && onDelete)) && (
+                        <span
                           style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#a1a1aa',
-                            padding: 0,
-                            fontSize: 13,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 10,
                             marginLeft: 'auto',
                           }}
-                          title="Remove entry"
                         >
-                          <i className="fa-regular fa-trash-can"></i>
-                        </button>
+                          {onEdit && (
+                            <button
+                              type="button"
+                              onClick={() => setEditingEntry(item)}
+                              aria-label="Edit entry"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#a1a1aa',
+                                padding: 0,
+                                fontSize: 13,
+                              }}
+                              title="Edit entry"
+                            >
+                              <i className="fa-regular fa-pen-to-square"></i>
+                            </button>
+                          )}
+                          {!readOnly && onDelete && (
+                            <button
+                              type="button"
+                              onClick={() => removeEntry(item.id)}
+                              disabled={deleting === item.id}
+                              aria-label="Remove entry"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#a1a1aa',
+                                padding: 0,
+                                fontSize: 13,
+                              }}
+                              title="Remove entry"
+                            >
+                              <i className="fa-regular fa-trash-can"></i>
+                            </button>
+                          )}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -335,7 +367,19 @@ export default function FoodLogSection({
         </div>
       )}
 
-      {showForm && onAdd && <AddEntryModal onAdd={onAdd} onClose={() => setShowForm(false)} />}
+      {showAddForm && onAdd && (
+        <AddEntryModal onAdd={onAdd} onClose={() => setShowAddForm(false)} />
+      )}
+      {editingEntry && onEdit && (
+        <AddEntryModal
+          entry={editingEntry}
+          onAdd={async (entry) => {
+            await onEdit(editingEntry.id, entry)
+            setEditingEntry(null)
+          }}
+          onClose={() => setEditingEntry(null)}
+        />
+      )}
     </div>
   )
 }
