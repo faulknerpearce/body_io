@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { cardSurface } from '../lib/styles'
 
 interface DashboardPreviewListProps {
   title: string
@@ -16,11 +17,8 @@ export default function DashboardPreviewList({
   return (
     <div
       style={{
-        background: 'white',
-        border: '1px solid #e4e4e7',
-        borderRadius: 24,
+        ...cardSurface,
         padding: 24,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
       }}
     >
       <div
@@ -86,7 +84,5 @@ export function PreviewRow({ primary, secondary, meta }: PreviewRowProps) {
 }
 
 export function PreviewEmpty({ message }: { message: string }) {
-  return (
-    <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0, padding: '8px 0' }}>{message}</p>
-  )
+  return <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0, padding: '8px 0' }}>{message}</p>
 }

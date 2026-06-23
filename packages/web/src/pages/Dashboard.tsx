@@ -1,20 +1,19 @@
 import {
   computeNetBalance,
   formatDuration,
+  goals,
   sumActivityTotals,
   sumTotals,
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
+import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityMetricCard from '../components/ActivityMetricCard'
-import DashboardPreviewList, {
-  PreviewEmpty,
-  PreviewRow,
-} from '../components/DashboardPreviewList'
+import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
 import MetricCard from '../components/MetricCard'
 import NetBalanceCard from '../components/NetBalanceCard'
 import { fetchActivities, type Activity } from '../lib/activities'
-import { type FoodEntry, fetchEntries, goals } from '../lib/entries'
+import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
 import { buildMetricConfigs } from '../lib/metrics'
 import { routeHref } from '../lib/routing'
@@ -49,18 +48,7 @@ function SectionHeader({
       }}
     >
       <div>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '1.5px',
-            color: '#134e4b',
-            textTransform: 'uppercase',
-            margin: '0 0 4px 0',
-          }}
-        >
-          {label}
-        </p>
+        <p style={sectionLabelStyle}>{label}</p>
         <h3
           style={{
             fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
@@ -157,29 +145,8 @@ export default function Dashboard() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '1.5px',
-            color: '#134e4b',
-            textTransform: 'uppercase',
-            margin: '0 0 4px 0',
-          }}
-        >
-          Overview
-        </p>
-        <h2
-          style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-            fontSize: 36,
-            margin: 0,
-            fontWeight: 600,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          Dashboard
-        </h2>
+        <p style={sectionLabelStyle}>Overview</p>
+        <h2 style={pageTitle}>Dashboard</h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           {todayISO()} · Target: {formatRange(goals.calories.low, goals.calories.high, 'kcal')} •{' '}
           {formatRange(goals.protein.low, goals.protein.high, 'g protein')} • ~{goals.carbs.value}g

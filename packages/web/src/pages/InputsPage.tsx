@@ -1,5 +1,6 @@
 import { formatDayLabel, sumTotals, todayISO } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
+import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import FoodLogSection from '../components/FoodLogSection'
 import MetricCard from '../components/MetricCard'
 import {
@@ -103,29 +104,8 @@ export default function InputsPage() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '1.5px',
-            color: '#134e4b',
-            textTransform: 'uppercase',
-            margin: '0 0 4px 0',
-          }}
-        >
-          Food Logs
-        </p>
-        <h2
-          style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-            fontSize: 36,
-            margin: 0,
-            fontWeight: 600,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          Inputs
-        </h2>
+        <p style={sectionLabelStyle}>Food Logs</p>
+        <h2 style={pageTitle}>Inputs</h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           Expand a day to view, add, or edit its food log entries.
         </p>

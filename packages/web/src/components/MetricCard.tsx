@@ -1,3 +1,5 @@
+import { cardSurface, iconTileMd } from '../lib/styles'
+
 export interface MetricConfig {
   label: string
   value: number
@@ -26,11 +28,8 @@ export default function MetricCard({ config }: MetricCardProps) {
   return (
     <div
       style={{
-        background: 'white',
-        border: '1px solid #e4e4e7',
-        borderRadius: 24,
+        ...cardSurface,
         padding: 24,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
       }}
     >
       <div
@@ -44,14 +43,8 @@ export default function MetricCard({ config }: MetricCardProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
             style={{
-              width: 44,
-              height: 44,
-              borderRadius: 16,
+              ...iconTileMd,
               background: config.iconBg,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
             }}
           >
             <i

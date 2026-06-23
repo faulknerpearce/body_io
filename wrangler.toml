@@ -1,13 +1,20 @@
+# This file is intentionally minimal. It exists at the repo root so that
+# Cloudflare Pages (Git integration) can discover the Pages Functions under
+# /functions and build the React app from packages/web/dist.
+#
+# For local `wrangler pages dev` runs, use packages/web/wrangler.toml —
+# both files share the same compatibility settings.
 name = "nutrition-tracker"
 compatibility_date = "2025-01-15"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "packages/web/dist"
 
-# Environment variables (non-secret)
-[vars]
-# SUPABASE_URL and SUPABASE_ANON_KEY are set as encrypted secrets via:
+# SUPABASE_URL, SUPABASE_ANON_KEY, and OAUTH_SIGNING_SECRET are encrypted
+# Cloudflare secrets. Set them with:
 #   wrangler pages secret put SUPABASE_URL
 #   wrangler pages secret put SUPABASE_ANON_KEY
+#   wrangler pages secret put OAUTH_SIGNING_SECRET
 #
 # VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are build-time vars for the
-# client bundle (set in CI or locally before npm run build).
+# client bundle (set in CI or locally before `npm run build`).
+[vars]

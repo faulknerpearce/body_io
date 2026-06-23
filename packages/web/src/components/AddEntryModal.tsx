@@ -6,6 +6,7 @@ import {
   type IconOption,
   type NewFoodEntry,
 } from '@nutrition-tracker/shared'
+import { inputBase, labelBase } from '../lib/styles'
 
 interface AddEntryModalProps {
   entry?: FoodEntry
@@ -63,11 +64,6 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
   const [error, setError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
-  const onCloseRef = useRef(onClose)
-
-  useEffect(() => {
-    onCloseRef.current = onClose
-  })
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
@@ -76,7 +72,7 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onCloseRef.current?.()
+        onClose()
       }
     }
     document.addEventListener('keydown', onKey)
@@ -84,6 +80,9 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
       document.removeEventListener('keydown', onKey)
       previousFocusRef.current?.focus()
     }
+    // onClose is intentionally captured at mount; the modal unmounts on close
+    // so the listener is torn down and the next mount gets the latest value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -191,19 +190,20 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
         )}
 
         <div style={{ marginBottom: 20 }}>
-          <label
-            htmlFor="entry-icon"
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              color: '#52525b',
-              display: 'block',
-              marginBottom: 6,
-            }}
-          >
+          <label htmlFor="entry-icon" style={labelBase}>
             Icon
           </label>
-          <div id="entry-icon" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <div
+            id="entry-icon"
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              maxHeight: 180,
+              overflowY: 'auto',
+              padding: 2,
+            }}
+          >
             {iconOptions.map((opt) => (
               <button
                 key={opt.icon}
@@ -234,16 +234,7 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label
-            htmlFor="entry-name"
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              color: '#52525b',
-              display: 'block',
-              marginBottom: 6,
-            }}
-          >
+          <label htmlFor="entry-name" style={labelBase}>
             Name
           </label>
           <input
@@ -252,29 +243,12 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="e.g. Grilled Chicken"
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              border: '1px solid #e4e4e7',
-              borderRadius: 12,
-              fontSize: 14,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
+            style={inputBase}
           />
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label
-            htmlFor="entry-description"
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              color: '#52525b',
-              display: 'block',
-              marginBottom: 6,
-            }}
-          >
+          <label htmlFor="entry-description" style={labelBase}>
             Description
           </label>
           <input
@@ -282,30 +256,13 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
             value={form.description}
             onChange={(e) => update('description', e.target.value)}
             placeholder="e.g. Lunch"
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              border: '1px solid #e4e4e7',
-              borderRadius: 12,
-              fontSize: 14,
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
+            style={inputBase}
           />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
           <div>
-            <label
-              htmlFor="entry-calories"
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#52525b',
-                display: 'block',
-                marginBottom: 6,
-              }}
-            >
+            <label htmlFor="entry-calories" style={labelBase}>
               Calories
             </label>
             <input
@@ -315,28 +272,11 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
               value={form.calories}
               onChange={(e) => update('calories', e.target.value)}
               placeholder="0"
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                border: '1px solid #e4e4e7',
-                borderRadius: 12,
-                fontSize: 14,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputBase}
             />
           </div>
           <div>
-            <label
-              htmlFor="entry-protein"
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#52525b',
-                display: 'block',
-                marginBottom: 6,
-              }}
-            >
+            <label htmlFor="entry-protein" style={labelBase}>
               Protein (g)
             </label>
             <input
@@ -346,28 +286,11 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
               value={form.protein}
               onChange={(e) => update('protein', e.target.value)}
               placeholder="0"
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                border: '1px solid #e4e4e7',
-                borderRadius: 12,
-                fontSize: 14,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputBase}
             />
           </div>
           <div>
-            <label
-              htmlFor="entry-carbs"
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#52525b',
-                display: 'block',
-                marginBottom: 6,
-              }}
-            >
+            <label htmlFor="entry-carbs" style={labelBase}>
               Carbs (g)
             </label>
             <input
@@ -377,28 +300,11 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
               value={form.carbs}
               onChange={(e) => update('carbs', e.target.value)}
               placeholder="0"
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                border: '1px solid #e4e4e7',
-                borderRadius: 12,
-                fontSize: 14,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputBase}
             />
           </div>
           <div>
-            <label
-              htmlFor="entry-caffeine"
-              style={{
-                fontSize: 12,
-                fontWeight: 500,
-                color: '#52525b',
-                display: 'block',
-                marginBottom: 6,
-              }}
-            >
+            <label htmlFor="entry-caffeine" style={labelBase}>
               Caffeine (mg)
             </label>
             <input
@@ -408,15 +314,7 @@ export default function AddEntryModal({ entry, onAdd, onClose }: AddEntryModalPr
               value={form.caffeine}
               onChange={(e) => update('caffeine', e.target.value)}
               placeholder="0"
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                border: '1px solid #e4e4e7',
-                borderRadius: 12,
-                fontSize: 14,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
+              style={inputBase}
             />
           </div>
         </div>

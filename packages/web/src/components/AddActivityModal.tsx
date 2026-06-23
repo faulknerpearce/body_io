@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { validateActivity, type Activity, type NewActivity } from '@nutrition-tracker/shared'
+import { inputBase, labelBase } from '../lib/styles'
 
 const ACTIVITY_TYPES = ['Run', 'Ride', 'Swim', 'Walk', 'Hike', 'Workout', 'Other'] as const
 
@@ -34,10 +35,8 @@ function formFromActivity(activity: Activity): FormState {
     name: activity.name,
     activityType: activity.activityType,
     durationMinutes: String(Math.round(activity.movingTimeSeconds / 60)),
-    distanceKm:
-      activity.distanceMeters !== null ? String(activity.distanceMeters / 1000) : '',
-    averageHeartrate:
-      activity.averageHeartrate !== null ? String(activity.averageHeartrate) : '',
+    distanceKm: activity.distanceMeters !== null ? String(activity.distanceMeters / 1000) : '',
+    averageHeartrate: activity.averageHeartrate !== null ? String(activity.averageHeartrate) : '',
     maxHeartrate: activity.maxHeartrate !== null ? String(activity.maxHeartrate) : '',
     calories: activity.calories !== null ? String(activity.calories) : '',
   }
@@ -64,11 +63,6 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
   const [error, setError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
-  const onCloseRef = useRef(onClose)
-
-  useEffect(() => {
-    onCloseRef.current = onClose
-  })
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
@@ -77,7 +71,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
-        onCloseRef.current?.()
+        onClose()
       }
     }
     document.addEventListener('keydown', onKey)
@@ -85,6 +79,9 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
       document.removeEventListener('keydown', onKey)
       previousFocusRef.current?.focus()
     }
+    // onClose is intentionally captured at mount; the modal unmounts on close
+    // so the listener is torn down and the next mount gets the latest value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -132,28 +129,12 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
       })
       close()
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'add'} activity`)
+      setError(
+        err instanceof Error ? err.message : `Failed to ${isEdit ? 'update' : 'add'} activity`,
+      )
     } finally {
       setAdding(false)
     }
-  }
-
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 14px',
-    border: '1px solid #e4e4e7',
-    borderRadius: 12,
-    fontSize: 14,
-    outline: 'none',
-    boxSizing: 'border-box' as const,
-  }
-
-  const labelStyle = {
-    fontSize: 12,
-    fontWeight: 500,
-    color: '#52525b',
-    display: 'block',
-    marginBottom: 6,
   }
 
   return (
@@ -217,7 +198,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
         )}
 
         <div style={{ marginBottom: 16 }}>
-          <label htmlFor="activity-name" style={labelStyle}>
+          <label htmlFor="activity-name" style={labelBase}>
             Name
           </label>
           <input
@@ -226,19 +207,19 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="e.g. Morning Run"
-            style={inputStyle}
+            style={inputBase}
           />
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label htmlFor="activity-type" style={labelStyle}>
+          <label htmlFor="activity-type" style={labelBase}>
             Activity Type
           </label>
           <select
             id="activity-type"
             value={form.activityType}
             onChange={(e) => update('activityType', e.target.value)}
-            style={inputStyle}
+            style={inputBase}
           >
             {ACTIVITY_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -250,7 +231,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
           <div>
-            <label htmlFor="activity-duration" style={labelStyle}>
+            <label htmlFor="activity-duration" style={labelBase}>
               Duration (min)
             </label>
             <input
@@ -260,11 +241,11 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
               value={form.durationMinutes}
               onChange={(e) => update('durationMinutes', e.target.value)}
               placeholder="45"
-              style={inputStyle}
+              style={inputBase}
             />
           </div>
           <div>
-            <label htmlFor="activity-distance" style={labelStyle}>
+            <label htmlFor="activity-distance" style={labelBase}>
               Distance (km)
             </label>
             <input
@@ -275,11 +256,11 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
               value={form.distanceKm}
               onChange={(e) => update('distanceKm', e.target.value)}
               placeholder="Optional"
-              style={inputStyle}
+              style={inputBase}
             />
           </div>
           <div>
-            <label htmlFor="activity-avg-hr" style={labelStyle}>
+            <label htmlFor="activity-avg-hr" style={labelBase}>
               Avg Heart Rate
             </label>
             <input
@@ -289,11 +270,11 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
               value={form.averageHeartrate}
               onChange={(e) => update('averageHeartrate', e.target.value)}
               placeholder="Optional"
-              style={inputStyle}
+              style={inputBase}
             />
           </div>
           <div>
-            <label htmlFor="activity-max-hr" style={labelStyle}>
+            <label htmlFor="activity-max-hr" style={labelBase}>
               Max Heart Rate
             </label>
             <input
@@ -303,13 +284,13 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
               value={form.maxHeartrate}
               onChange={(e) => update('maxHeartrate', e.target.value)}
               placeholder="Optional"
-              style={inputStyle}
+              style={inputBase}
             />
           </div>
         </div>
 
         <div style={{ marginBottom: 24 }}>
-          <label htmlFor="activity-calories" style={labelStyle}>
+          <label htmlFor="activity-calories" style={labelBase}>
             Calories Burned
           </label>
           <input
@@ -319,7 +300,7 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
             value={form.calories}
             onChange={(e) => update('calories', e.target.value)}
             placeholder="Optional"
-            style={inputStyle}
+            style={inputBase}
           />
         </div>
 

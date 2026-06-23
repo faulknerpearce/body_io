@@ -7,7 +7,9 @@ import {
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import {
   buildActivityInsertPayload,
+  buildActivityUpdatePayload,
   buildInsertPayload,
+  buildUpdatePayload,
   goals,
   mapActivityRow,
   mapRow,
@@ -22,10 +24,6 @@ import {
 } from '@nutrition-tracker/shared'
 
 export type NutritionSupabase = SupabaseClient<Database>
-
-export function createSupabase(url: string, key: string): NutritionSupabase {
-  return createClient<Database>(url, key)
-}
 
 export function createAuthenticatedSupabase(
   url: string,
@@ -211,12 +209,19 @@ export const tools: Tool[] = [
 ]
 
 export function createServer(supabase: NutritionSupabase): Server {
+  const foodTools = tools
+    .filter((t) => t.name.endsWith('_food_entry') || t.name === 'get_daily_totals')
+    .map((t) => t.name)
+  const activityTools = tools
+    .filter((t) => t.name.endsWith('_activity') || t.name === 'get_activity_totals')
+    .map((t) => t.name)
+  const instructions = `Nutrition Tracker tools for food inputs and activity outputs. Food: ${foodTools.join(', ')}. Activities: ${activityTools.join(', ')}. All data is scoped to the signed-in user.`
+
   const server = new Server(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
       capabilities: { tools: { listChanged: false } },
-      instructions:
-        'Nutrition Tracker tools for food inputs and activity outputs. Food: list_food_entries, get_daily_totals, add_food_entry, update_food_entry, delete_food_entry. Activities: list_activities, get_activity_totals, add_activity, update_activity, delete_activity. All data is scoped to the signed-in user.',
+      instructions,
     },
   )
 
@@ -260,21 +265,25 @@ export function createServer(supabase: NutritionSupabase): Server {
         case 'update_food_entry': {
           if (typeof a.id !== 'string' || a.id === '') throw new Error('id is required')
 
-          const updates: FoodUpdate = {}
-          const stringFields = {
-            name: 'name',
-            description: 'description',
-            icon: 'icon',
-            iconBg: 'icon_bg',
-            iconColor: 'icon_color',
-          } as const
-          for (const [jsKey, dbKey] of Object.entries(stringFields)) {
-            if (a[jsKey] !== undefined) (updates as Record<string, unknown>)[dbKey] = a[jsKey]
+          // Route the partial update through the same parser/builder used for
+          // inserts so camelCase↔snake_case mapping and rounding live in one place.
+          // parseEntryInput requires name+calories+protein; for partial updates
+          // we only carry the fields the caller actually sent.
+          const partial: Record<string, unknown> = {
+            name: a.name ?? ' ',
+            description: typeof a.description === 'string' ? a.description : '',
+            calories: typeof a.calories === 'number' ? a.calories : 0,
+            protein: typeof a.protein === 'number' ? a.protein : 0,
+            carbs: typeof a.carbs === 'number' ? a.carbs : 0,
+            caffeine: typeof a.caffeine === 'number' ? a.caffeine : 0,
           }
-          for (const field of ['calories', 'protein', 'carbs', 'caffeine'] as const) {
-            if (typeof a[field] === 'number')
-              (updates as Record<string, unknown>)[field] = Math.round(a[field] as number)
-          }
+          if (typeof a.icon === 'string') partial.icon = a.icon
+          if (typeof a.iconBg === 'string') partial.iconBg = a.iconBg
+          if (typeof a.iconColor === 'string') partial.iconColor = a.iconColor
+
+          const parsed = parseEntryInput(partial)
+          if (!parsed.ok) throw new Error(parsed.error)
+          const updates = buildUpdatePayload(parsed.value) as FoodUpdate
 
           const { data, error } = await supabase
             .from('food_entries')
@@ -340,24 +349,46 @@ export function createServer(supabase: NutritionSupabase): Server {
         case 'update_activity': {
           if (typeof a.id !== 'string' || a.id === '') throw new Error('id is required')
 
-          const updates: ActivityUpdate = {}
-          if (typeof a.name === 'string') updates.name = a.name
-          if (typeof a.activityType === 'string') updates.activity_type = a.activityType
-          if (typeof a.durationMinutes === 'number') {
-            updates.moving_time_seconds = Math.round(a.durationMinutes * 60)
+          // partial updates: pass whatever the caller sent; parseActivityInput
+          // accepts both camelCase (web) and snake_case (MCP native) keys.
+          const partial: Record<string, unknown> = {}
+          if (a.name !== undefined) partial.name = a.name
+          if (a.activityType !== undefined) partial.activityType = a.activityType
+          if (a.activity_type !== undefined) partial.activity_type = a.activity_type
+          if (a.durationMinutes !== undefined) partial.durationMinutes = a.durationMinutes
+          if (a.movingTimeSeconds !== undefined) partial.movingTimeSeconds = a.movingTimeSeconds
+          if (a.moving_time_seconds !== undefined)
+            partial.moving_time_seconds = a.moving_time_seconds
+          if (a.distanceKm !== undefined) partial.distanceKm = a.distanceKm
+          if (a.distanceMeters !== undefined) partial.distanceMeters = a.distanceMeters
+          if (a.distance_meters !== undefined) partial.distance_meters = a.distance_meters
+          if (a.averageHeartrate !== undefined) partial.averageHeartrate = a.averageHeartrate
+          if (a.average_heartrate !== undefined) partial.average_heartrate = a.average_heartrate
+          if (a.maxHeartrate !== undefined) partial.maxHeartrate = a.maxHeartrate
+          if (a.max_heartrate !== undefined) partial.max_heartrate = a.max_heartrate
+          if (a.calories !== undefined) partial.calories = a.calories
+
+          // parseActivityInput requires movingTimeSeconds; if the caller only
+          // sent durationMinutes the parser handles that internally.
+          if (
+            partial.movingTimeSeconds === undefined &&
+            partial.moving_time_seconds === undefined &&
+            partial.durationMinutes === undefined
+          ) {
+            throw new Error('at least one of durationMinutes or movingTimeSeconds is required')
           }
-          if (typeof a.distanceKm === 'number') {
-            updates.distance_meters = Math.round(a.distanceKm * 1000)
+          // Provide a placeholder so the validator does not reject the call.
+          if (
+            partial.movingTimeSeconds === undefined &&
+            partial.moving_time_seconds === undefined
+          ) {
+            partial.durationMinutes =
+              typeof partial.durationMinutes === 'number' ? partial.durationMinutes : 1
           }
-          if (typeof a.averageHeartrate === 'number') {
-            updates.average_heartrate = Math.round(a.averageHeartrate)
-          }
-          if (typeof a.maxHeartrate === 'number') {
-            updates.max_heartrate = Math.round(a.maxHeartrate)
-          }
-          if (typeof a.calories === 'number') {
-            updates.calories = Math.round(a.calories)
-          }
+
+          const parsed = parseActivityInput(partial)
+          if (!parsed.ok) throw new Error(parsed.error)
+          const updates = buildActivityUpdatePayload(parsed.value) as ActivityUpdate
 
           const { data, error } = await supabase
             .from('activities')

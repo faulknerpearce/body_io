@@ -2,65 +2,61 @@ import { validateActivity, type ActivityInput } from './activityValidation.js'
 
 export type ParsedActivityInput = ActivityInput
 
-export function parseActivityInput(input: Record<string, unknown>):
-  | { ok: true; value: ParsedActivityInput }
-  | { ok: false; error: string } {
+/**
+ * Read a numeric field, preferring the camelCase key, then the snake_case key,
+ * and finally (optionally) a value to multiply by a scale factor. Returns null
+ * for missing/invalid values. Used to normalise MCP snake_case payloads
+ * alongside the web client's camelCase payloads.
+ */
+function readNumber(
+  input: Record<string, unknown>,
+  camel: string,
+  snake: string,
+  scale = 1,
+): number | null {
+  if (input[camel] === null || input[camel] === undefined) {
+    if (input[snake] === null || input[snake] === undefined) return null
+    return typeof input[snake] === 'number' ? Math.round(input[snake] * scale) : null
+  }
+  return typeof input[camel] === 'number' ? Math.round(input[camel] * scale) : null
+}
+
+function readRoundedNumber(
+  input: Record<string, unknown>,
+  camel: string,
+  snake: string,
+): number | null {
+  return readNumber(input, camel, snake, 1)
+}
+
+function readString(input: Record<string, unknown>, camel: string, snake: string): string {
+  if (typeof input[camel] === 'string') return input[camel]
+  if (typeof input[snake] === 'string') return input[snake]
+  return ''
+}
+
+export function parseActivityInput(
+  input: Record<string, unknown>,
+): { ok: true; value: ParsedActivityInput } | { ok: false; error: string } {
+  // movingTimeSeconds accepts minutes (web modal) or seconds (MCP).
+  const movingTimeSeconds =
+    readNumber(input, 'movingTimeSeconds', 'moving_time_seconds') ??
+    (typeof input.durationMinutes === 'number' ? Math.round(input.durationMinutes * 60) : NaN)
+
   const candidate: Partial<ActivityInput> = {
     name: typeof input.name === 'string' ? input.name : '',
-    activityType:
-      typeof input.activityType === 'string'
-        ? input.activityType
-        : typeof input.activity_type === 'string'
-          ? input.activity_type
-          : '',
-    movingTimeSeconds:
-      typeof input.movingTimeSeconds === 'number'
-        ? Math.round(input.movingTimeSeconds)
-        : typeof input.moving_time_seconds === 'number'
-          ? Math.round(input.moving_time_seconds)
-          : typeof input.durationMinutes === 'number'
-            ? Math.round(input.durationMinutes * 60)
-            : NaN,
+    activityType: readString(input, 'activityType', 'activity_type'),
+    movingTimeSeconds,
     distanceMeters:
-      input.distanceMeters === null || input.distanceMeters === undefined
-        ? input.distance_meters === null || input.distance_meters === undefined
-          ? input.distanceKm === null || input.distanceKm === undefined
-            ? null
-            : typeof input.distanceKm === 'number'
-              ? Math.round(input.distanceKm * 1000)
-              : null
-          : typeof input.distance_meters === 'number'
-            ? input.distance_meters
-            : null
-        : typeof input.distanceMeters === 'number'
-          ? input.distanceMeters
-          : null,
-    averageHeartrate:
-      input.averageHeartrate === null || input.averageHeartrate === undefined
-        ? input.average_heartrate === null || input.average_heartrate === undefined
-          ? null
-          : typeof input.average_heartrate === 'number'
-            ? Math.round(input.average_heartrate)
-            : null
-        : typeof input.averageHeartrate === 'number'
-          ? Math.round(input.averageHeartrate)
-          : null,
-    maxHeartrate:
-      input.maxHeartrate === null || input.maxHeartrate === undefined
-        ? input.max_heartrate === null || input.max_heartrate === undefined
-          ? null
-          : typeof input.max_heartrate === 'number'
-            ? Math.round(input.max_heartrate)
-            : null
-        : typeof input.maxHeartrate === 'number'
-          ? Math.round(input.maxHeartrate)
-          : null,
-    calories:
-      input.calories === null || input.calories === undefined
+      readNumber(input, 'distanceMeters', 'distance_meters') ??
+      (input.distanceKm === null || input.distanceKm === undefined
         ? null
-        : typeof input.calories === 'number'
-          ? Math.round(input.calories)
-          : null,
+        : typeof input.distanceKm === 'number'
+          ? Math.round(input.distanceKm * 1000)
+          : null),
+    averageHeartrate: readRoundedNumber(input, 'averageHeartrate', 'average_heartrate'),
+    maxHeartrate: readRoundedNumber(input, 'maxHeartrate', 'max_heartrate'),
+    calories: readRoundedNumber(input, 'calories', 'calories'),
   }
 
   return validateActivity(candidate)

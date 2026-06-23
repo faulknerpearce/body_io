@@ -6,6 +6,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
+import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityLogSection from '../components/ActivityLogSection'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
@@ -120,29 +121,8 @@ export default function OutputsPage() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '1.5px',
-            color: '#134e4b',
-            textTransform: 'uppercase',
-            margin: '0 0 4px 0',
-          }}
-        >
-          Activity Logs
-        </p>
-        <h2
-          style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-            fontSize: 36,
-            margin: 0,
-            fontWeight: 600,
-            letterSpacing: '-0.03em',
-          }}
-        >
-          Outputs
-        </h2>
+        <p style={sectionLabelStyle}>Activity Logs</p>
+        <h2 style={pageTitle}>Outputs</h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           Log workouts manually — type, duration, distance, heart rate, and calories burned.
         </p>

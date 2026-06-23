@@ -1,4 +1,5 @@
 import type { NetBalance } from '@nutrition-tracker/shared'
+import { cardSurface, iconTileSm, subtleSurface } from '../lib/styles'
 
 interface NetBalanceCardProps {
   balance: NetBalance
@@ -152,11 +153,8 @@ export default function NetBalanceCard({ balance, hasActivities }: NetBalanceCar
   return (
     <div
       style={{
-        background: 'white',
-        border: '1px solid #e4e4e7',
-        borderRadius: 24,
+        ...cardSurface,
         padding: 28,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         marginBottom: 32,
       }}
     >
@@ -185,14 +183,8 @@ export default function NetBalanceCard({ balance, hasActivities }: NetBalanceCar
           >
             <div
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 12,
+                ...iconTileSm,
                 background: statusBadgeBg[balance.status],
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
               }}
             >
               <i className="fa-solid fa-bolt" style={{ color, fontSize: 16 }}></i>
@@ -215,7 +207,9 @@ export default function NetBalanceCard({ balance, hasActivities }: NetBalanceCar
           <p style={{ fontSize: 13, color: '#71717a', margin: '14px 0 0 0', lineHeight: 1.5 }}>
             {balance.consumed.toLocaleString()} consumed · {balance.burned.toLocaleString()} burned
           </p>
-          <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>{balance.contextMessage}</p>
+          <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>
+            {balance.contextMessage}
+          </p>
           {!hasActivities && (
             <p style={{ fontSize: 12, color: '#a1a1aa', margin: '8px 0 0 0' }}>
               Log an activity on Outputs to track calories burned.
@@ -225,9 +219,7 @@ export default function NetBalanceCard({ balance, hasActivities }: NetBalanceCar
 
         <div
           style={{
-            background: '#fafafa',
-            border: '1px solid #e4e4e7',
-            borderRadius: 20,
+            ...subtleSurface,
             padding: '20px 22px',
           }}
         >
