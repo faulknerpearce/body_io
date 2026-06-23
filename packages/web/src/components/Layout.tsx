@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/useAuth'
+import { useProfileOptional } from '../context/useProfile'
 import { type AppRoute, routeHref } from '../lib/routing'
-import GoalsModal from './GoalsModal'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -16,11 +16,14 @@ const tabs: { route: AppRoute; label: string }[] = [
 
 export default function Layout({ children, activeTab }: LayoutProps) {
   const { user, signOut } = useAuth()
+  const profileContext = useProfileOptional()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [showGoalsModal, setShowGoalsModal] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
   const displayLabel =
-    (user?.user_metadata?.display_name as string | undefined) ?? user?.email ?? 'Account'
+    profileContext?.profile.displayName ??
+    (user?.user_metadata?.display_name as string | undefined) ??
+    user?.email ??
+    'Account'
 
   useEffect(() => {
     if (!menuOpen) return
@@ -114,9 +117,10 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                   width: 40,
                   height: 40,
                   borderRadius: 9999,
-                  border: '1px solid #e4e4e7',
-                  background: '#f4f4f5',
-                  color: '#3f3f46',
+                  border:
+                    activeTab === 'profile' ? '1px solid #134e4b' : '1px solid #e4e4e7',
+                  background: activeTab === 'profile' ? '#134e4b' : '#f4f4f5',
+                  color: activeTab === 'profile' ? 'white' : '#3f3f46',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -153,14 +157,12 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                   >
                     {displayLabel}
                   </div>
-                  <button
-                    type="button"
+                  <a
+                    href={routeHref('profile')}
                     role="menuitem"
-                    onClick={() => {
-                      setMenuOpen(false)
-                      setShowGoalsModal(true)
-                    }}
+                    onClick={() => setMenuOpen(false)}
                     style={{
+                      display: 'block',
                       width: '100%',
                       padding: '10px 12px',
                       borderRadius: 10,
@@ -171,6 +173,7 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                       fontWeight: 500,
                       cursor: 'pointer',
                       textAlign: 'left',
+                      textDecoration: 'none',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = '#fafafa'
@@ -179,8 +182,8 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                       e.currentTarget.style.background = 'transparent'
                     }}
                   >
-                    Daily Goals
-                  </button>
+                    Profile
+                  </a>
                   <button
                     type="button"
                     role="menuitem"
@@ -218,7 +221,6 @@ export default function Layout({ children, activeTab }: LayoutProps) {
       <main className="max-w-4xl mx-auto px-4" style={{ paddingTop: 32, paddingBottom: 64 }}>
         {children}
       </main>
-      {showGoalsModal && <GoalsModal onClose={() => setShowGoalsModal(false)} />}
     </div>
   )
 }

@@ -6,7 +6,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { useNutritionGoals } from '../context/useGoals'
+import { useNutritionGoals } from '../context/useProfile'
 import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'

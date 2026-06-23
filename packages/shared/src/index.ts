@@ -1,6 +1,7 @@
 export * from './database.js'
 export * from './types.js'
 export * from './goals.js'
+export * from './profile.js'
 export * from './icons.js'
 export * from './mapRow.js'
 export * from './mapActivityRow.js'

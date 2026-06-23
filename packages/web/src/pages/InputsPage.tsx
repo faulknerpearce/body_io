@@ -1,6 +1,6 @@
 import { formatDayLabel, sumTotals, todayISO } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { useNutritionGoals } from '../context/useGoals'
+import { useNutritionGoals } from '../context/useProfile'
 import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import FoodLogSection from '../components/FoodLogSection'
 import MetricCard from '../components/MetricCard'

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
 import Layout from './components/Layout'
 import { AuthProvider } from './context/AuthProvider'
-import { GoalsProvider } from './context/GoalsProvider'
+import { ProfileProvider } from './context/ProfileProvider'
 import { useAuth } from './context/useAuth'
 import { parseHashRoute } from './lib/routing'
 import AuthPage from './pages/AuthPage'
 import Dashboard from './pages/Dashboard'
 import InputsPage from './pages/InputsPage'
 import OutputsPage from './pages/OutputsPage'
+import ProfilePage from './pages/ProfilePage'
 
 function useHashRoute() {
   const [route, setRoute] = useState(() => parseHashRoute(window.location.hash))
@@ -42,11 +43,19 @@ function AppContent() {
   }
 
   return (
-    <GoalsProvider>
+    <ProfileProvider>
       <Layout activeTab={route}>
-        {route === 'inputs' ? <InputsPage /> : route === 'outputs' ? <OutputsPage /> : <Dashboard />}
+        {route === 'profile' ? (
+          <ProfilePage />
+        ) : route === 'inputs' ? (
+          <InputsPage />
+        ) : route === 'outputs' ? (
+          <OutputsPage />
+        ) : (
+          <Dashboard />
+        )}
       </Layout>
-    </GoalsProvider>
+    </ProfileProvider>
   )
 }
 
