@@ -26,3 +26,28 @@ export type Totals = {
   carbs: number
   caffeine: number
 }
+
+export type ActivityRow = Database['public']['Tables']['activities']['Row']
+export type ActivityInsert = Database['public']['Tables']['activities']['Insert']
+export type ActivityUpdate = Database['public']['Tables']['activities']['Update']
+
+export interface Activity {
+  id: string
+  name: string
+  activityType: string
+  activityDate: string
+  distanceMeters: number | null
+  movingTimeSeconds: number
+  averageHeartrate: number | null
+  maxHeartrate: number | null
+  calories: number | null
+}
+
+export type NewActivity = Omit<Activity, 'id' | 'activityDate'>
+export type UpdateActivity = Partial<NewActivity>
+
+export type ActivityTotals = {
+  calories: number
+  movingTimeSeconds: number
+  distanceMeters: number
+}

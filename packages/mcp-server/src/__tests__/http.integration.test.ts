@@ -138,7 +138,7 @@ describe('handleMcp HTTP integration', () => {
     expect((toolsListBody as { error?: unknown }).error).toBeUndefined()
 
     const tools = (toolsListBody as { result: { tools: { name: string }[] } }).result.tools
-    expect(tools).toHaveLength(5)
+    expect(tools).toHaveLength(10)
 
 
   })

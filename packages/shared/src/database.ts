@@ -57,6 +57,56 @@ export type Database = {
           },
         ]
       }
+      activities: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          activity_type: string
+          activity_date: string
+          distance_meters: number | null
+          moving_time_seconds: number
+          average_heartrate: number | null
+          max_heartrate: number | null
+          calories: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          activity_type: string
+          activity_date?: string
+          distance_meters?: number | null
+          moving_time_seconds: number
+          average_heartrate?: number | null
+          max_heartrate?: number | null
+          calories?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          activity_type?: string
+          activity_date?: string
+          distance_meters?: number | null
+          moving_time_seconds?: number
+          average_heartrate?: number | null
+          max_heartrate?: number | null
+          calories?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'activities_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       profiles: {
         Row: {
           id: string

@@ -73,6 +73,7 @@ Run migrations in SQL editor:
 ```
 packages/shared/migrations/0001_add_entry_date.sql
 packages/shared/migrations/0002_auth_and_user_scoping.sql
+packages/shared/migrations/0003_activities.sql
 ```
 
 Enable Email auth and set Site URL / redirect URLs in the Supabase dashboard.
