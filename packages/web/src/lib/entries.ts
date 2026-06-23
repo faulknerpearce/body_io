@@ -1,23 +1,17 @@
 import {
-  mapRow,
-  sumTotals,
-  calGoal,
-  proGoal,
-  carbGoal,
-  caffeineGoal,
-  goals,
-  todayISO,
-  offsetDateISO,
   buildInsertPayload,
   buildUpdatePayload,
+  mapRow,
+  offsetDateISO,
   parseEntryInput,
+  sumTotals,
+  todayISO,
   type FoodEntry,
   type NewFoodEntry,
   type Totals,
 } from '@nutrition-tracker/shared'
 import { supabase } from './supabase'
 
-export { sumTotals, calGoal, proGoal, carbGoal, caffeineGoal, goals, todayISO, offsetDateISO }
 export type { FoodEntry, NewFoodEntry }
 
 export interface DaySummary {
@@ -44,12 +38,6 @@ export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry
     .order('created_at', { ascending: true })
   if (error) throw new Error(error.message)
   return (data ?? []).map(mapRow)
-}
-
-export async function fetchPriorDaySummaries(daysBack = 30): Promise<DaySummary[]> {
-  const summaries = await fetchDaySummaries(daysBack)
-  const today = todayISO()
-  return summaries.filter((day) => day.date !== today)
 }
 
 export async function fetchDaySummaries(daysBack = 30): Promise<DaySummary[]> {
@@ -117,9 +105,4 @@ export async function updateEntry(id: string, input: NewFoodEntry): Promise<Food
 export async function deleteEntry(id: string): Promise<void> {
   const { error } = await supabase.from('food_entries').delete().eq('id', id)
   if (error) throw new Error(error.message)
-}
-
-export async function getAccessToken(): Promise<string | null> {
-  const { data } = await supabase.auth.getSession()
-  return data.session?.access_token ?? null
 }

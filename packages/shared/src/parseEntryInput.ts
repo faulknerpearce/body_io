@@ -1,5 +1,5 @@
 import { DEFAULT_ICON, DEFAULT_ICON_BG, DEFAULT_ICON_COLOR, type IconOption } from './icons.js'
-import { validateEntry, type EntryInput } from './validation.js'
+import { validateEntry } from './validation.js'
 
 export interface ParsedEntryInput {
   icon: string
@@ -46,17 +46,6 @@ export function parseEntryInput(input: Record<string, unknown>):
       iconColor: typeof input.iconColor === 'string' ? input.iconColor : FALLBACK_ICON.color,
       ...validated.value,
     },
-  }
-}
-
-export function buildNewEntry(input: ParsedEntryInput): EntryInput {
-  return {
-    name: input.name,
-    description: input.description,
-    calories: input.calories,
-    protein: input.protein,
-    carbs: input.carbs,
-    caffeine: input.caffeine,
   }
 }
 
