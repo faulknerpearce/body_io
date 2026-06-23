@@ -23,10 +23,7 @@ export const iconOptions: readonly IconOption[] = [
   { icon: 'fa-mug-saucer', label: 'Tea', bg: '#ecfeff', color: '#0e7490' },
   { icon: 'fa-glass-water', label: 'Water', bg: '#e0f2fe', color: '#0284c7' },
 
-  // Cold drinks / alcohol
-  { icon: 'fa-wine-bottle', label: 'Bottle', bg: '#e0f2fe', color: '#0284c7' },
-  { icon: 'fa-wine-glass', label: 'Wine', bg: '#fce7f3', color: '#be185d' },
-  { icon: 'fa-beer-mug-empty', label: 'Beer', bg: '#fef3c7', color: '#b45309' },
+  // Cold drinks
   { icon: 'fa-martini-glass-citrus', label: 'Cocktail', bg: '#fef9c3', color: '#a16207' },
   { icon: 'fa-blender', label: 'Shake', bg: '#e0f2fe', color: '#0284c7' },
 
@@ -58,7 +55,6 @@ export const iconOptions: readonly IconOption[] = [
   { icon: 'fa-cookie', label: 'Cookie', bg: '#f5d0a9', color: '#92400e' },
   { icon: 'fa-cookie-bite', label: 'Snack', bg: '#f5d0a9', color: '#92400e' },
   { icon: 'fa-ice-cream', label: 'Ice cream', bg: '#fce7f3', color: '#be185d' },
-  { icon: 'fa-candy-cane', label: 'Treat', bg: '#f3e8ff', color: '#9333ea' },
   { icon: 'fa-popcorn', label: 'Popcorn', bg: '#fef9c3', color: '#a16207' },
 
   // Energy / supplements
