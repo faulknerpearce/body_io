@@ -60,4 +60,7 @@ export const iconOptions: readonly IconOption[] = [
   { icon: 'fa-ice-cream', label: 'Ice cream', bg: '#fce7f3', color: '#be185d' },
   { icon: 'fa-candy-cane', label: 'Treat', bg: '#f3e8ff', color: '#9333ea' },
   { icon: 'fa-popcorn', label: 'Popcorn', bg: '#fef9c3', color: '#a16207' },
+
+  // Energy / supplements
+  { icon: 'fa-bolt', label: 'Energy', bg: '#fef9c3', color: '#ca8a04' },
 ]

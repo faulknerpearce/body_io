@@ -43,6 +43,8 @@ describe('iconOptions', () => {
     expect(icons.has('fa-pizza-slice')).toBe(true)
     // Sweets
     expect(icons.has('fa-ice-cream')).toBe(true)
+    // Energy
+    expect(icons.has('fa-bolt')).toBe(true)
   })
 
   it('DEFAULT_ICON points at the first option', () => {
