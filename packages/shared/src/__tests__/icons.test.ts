@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  DEFAULT_ICON,
-  DEFAULT_ICON_BG,
-  DEFAULT_ICON_COLOR,
-  iconOptions,
-} from '../icons.js'
+import { DEFAULT_ICON, DEFAULT_ICON_BG, DEFAULT_ICON_COLOR, iconOptions } from '../icons.js'
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/
 
