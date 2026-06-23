@@ -1,26 +1,25 @@
 @import 'tailwindcss';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* Desktop-first layout tokens (match pre-mobile-fix design) */
+.metric-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
-html {
-  overflow-x: clip;
+.metric-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
 }
 
-body {
-  margin: 0;
-  overflow-x: clip;
-  max-width: 100%;
+.metric-grid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
 }
 
-#root {
-  overflow-x: clip;
-  max-width: 100%;
-}
-
+/* Modal shell (portal) */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -36,7 +35,7 @@ body {
 .modal-panel {
   background: white;
   border-radius: 24px;
-  padding: 20px;
+  padding: 32px;
   width: 100%;
   max-width: 480px;
   max-height: min(90dvh, 100%);
@@ -45,91 +44,16 @@ body {
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
 
-@media (min-width: 640px) {
-  .modal-panel {
-    padding: 32px;
-  }
-}
-
 .modal-form-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-}
-
-@media (min-width: 480px) {
-  .modal-form-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.metric-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 640px) {
-  .metric-grid-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.metric-grid-auto {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 640px) {
-  .metric-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  }
-}
-
-.app-tab-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.app-nav-title {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-@media (min-width: 640px) {
-  .app-nav-title {
-    font-size: 24px;
-  }
-}
-
-.log-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  flex-wrap: wrap;
-}
-
-@media (min-width: 640px) {
-  .log-section-header {
-    padding: 20px 24px;
-    flex-wrap: nowrap;
-  }
-}
-
-.log-section-header-toggle {
-  flex: 1 1 12rem;
-  min-width: 0;
 }
 
 .log-entry-card {
   transition:
     box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -142,64 +66,62 @@ body {
   }
 }
 
-.metric-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-  min-width: 0;
-}
-
-.metric-card-value {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  font-size: 32px;
-  font-weight: 600;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-@media (min-width: 640px) {
-  .metric-card-value {
-    font-size: 42px;
+/* Mobile-only overrides */
+@media (max-width: 639px) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+    max-width: 100%;
   }
-}
 
-.metric-card-pct {
-  font-size: 22px;
-  font-weight: 600;
-}
-
-@media (min-width: 640px) {
-  .metric-card-pct {
-    font-size: 28px;
+  .metric-grid-2,
+  .metric-grid-auto,
+  .metric-grid-stats {
+    grid-template-columns: 1fr;
   }
-}
 
-.page-title {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  font-size: 28px;
-  margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-@media (min-width: 640px) {
-  .page-title {
-    font-size: 36px;
+  .modal-panel {
+    padding: 20px;
   }
-}
 
-.net-balance-value {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.03em;
-}
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
 
-@media (min-width: 640px) {
-  .net-balance-value {
-    font-size: 52px;
+  .log-section-header {
+    flex-wrap: wrap !important;
+    padding: 16px 20px !important;
+    gap: 12px !important;
+  }
+
+  .log-section-header-toggle {
+    flex: 1 1 100% !important;
+    margin-right: 0 !important;
+  }
+
+  .log-section-content {
+    padding: 0 20px 20px !important;
+  }
+
+  .log-entry-card {
+    padding: 16px 20px !important;
+    gap: 16px !important;
+  }
+
+  .page-title-mobile {
+    font-size: 28px !important;
+  }
+
+  .metric-card-value-mobile {
+    font-size: 32px !important;
+  }
+
+  .metric-card-pct-mobile {
+    font-size: 22px !important;
+  }
+
+  .net-balance-value-mobile {
+    font-size: 40px !important;
   }
 }

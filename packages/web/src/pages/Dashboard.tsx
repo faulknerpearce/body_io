@@ -7,7 +7,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
 import MetricCard from '../components/MetricCard'
@@ -140,7 +140,9 @@ export default function Dashboard() {
     <div>
       <div style={{ marginBottom: 32 }}>
         <p style={sectionLabelStyle}>Overview</p>
-        <h2 className="page-title">Dashboard</h2>
+        <h2 className="page-title-mobile" style={pageTitle}>
+          Dashboard
+        </h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           {todayISO()} · Target: {formatRange(goals.calories.low, goals.calories.high, 'kcal')} •{' '}
           {formatRange(goals.protein.low, goals.protein.high, 'g protein')} • ~{goals.carbs.value}g

@@ -32,7 +32,14 @@ export default function MetricCard({ config }: MetricCardProps) {
         padding: 24,
       }}
     >
-      <div className="metric-card-header">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 20,
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <div
             style={{
@@ -48,7 +55,18 @@ export default function MetricCard({ config }: MetricCardProps) {
           <div>
             <div style={{ fontSize: 13, color: '#71717a', fontWeight: 500 }}>{config.label}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: config.unit ? 4 : 0 }}>
-              <span className="metric-card-value">{config.formatValue(config.value)}</span>
+              <span
+                className="metric-card-value-mobile"
+                style={{
+                  fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+                  fontSize: 42,
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {config.formatValue(config.value)}
+              </span>
               {config.unit && (
                 <span style={{ fontSize: 18, fontWeight: 500, color: config.color }}>
                   {config.unit}
@@ -59,7 +77,10 @@ export default function MetricCard({ config }: MetricCardProps) {
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 2 }}>
-            <span className="metric-card-pct" style={{ color: config.color }}>
+            <span
+              className="metric-card-pct-mobile"
+              style={{ fontSize: 28, fontWeight: 600, color: config.color }}
+            >
               {pct}
             </span>
             <span style={{ fontSize: 14, fontWeight: 500, color: config.color }}>%</span>

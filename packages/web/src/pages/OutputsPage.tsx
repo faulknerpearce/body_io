@@ -6,7 +6,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityLogSection from '../components/ActivityLogSection'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
@@ -122,7 +122,9 @@ export default function OutputsPage() {
     <div>
       <div style={{ marginBottom: 32 }}>
         <p style={sectionLabelStyle}>Activity Logs</p>
-        <h2 className="page-title">Outputs</h2>
+        <h2 className="page-title-mobile" style={pageTitle}>
+          Outputs
+        </h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
           Log workouts manually — type, duration, distance, heart rate, and calories burned.
         </p>
@@ -193,7 +195,10 @@ export default function OutputsPage() {
               </button>
 
               {expanded && (
-                <div style={{ padding: '0 20px 20px', borderTop: '1px solid #f4f4f5' }}>
+                <div
+                  className="log-section-content"
+                  style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}
+                >
                   <div className="metric-grid-2" style={{ paddingTop: 20, marginBottom: 24 }}>
                     {buildActivityMetricConfigs(day.activities).map((metric) => (
                       <ActivityMetricCard key={metric.label} config={metric} />

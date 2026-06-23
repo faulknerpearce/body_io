@@ -61,12 +61,22 @@ export default function ActivityLogSection({
         overflow: 'hidden',
       }}
     >
-      <div className="log-section-header">
+      <div
+        className="log-section-header"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px 24px',
+        }}
+      >
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="log-section-header-toggle"
           style={{
+            flex: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -75,6 +85,7 @@ export default function ActivityLogSection({
             cursor: 'pointer',
             textAlign: 'left',
             padding: 0,
+            marginRight: 12,
           }}
         >
           <div>
@@ -127,7 +138,10 @@ export default function ActivityLogSection({
       </div>
 
       {expanded && (
-        <div style={{ padding: '0 20px 20px', borderTop: '1px solid #f4f4f5' }}>
+        <div
+          className="log-section-content"
+          style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}
+        >
           {count === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#a1a1aa' }}>
               <i
@@ -153,10 +167,10 @@ export default function ActivityLogSection({
                       background: '#fafafa',
                       border: '1px solid #e4e4e7',
                       borderRadius: 20,
-                      padding: '16px 20px',
+                      padding: '20px 24px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 16,
+                      gap: 20,
                       opacity: deleting === item.id ? 0.5 : 1,
                     }}
                   >
