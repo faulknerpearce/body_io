@@ -8,9 +8,10 @@
   ],
   "scripts": {
     "build:shared": "npm run build -w @nutrition-tracker/shared",
+    "build:mcp-server": "npm run build -w @nutrition-tracker/mcp-server",
     "dev": "npm run build:shared && npm run dev -w @nutrition-tracker/web",
     "dev:mcp": "npm run build:shared && npm run dev -w @nutrition-tracker/mcp-server",
-    "prebuild": "npm run build:shared",
+    "prebuild": "npm run build:shared && npm run build:mcp-server",
     "build": "npm run build -w @nutrition-tracker/web",
     "pretypecheck": "npm run build:shared",
     "typecheck": "npm run typecheck --workspaces --if-present",
