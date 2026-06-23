@@ -1,9 +1,7 @@
-# Local `wrangler pages dev` / manual deploy from packages/web.
-# Cloudflare Git builds use the repo-root wrangler.toml (output: packages/web/dist).
 name = "nutrition-tracker"
 compatibility_date = "2025-01-15"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = "./dist"
+pages_build_output_dir = "packages/web/dist"
 
 # Environment variables (non-secret)
 [vars]

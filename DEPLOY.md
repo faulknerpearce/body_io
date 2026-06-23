@@ -46,6 +46,24 @@ npm run build
 npm run build -w @nutrition-tracker/mcp-server
 ```
 
+## Cloudflare Pages (GitHub)
+
+Connect `faulknerpearce/nutrition_tracker` with these build settings (repo root):
+
+| Setting | Value |
+| ------- | ----- |
+| Framework preset | None |
+| Root directory | *(blank)* |
+| Build command | `npm run build` |
+| Build output directory | `packages/web/dist` *(or leave blank — root `wrangler.toml` sets this)* |
+| Node.js version | `20` |
+
+The repo-root `wrangler.toml` and `functions/` wrappers exist so Git builds find Pages Functions (`/mcp`, OAuth) without changing the monorepo layout.
+
+**Build-time env vars:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+
+**Runtime secrets:** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `OAUTH_SIGNING_SECRET`
+
 ## Deploy steps
 
 ### 1. Supabase
