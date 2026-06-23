@@ -1,6 +1,7 @@
 import { formatDayLabel, sumTotals, todayISO } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
 import FoodLogSection from '../components/FoodLogSection'
+import MetricCard from '../components/MetricCard'
 import {
   addEntry,
   deleteEntry,
@@ -10,6 +11,7 @@ import {
   type FoodEntry,
   type NewFoodEntry,
 } from '../lib/entries'
+import { buildMetricConfigs } from '../lib/metrics'
 
 function updateDayEntries(days: DaySummary[], date: string, entries: FoodEntry[]): DaySummary[] {
   return days.map((day) =>
@@ -184,6 +186,19 @@ export default function InputsPage() {
 
               {expanded && (
                 <div style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                      gap: 16,
+                      paddingTop: 20,
+                      marginBottom: 24,
+                    }}
+                  >
+                    {buildMetricConfigs(day.entries).map((m) => (
+                      <MetricCard key={m.label} config={m} />
+                    ))}
+                  </div>
                   <FoodLogSection
                     entries={day.entries}
                     onAdd={isToday ? persistAdd : undefined}
