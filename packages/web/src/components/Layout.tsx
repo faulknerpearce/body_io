@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import { type AppRoute, routeHref } from '../lib/routing'
 
@@ -14,8 +15,30 @@ const tabs: { route: AppRoute; label: string }[] = [
 
 export default function Layout({ children, activeTab }: LayoutProps) {
   const { user, signOut } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement | null>(null)
   const displayLabel =
     (user?.user_metadata?.display_name as string | undefined) ?? user?.email ?? 'Account'
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
 
   return (
     <div className="min-h-screen" style={{ background: '#fafafa' }}>
@@ -46,24 +69,86 @@ export default function Layout({ children, activeTab }: LayoutProps) {
               Nutrition Tracker
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 13, color: '#71717a' }}>{displayLabel}</span>
+          <div ref={menuRef} style={{ position: 'relative' }}>
             <button
               type="button"
-              onClick={() => void signOut()}
+              aria-label="Account menu"
+              aria-expanded={menuOpen}
+              aria-haspopup="true"
+              onClick={() => setMenuOpen((open) => !open)}
               style={{
-                padding: '6px 12px',
-                borderRadius: 8,
+                width: 40,
+                height: 40,
+                borderRadius: 9999,
                 border: '1px solid #e4e4e7',
-                background: 'white',
+                background: '#f4f4f5',
                 color: '#3f3f46',
-                fontSize: 13,
-                fontWeight: 500,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              Log out
+              <i className="fa-solid fa-user" style={{ fontSize: 16 }}></i>
             </button>
+            {menuOpen && (
+              <div
+                role="menu"
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  right: 0,
+                  minWidth: 200,
+                  background: 'white',
+                  border: '1px solid #e4e4e7',
+                  borderRadius: 16,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+                  padding: 8,
+                  zIndex: 50,
+                }}
+              >
+                <div
+                  style={{
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: '#3f3f46',
+                    borderBottom: '1px solid #f4f4f5',
+                    marginBottom: 4,
+                  }}
+                >
+                  {displayLabel}
+                </div>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    void signOut()
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#3f3f46',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#fafafa'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                  }}
+                >
+                  Log out
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div className="max-w-4xl mx-auto px-4" style={{ marginTop: 12 }}>

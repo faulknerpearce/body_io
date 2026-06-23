@@ -1,0 +1,92 @@
+import type { ReactNode } from 'react'
+
+interface DashboardPreviewListProps {
+  title: string
+  viewAllHref: string
+  viewAllLabel: string
+  children: ReactNode
+}
+
+export default function DashboardPreviewList({
+  title,
+  viewAllHref,
+  viewAllLabel,
+  children,
+}: DashboardPreviewListProps) {
+  return (
+    <div
+      style={{
+        background: 'white',
+        border: '1px solid #e4e4e7',
+        borderRadius: 24,
+        padding: 24,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 16,
+        }}
+      >
+        <h3
+          style={{
+            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+            fontSize: 16,
+            fontWeight: 600,
+            margin: 0,
+          }}
+        >
+          {title}
+        </h3>
+        <a
+          href={viewAllHref}
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: '#134e4b',
+            textDecoration: 'none',
+          }}
+        >
+          {viewAllLabel} →
+        </a>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+interface PreviewRowProps {
+  primary: string
+  secondary: string
+  meta: string
+}
+
+export function PreviewRow({ primary, secondary, meta }: PreviewRowProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        padding: '12px 0',
+        borderBottom: '1px solid #f4f4f5',
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: 14 }}>{primary}</div>
+        <div style={{ fontSize: 12, color: '#71717a' }}>{secondary}</div>
+      </div>
+      <div style={{ fontSize: 12, color: '#a1a1aa', flexShrink: 0 }}>{meta}</div>
+    </div>
+  )
+}
+
+export function PreviewEmpty({ message }: { message: string }) {
+  return (
+    <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0, padding: '8px 0' }}>{message}</p>
+  )
+}
