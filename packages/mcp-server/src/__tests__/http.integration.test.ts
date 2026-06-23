@@ -101,7 +101,7 @@ describe('handleMcp HTTP integration', () => {
         }),
         serverInfo: {
           name: 'nutrition_tracker',
-          version: '1.0.0',
+          version: '1.1.0',
         },
       },
     })
@@ -151,6 +151,7 @@ describe('handleMcp HTTP integration', () => {
         'update_activity',
         'delete_activity',
         'get_activity_totals',
+        'manage_day_log',
       ]),
     )
   })

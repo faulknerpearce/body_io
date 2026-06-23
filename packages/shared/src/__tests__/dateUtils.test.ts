@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { formatDayLabel, offsetDateISO, parseISODate, todayISO } from '../dateUtils.js'
+import {
+  formatDayLabel,
+  offsetDateISO,
+  parseISODate,
+  parseLogDate,
+  todayISO,
+} from '../dateUtils.js'
 
 describe('todayISO', () => {
   it('formats a date as YYYY-MM-DD using local components', () => {
@@ -33,6 +39,31 @@ describe('offsetDateISO', () => {
     const ref = new Date(2026, 5, 23)
     expect(offsetDateISO(1, ref)).toBe('2026-06-22')
     expect(offsetDateISO(30, ref)).toBe('2026-05-24')
+  })
+})
+
+describe('parseLogDate', () => {
+  const now = new Date(2026, 5, 23)
+
+  it('accepts a valid past or present ISO date', () => {
+    expect(parseLogDate('2026-06-22', { now })).toEqual({ ok: true, value: '2026-06-22' })
+    expect(parseLogDate('2026-06-23', { now })).toEqual({ ok: true, value: '2026-06-23' })
+  })
+
+  it('uses fallback when value is missing', () => {
+    expect(parseLogDate(undefined, { fallback: '2026-06-20', now })).toEqual({
+      ok: true,
+      value: '2026-06-20',
+    })
+  })
+
+  it('rejects invalid and future dates', () => {
+    expect(parseLogDate('2026-13-01', { now }).ok).toBe(false)
+    expect(parseLogDate('06-23-2026', { now }).ok).toBe(false)
+    expect(parseLogDate('2026-06-24', { now })).toEqual({
+      ok: false,
+      error: 'date cannot be in the future',
+    })
   })
 })
 
