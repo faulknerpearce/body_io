@@ -6,7 +6,7 @@ import {
   todayISO,
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
-import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { PageError, PageLoading } from '../components/layout/PageState'
 import ActivityLogSection from '../components/ActivityLogSection'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
@@ -105,79 +105,25 @@ export default function OutputsPage() {
     )
   }
 
-  if (loading) {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading activities...
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div role="alert" style={{ textAlign: 'center', padding: '80px 20px', color: '#dc2626' }}>
-        <i
-          className="fa-solid fa-circle-exclamation"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>Failed to load activities</p>
-        <p style={{ fontSize: 13, color: '#71717a', margin: 0 }}>{error}</p>
-      </div>
-    )
-  }
+  if (loading) return <PageLoading message="Loading activities..." />
+  if (error) return <PageError message="Failed to load activities" detail={error} />
 
   return (
-    <div>
-      <div style={{ marginBottom: 32 }}>
-        <p style={sectionLabelStyle}>Activity Logs</p>
-        <h2 className="page-title-mobile" style={pageTitle}>
-          Outputs
-        </h2>
-        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-          Log cardio manually or pick a saved workout template with per-exercise sets.
-        </p>
-      </div>
+    <div className="catalog-list">
+      {days.map((day) => {
+        const expanded = expandedDate === day.date
+        const isToday = day.date === todayISO()
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {days.map((day) => {
-          const expanded = expandedDate === day.date
-          const isToday = day.date === todayISO()
-
-          return (
-            <div
-              key={day.date}
-              style={{
-                background: 'white',
-                border: '1px solid #e4e4e7',
-                borderRadius: 24,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                overflow: 'hidden',
-              }}
+        return (
+          <div
+            key={day.date}
+            className={isToday ? 'day-accordion day-accordion-today' : 'day-accordion'}
+          >
+            <button
+              type="button"
+              className="day-accordion-toggle"
+              onClick={() => setExpandedDate(expanded ? null : day.date)}
             >
-              <button
-                type="button"
-                onClick={() => setExpandedDate(expanded ? null : day.date)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 16,
-                  padding: '20px 24px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>
                     {formatDayLabel(day.date)}
@@ -236,10 +182,9 @@ export default function OutputsPage() {
                   />
                 </div>
               )}
-            </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

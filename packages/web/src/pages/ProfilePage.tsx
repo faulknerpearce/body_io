@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import type { ProfileUpdate, UserProfile } from '@nutrition-tracker/shared'
 import GoalsFormFields from '../components/GoalsFormFields'
+import PageHeader from '../components/layout/PageHeader'
+import { PageLoading } from '../components/layout/PageState'
+import ZoneButton from '../components/layout/ZoneButton'
 import { useProfile } from '../context/useProfile'
 import { defaultGoalsForm, normalizeGoals } from '../lib/goalsForm'
-import { cardSurface, inputBase, labelBase, pageTitle, sectionHeader } from '../lib/styles'
+import { inputBase, labelBase } from '../lib/styles'
 
 function optionalInt(value: string): number | null {
   if (value.trim() === '') return null
@@ -103,10 +106,10 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
         </div>
       )}
 
-      <section style={{ ...cardSurface, padding: 24, marginBottom: 24 }}>
+      <section className="day-accordion" style={{ padding: 24, marginBottom: 16 }}>
         <h3
           style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+            fontFamily: 'var(--font-display)',
             fontSize: 20,
             fontWeight: 600,
             margin: '0 0 4px 0',
@@ -183,10 +186,10 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
         </div>
       </section>
 
-      <section style={{ ...cardSurface, padding: 24, marginBottom: 24 }}>
+      <section className="day-accordion" style={{ padding: 24, marginBottom: 24 }}>
         <h3
           style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+            fontFamily: 'var(--font-display)',
             fontSize: 20,
             fontWeight: 600,
             margin: '0 0 4px 0',
@@ -203,39 +206,10 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
       </section>
 
       <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <button
-          type="button"
-          onClick={resetGoalsDefaults}
-          style={{
-            padding: '10px 20px',
-            borderRadius: 9999,
-            border: '1px solid #e4e4e7',
-            background: 'white',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-            color: '#52525b',
-          }}
-        >
-          Reset goal defaults
-        </button>
-        <button
-          type="button"
-          onClick={submit}
-          disabled={saving}
-          style={{
-            padding: '10px 20px',
-            borderRadius: 9999,
-            border: 'none',
-            background: saving ? '#6b7280' : '#134e4b',
-            color: 'white',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
+        <ZoneButton onClick={resetGoalsDefaults}>Reset goal defaults</ZoneButton>
+        <ZoneButton variant="primary" onClick={submit} disabled={saving}>
           {saving ? 'Saving...' : 'Save Profile'}
-        </button>
+        </ZoneButton>
       </div>
     </>
   )
@@ -244,33 +218,15 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
 export default function ProfilePage() {
   const { profile, loading, updateProfile } = useProfile()
 
-  if (loading) {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading profile...
-      </div>
-    )
-  }
+  if (loading) return <PageLoading message="Loading profile..." />
 
   return (
     <div>
-      <div style={{ marginBottom: 32 }}>
-        <p style={sectionHeader}>Account</p>
-        <h2 className="page-title-mobile" style={pageTitle}>
-          Profile
-        </h2>
-        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-          Manage your basic information and daily nutrition targets.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Account"
+        title="Profile"
+        description="Manage your basic information and daily nutrition targets."
+      />
 
       <ProfileForm
         key={profileFormKey(profile)}

@@ -1,21 +1,26 @@
 import { useEffect, useState } from 'react'
 import Layout from './components/Layout'
+import PageShell from './components/layout/PageShell'
 import { AuthProvider } from './context/AuthProvider'
 import { ProfileProvider } from './context/ProfileProvider'
 import { useAuth } from './context/useAuth'
-import { parseHashRoute } from './lib/routing'
+import { legacyRedirectPath, parseHashRoute, type AppRoute } from './lib/routing'
 import AuthPage from './pages/AuthPage'
 import Dashboard from './pages/Dashboard'
-import InputsPage from './pages/InputsPage'
-import OutputsPage from './pages/OutputsPage'
+import InputsZone from './pages/InputsZone'
+import OutputsZone from './pages/OutputsZone'
 import ProfilePage from './pages/ProfilePage'
-import RecipesPage from './pages/RecipesPage'
-import WorkoutsPage from './pages/WorkoutsPage'
 
 function useHashRoute() {
-  const [route, setRoute] = useState(() => parseHashRoute(window.location.hash))
+  const [route, setRoute] = useState<AppRoute>(() => parseHashRoute(window.location.hash))
 
   useEffect(() => {
+    const redirect = legacyRedirectPath(window.location.hash)
+    if (redirect) {
+      window.location.replace(redirect)
+      return
+    }
+
     const onHashChange = () => setRoute(parseHashRoute(window.location.hash))
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
@@ -46,19 +51,19 @@ function AppContent() {
 
   return (
     <ProfileProvider>
-      <Layout activeTab={route}>
+      <Layout activeRoute={route}>
         {route === 'profile' ? (
-          <ProfilePage />
-        ) : route === 'inputs' ? (
-          <InputsPage />
-        ) : route === 'recipes' ? (
-          <RecipesPage />
-        ) : route === 'workouts' ? (
-          <WorkoutsPage />
-        ) : route === 'outputs' ? (
-          <OutputsPage />
+          <PageShell zone="profile">
+            <ProfilePage />
+          </PageShell>
+        ) : route === 'inputs' || route === 'inputs/recipes' ? (
+          <InputsZone route={route} />
+        ) : route === 'outputs' || route === 'outputs/workouts' ? (
+          <OutputsZone route={route} />
         ) : (
-          <Dashboard />
+          <PageShell zone="dashboard">
+            <Dashboard />
+          </PageShell>
         )}
       </Layout>
     </ProfileProvider>

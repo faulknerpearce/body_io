@@ -7,7 +7,9 @@ import {
 } from '@nutrition-tracker/shared'
 import { useEffect, useState } from 'react'
 import { useNutritionGoals } from '../context/useProfile'
-import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { useZoneTheme } from '../context/ZoneThemeContext'
+import PageHeader from '../components/layout/PageHeader'
+import { PageError, PageLoading } from '../components/layout/PageState'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
 import MetricCard from '../components/MetricCard'
@@ -17,6 +19,7 @@ import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
 import { buildMetricConfigs } from '../lib/metrics'
 import { routeHref } from '../lib/routing'
+import { zoneTokens } from '../lib/design-tokens'
 
 function formatRange(low: number, high: number, unit: string): string {
   return `${low.toLocaleString()}–${high.toLocaleString()} ${unit}`
@@ -31,11 +34,13 @@ function SectionHeader({
   title,
   href,
   linkLabel,
+  accent,
 }: {
   label: string
   title: string
   href: string
   linkLabel: string
+  accent: string
 }) {
   return (
     <div
@@ -48,11 +53,22 @@ function SectionHeader({
       }}
     >
       <div>
-        <p style={sectionLabelStyle}>{label}</p>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase',
+            margin: '0 0 4px 0',
+            color: '#71717a',
+          }}
+        >
+          {label}
+        </p>
         <h3
           style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-            fontSize: 24,
+            fontFamily: 'var(--font-display)',
+            fontSize: 20,
             margin: 0,
             fontWeight: 600,
             letterSpacing: '-0.02em',
@@ -66,7 +82,7 @@ function SectionHeader({
         style={{
           fontSize: 12,
           fontWeight: 500,
-          color: '#134e4b',
+          color: accent,
           textDecoration: 'none',
           flexShrink: 0,
         }}
@@ -79,6 +95,7 @@ function SectionHeader({
 
 export default function Dashboard() {
   const nutritionGoals = useNutritionGoals()
+  const zone = useZoneTheme()
   const [entries, setEntries] = useState<FoodEntry[]>([])
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
@@ -97,35 +114,13 @@ export default function Dashboard() {
       })
   }, [])
 
-  if (loading) {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading dashboard...
-      </div>
-    )
-  }
-
+  if (loading) return <PageLoading message="Loading dashboard..." />
   if (error) {
     return (
-      <div role="alert" style={{ textAlign: 'center', padding: '80px 20px', color: '#dc2626' }}>
-        <i
-          className="fa-solid fa-circle-exclamation"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>Failed to load dashboard</p>
-        <p style={{ fontSize: 13, color: '#71717a', margin: 0 }}>{error}</p>
-        <p style={{ fontSize: 12, color: '#a1a1aa', marginTop: 16 }}>
-          Check that you are signed in and Supabase is reachable.
-        </p>
-      </div>
+      <PageError
+        message="Failed to load dashboard"
+        detail={`${error}. Check that you are signed in and Supabase is reachable.`}
+      />
     )
   }
 
@@ -142,125 +137,159 @@ export default function Dashboard() {
   const recentEntries = [...entries].slice(-3).reverse()
   const recentActivities = [...activities].slice(-3).reverse()
 
+  const goalsSummary = [
+    formatRange(nutritionGoals.calories.low, nutritionGoals.calories.high, 'kcal'),
+    formatRange(nutritionGoals.protein.low, nutritionGoals.protein.high, 'g protein'),
+    `~${nutritionGoals.carbs.value}g carbs`,
+    `~${nutritionGoals.fat.value}g fat`,
+    `~${nutritionGoals.fiber.value}g fiber`,
+    formatCaffeineLimit(nutritionGoals.caffeine.value, 'mg caffeine'),
+  ].join(' · ')
+
   return (
     <div>
-      <div style={{ marginBottom: 32 }}>
-        <p style={sectionLabelStyle}>Overview</p>
-        <h2 className="page-title-mobile" style={pageTitle}>
-          Dashboard
-        </h2>
-        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-          {todayISO()} · Target:{' '}
-          {formatRange(nutritionGoals.calories.low, nutritionGoals.calories.high, 'kcal')} •{' '}
-          {formatRange(nutritionGoals.protein.low, nutritionGoals.protein.high, 'g protein')} • ~
-          {nutritionGoals.carbs.value}g carbs • ~{nutritionGoals.fat.value}g fat • ~
-          {nutritionGoals.fiber.value}g fiber •{' '}
-          {formatCaffeineLimit(nutritionGoals.caffeine.value, 'mg caffeine')}
-        </p>
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description={`${todayISO()} · Target: ${goalsSummary}`}
+      />
+
+      <div className="quick-chips">
+        <a
+          href={routeHref('inputs')}
+          className="quick-chip"
+          style={{
+            background: zoneTokens.inputs.accent,
+            color: zoneTokens.inputs.accentText,
+            borderColor: zoneTokens.inputs.accent,
+          }}
+        >
+          <i className="fa-solid fa-plus" aria-hidden="true" /> Log Food
+        </a>
+        <a href={routeHref('inputs/recipes')} className="quick-chip">
+          <i className="fa-solid fa-book-open" aria-hidden="true" /> Recipes
+        </a>
+        <a
+          href={routeHref('outputs')}
+          className="quick-chip"
+          style={{
+            background: zoneTokens.outputs.accent,
+            color: zoneTokens.outputs.accentText,
+            borderColor: zoneTokens.outputs.accent,
+          }}
+        >
+          <i className="fa-solid fa-plus" aria-hidden="true" /> Log Activity
+        </a>
+        <a href={routeHref('outputs/workouts')} className="quick-chip">
+          <i className="fa-solid fa-dumbbell" aria-hidden="true" /> Workouts
+        </a>
       </div>
 
-      <NetBalanceCard balance={balance} hasActivities={activities.length > 0} />
-
-      <section style={{ marginBottom: 40 }}>
-        <SectionHeader
-          label="Nutrition"
-          title="Today's Inputs"
-          href={routeHref('inputs')}
-          linkLabel="View Inputs"
-        />
-        <div className="metric-grid-2">
-          {inputMetrics.map((m) => (
-            <MetricCard key={m.label} config={m} />
-          ))}
+      <div className="dashboard-bento">
+        <div className="dashboard-bento-hero">
+          <NetBalanceCard balance={balance} hasActivities={activities.length > 0} />
         </div>
-      </section>
 
-      <section style={{ marginBottom: 40 }}>
-        <SectionHeader
-          label="Activity"
-          title="Today's Outputs"
-          href={routeHref('outputs')}
-          linkLabel="View Outputs"
-        />
-        {activities.length === 0 ? (
-          <div
-            style={{
-              background: 'white',
-              border: '1px solid #e4e4e7',
-              borderRadius: 24,
-              padding: 24,
-              textAlign: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-            }}
-          >
-            <p style={{ fontWeight: 500, color: '#52525b', margin: '0 0 4px 0' }}>
-              No activities logged today
-            </p>
-            <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0 }}>
-              <a href={routeHref('outputs')} style={{ color: '#134e4b', fontWeight: 500 }}>
-                Log an activity
-              </a>{' '}
-              to track workouts and calories burned.
-            </p>
-          </div>
-        ) : (
-          <div className="metric-grid-2">
-            {outputMetrics.map((metric) => (
-              <ActivityMetricCard key={metric.label} config={metric} />
-            ))}
-          </div>
-        )}
-      </section>
+        <div className="dashboard-bento-split">
+          <section>
+            <SectionHeader
+              label="Nutrition"
+              title="Today's Inputs"
+              href={routeHref('inputs')}
+              linkLabel="View all"
+              accent={zoneTokens.inputs.accent}
+            />
+            <div className="metric-grid-2">
+              {inputMetrics.map((m) => (
+                <MetricCard key={m.label} config={m} />
+              ))}
+            </div>
+          </section>
 
-      <section style={{ marginBottom: 32 }}>
-        <SectionHeader
-          label="Logs"
-          title="Today's Logs"
-          href={routeHref('inputs')}
-          linkLabel="View all"
-        />
-        <div className="metric-grid-auto">
-          <DashboardPreviewList
-            title="Recent Food"
-            viewAllHref={routeHref('inputs')}
-            viewAllLabel="Inputs"
-          >
-            {recentEntries.length === 0 ? (
-              <PreviewEmpty message="No food logged today" />
+          <section>
+            <SectionHeader
+              label="Activity"
+              title="Today's Outputs"
+              href={routeHref('outputs')}
+              linkLabel="View all"
+              accent={zoneTokens.outputs.accent}
+            />
+            {activities.length === 0 ? (
+              <div className="day-accordion" style={{ padding: 24, textAlign: 'center' }}>
+                <p style={{ fontWeight: 500, color: '#52525b', margin: '0 0 4px 0' }}>
+                  No activities logged today
+                </p>
+                <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0 }}>
+                  <a
+                    href={routeHref('outputs')}
+                    style={{ color: zoneTokens.outputs.accent, fontWeight: 500 }}
+                  >
+                    Log an activity
+                  </a>{' '}
+                  to track workouts and calories burned.
+                </p>
+              </div>
             ) : (
-              recentEntries.map((entry) => (
-                <PreviewRow
-                  key={entry.id}
-                  primary={entry.name}
-                  secondary={entry.description || 'Food entry'}
-                  meta={`${entry.calories} kcal · ${entry.protein}g protein`}
-                />
-              ))
+              <div className="metric-grid-2">
+                {outputMetrics.map((metric) => (
+                  <ActivityMetricCard key={metric.label} config={metric} />
+                ))}
+              </div>
             )}
-          </DashboardPreviewList>
-
-          <DashboardPreviewList
-            title="Recent Activities"
-            viewAllHref={routeHref('outputs')}
-            viewAllLabel="Outputs"
-          >
-            {recentActivities.length === 0 ? (
-              <PreviewEmpty message="No activities logged today" />
-            ) : (
-              recentActivities.map((activity) => (
-                <PreviewRow
-                  key={activity.id}
-                  primary={activity.name}
-                  secondary={activity.activityType}
-                  meta={formatDuration(activity.movingTimeSeconds)}
-                />
-              ))
-            )}
-          </DashboardPreviewList>
+          </section>
         </div>
-      </section>
 
-      <div style={{ textAlign: 'center' }}>
+        <section>
+          <SectionHeader
+            label="Logs"
+            title="Today's Logs"
+            href={routeHref('inputs')}
+            linkLabel="View all"
+            accent={zone.eyebrow}
+          />
+          <div className="metric-grid-auto">
+            <DashboardPreviewList
+              title="Recent Food"
+              viewAllHref={routeHref('inputs')}
+              viewAllLabel="Inputs"
+            >
+              {recentEntries.length === 0 ? (
+                <PreviewEmpty message="No food logged today" />
+              ) : (
+                recentEntries.map((entry) => (
+                  <PreviewRow
+                    key={entry.id}
+                    primary={entry.name}
+                    secondary={entry.description || 'Food entry'}
+                    meta={`${entry.calories} kcal · ${entry.protein}g protein`}
+                  />
+                ))
+              )}
+            </DashboardPreviewList>
+
+            <DashboardPreviewList
+              title="Recent Activities"
+              viewAllHref={routeHref('outputs')}
+              viewAllLabel="Outputs"
+            >
+              {recentActivities.length === 0 ? (
+                <PreviewEmpty message="No activities logged today" />
+              ) : (
+                recentActivities.map((activity) => (
+                  <PreviewRow
+                    key={activity.id}
+                    primary={activity.name}
+                    secondary={activity.activityType}
+                    meta={formatDuration(activity.movingTimeSeconds)}
+                  />
+                ))
+              )}
+            </DashboardPreviewList>
+          </div>
+        </section>
+      </div>
+
+      <div style={{ textAlign: 'center', marginTop: 24 }}>
         <p style={{ fontSize: 10, color: '#a1a1aa' }}>
           Data is estimated using standard nutritional references. Actual values may vary.
         </p>

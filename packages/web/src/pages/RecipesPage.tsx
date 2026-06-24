@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
+import CatalogRow from '../components/layout/CatalogRow'
+import { PageLoading } from '../components/layout/PageState'
+import ZoneButton from '../components/layout/ZoneButton'
 import LogRecipeModal from '../components/LogRecipeModal'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import RecipeViewModal from '../components/RecipeViewModal'
@@ -15,9 +18,13 @@ import {
   logRecipe,
   saveRecipe,
 } from '../lib/recipes'
-import { cardSurface, iconTileMd, inputBase, pageTitle, sectionHeader } from '../lib/styles'
+import { inputBase } from '../lib/styles'
 
-export default function RecipesPage() {
+interface RecipesPageProps {
+  createTick?: number
+}
+
+export default function RecipesPage({ createTick = 0 }: RecipesPageProps) {
   const [recipes, setRecipes] = useState<RecipeSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +61,9 @@ export default function RecipesPage() {
       })
   }, [])
 
-  const openCreate = () => setEditingRecipe(null)
+  useEffect(() => {
+    if (createTick > 0) setEditingRecipe(null)
+  }, [createTick])
 
   const openEdit = async (id: string) => {
     try {
@@ -84,60 +93,10 @@ export default function RecipesPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div
-        role="status"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading recipes...
-      </div>
-    )
-  }
+  if (loading) return <PageLoading message="Loading recipes..." />
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 16,
-          marginBottom: 32,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <p style={sectionHeader}>Templates</p>
-          <h2 className="page-title-mobile" style={pageTitle}>
-            Recipes
-          </h2>
-          <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-            Save meals with ingredients, then quick-log them from the food log.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          style={{
-            padding: '10px 20px',
-            borderRadius: 9999,
-            border: 'none',
-            background: '#134e4b',
-            color: 'white',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          New Recipe
-        </button>
-      </div>
-
       {logSuccess && (
         <div
           role="status"
@@ -171,16 +130,7 @@ export default function RecipesPage() {
       )}
 
       {recipes.length > 0 && (
-        <div
-          style={{
-            ...cardSurface,
-            padding: 20,
-            marginBottom: 20,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-          }}
-        >
+        <div className="day-accordion" style={{ padding: 20, marginBottom: 20 }}>
           <div
             style={{
               display: 'grid',
@@ -191,7 +141,16 @@ export default function RecipesPage() {
             className="recipe-toolbar"
           >
             <div>
-              <label htmlFor="recipe-search" style={{ fontSize: 12, fontWeight: 500, color: '#52525b', display: 'block', marginBottom: 6 }}>
+              <label
+                htmlFor="recipe-search"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#52525b',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
                 Search recipes
               </label>
               <div style={{ position: 'relative' }}>
@@ -218,7 +177,16 @@ export default function RecipesPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="recipe-sort" style={{ fontSize: 12, fontWeight: 500, color: '#52525b', display: 'block', marginBottom: 6 }}>
+              <label
+                htmlFor="recipe-sort"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#52525b',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
                 Sort by
               </label>
               <select
@@ -244,6 +212,7 @@ export default function RecipesPage() {
               flexWrap: 'wrap',
               fontSize: 12,
               color: '#71717a',
+              marginTop: 16,
             }}
           >
             <span>
@@ -251,35 +220,25 @@ export default function RecipesPage() {
               {recipes.length === 1 ? 'recipe' : 'recipes'}
             </span>
             {hasActiveFilters && (
-              <button
-                type="button"
+              <ZoneButton
                 onClick={() => {
                   setSearchQuery('')
                   setSortBy('name-asc')
                 }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 9999,
-                  border: '1px solid #e4e4e7',
-                  background: 'white',
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  color: '#52525b',
-                }}
               >
                 Clear filters
-              </button>
+              </ZoneButton>
             )}
           </div>
         </div>
       )}
 
       {recipes.length === 0 ? (
-        <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: 0 }}>No recipes yet. Create one to speed up logging.</p>
         </div>
       ) : visibleRecipes.length === 0 ? (
-        <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>No matching recipes</p>
           <p style={{ margin: 0, fontSize: 13 }}>
             Try a different search term or{' '}
@@ -290,7 +249,7 @@ export default function RecipesPage() {
                 background: 'none',
                 border: 'none',
                 padding: 0,
-                color: '#134e4b',
+                color: 'var(--zone-accent)',
                 fontWeight: 500,
                 cursor: 'pointer',
                 textDecoration: 'underline',
@@ -302,101 +261,39 @@ export default function RecipesPage() {
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="catalog-list">
           {visibleRecipes.map((recipe) => (
-            <div
+            <CatalogRow
               key={recipe.id}
-              style={{
-                ...cardSurface,
-                padding: 20,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-                <div style={{ ...iconTileMd, background: recipe.iconBg }}>
-                  <i
-                    className={`fa-solid ${recipe.icon}`}
-                    style={{ color: recipe.iconColor, fontSize: 18 }}
-                  />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, color: '#18181b' }}>{recipe.name}</div>
-                  <div style={{ fontSize: 12, color: '#71717a', marginTop: 4 }}>
-                    {recipe.ingredientCount} ingredients · {recipe.defaultServings} servings/batch ·{' '}
-                    {recipe.perServingTotals.calories} kcal/serving
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLogSuccess(null)
-                    setLoggingRecipe(recipe)
-                  }}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: 'none',
-                    background: '#134e4b',
-                    color: 'white',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Add to Log
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewingRecipeId(recipe.id)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #e4e4e7',
-                    background: 'white',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  View
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openEdit(recipe.id)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #e4e4e7',
-                    background: 'white',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(recipe.id)}
-                  disabled={deletingId === recipe.id}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #fecaca',
-                    background: '#fff1f2',
-                    color: '#b91c1c',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {deletingId === recipe.id ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </div>
+              icon={recipe.icon}
+              iconBg={recipe.iconBg}
+              iconColor={recipe.iconColor}
+              title={recipe.name}
+              subtitle={`${recipe.ingredientCount} ingredients · ${recipe.defaultServings} servings/batch · ${recipe.perServingTotals.calories} kcal/serving`}
+              onView={() => setViewingRecipeId(recipe.id)}
+              actions={
+                <>
+                  <ZoneButton
+                    variant="primary"
+                    onClick={() => {
+                      setLogSuccess(null)
+                      setLoggingRecipe(recipe)
+                    }}
+                  >
+                    Add to Log
+                  </ZoneButton>
+                  <ZoneButton onClick={() => setViewingRecipeId(recipe.id)}>View</ZoneButton>
+                  <ZoneButton onClick={() => openEdit(recipe.id)}>Edit</ZoneButton>
+                  <ZoneButton
+                    variant="danger"
+                    onClick={() => handleDelete(recipe.id)}
+                    disabled={deletingId === recipe.id}
+                  >
+                    {deletingId === recipe.id ? 'Deleting...' : 'Delete'}
+                  </ZoneButton>
+                </>
+              }
+            />
           ))}
         </div>
       )}
@@ -421,10 +318,7 @@ export default function RecipesPage() {
       )}
 
       {viewingRecipeId && (
-        <RecipeViewModal
-          recipeId={viewingRecipeId}
-          onClose={() => setViewingRecipeId(null)}
-        />
+        <RecipeViewModal recipeId={viewingRecipeId} onClose={() => setViewingRecipeId(null)} />
       )}
     </div>
   )
