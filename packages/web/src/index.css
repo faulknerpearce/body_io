@@ -44,6 +44,10 @@
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
 
+.modal-panel-wide {
+  max-width: 720px;
+}
+
 .modal-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

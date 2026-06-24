@@ -200,6 +200,8 @@ export type Database = {
           average_heartrate: number | null
           max_heartrate: number | null
           calories: number | null
+          workout_id: string | null
+          workout_sets_logged: number | string | null
           created_at: string
         }
         Insert: {
@@ -213,6 +215,8 @@ export type Database = {
           average_heartrate?: number | null
           max_heartrate?: number | null
           calories?: number | null
+          workout_id?: string | null
+          workout_sets_logged?: number | string | null
           created_at?: string
         }
         Update: {
@@ -226,6 +230,8 @@ export type Database = {
           average_heartrate?: number | null
           max_heartrate?: number | null
           calories?: number | null
+          workout_id?: string | null
+          workout_sets_logged?: number | string | null
           created_at?: string
         }
         Relationships: [
@@ -234,6 +240,163 @@ export type Database = {
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'activities_workout_id_fkey'
+            columns: ['workout_id']
+            isOneToOne: false
+            referencedRelation: 'workouts'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      workouts: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string
+          icon: string
+          icon_bg: string
+          icon_color: string
+          default_duration_minutes: number | null
+          default_calories: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          description?: string
+          icon?: string
+          icon_bg?: string
+          icon_color?: string
+          default_duration_minutes?: number | null
+          default_calories?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          description?: string
+          icon?: string
+          icon_bg?: string
+          icon_color?: string
+          default_duration_minutes?: number | null
+          default_calories?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'workouts_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      workout_exercises: {
+        Row: {
+          id: string
+          workout_id: string
+          user_id: string
+          sort_order: number
+          name: string
+          target_reps: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workout_id: string
+          user_id: string
+          sort_order?: number
+          name: string
+          target_reps?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workout_id?: string
+          user_id?: string
+          sort_order?: number
+          name?: string
+          target_reps?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'workout_exercises_workout_id_fkey'
+            columns: ['workout_id']
+            isOneToOne: false
+            referencedRelation: 'workouts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'workout_exercises_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      activity_exercises: {
+        Row: {
+          id: string
+          activity_id: string
+          user_id: string
+          workout_exercise_id: string | null
+          sort_order: number
+          name: string
+          reps_completed: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          activity_id: string
+          user_id: string
+          workout_exercise_id?: string | null
+          sort_order?: number
+          name: string
+          reps_completed: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          activity_id?: string
+          user_id?: string
+          workout_exercise_id?: string | null
+          sort_order?: number
+          name?: string
+          reps_completed?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'activity_exercises_activity_id_fkey'
+            columns: ['activity_id']
+            isOneToOne: false
+            referencedRelation: 'activities'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'activity_exercises_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'activity_exercises_workout_exercise_id_fkey'
+            columns: ['workout_exercise_id']
+            isOneToOne: false
+            referencedRelation: 'workout_exercises'
             referencedColumns: ['id']
           },
         ]

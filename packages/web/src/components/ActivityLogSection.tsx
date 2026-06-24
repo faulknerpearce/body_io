@@ -6,6 +6,7 @@ import AddActivityModal from './AddActivityModal'
 interface ActivityLogSectionProps {
   activities: Activity[]
   onAdd?: (activity: NewActivity) => Promise<void>
+  onLogWorkout?: (options: { workoutId: string; setsLogged: number }) => Promise<void>
   onEdit?: (id: string, activity: NewActivity) => Promise<void>
   onDelete?: (id: string) => Promise<void>
   title?: string
@@ -26,6 +27,7 @@ const activityIcon: Record<string, string> = {
 export default function ActivityLogSection({
   activities,
   onAdd,
+  onLogWorkout,
   onEdit,
   onDelete,
   title = "Today's Activities",
@@ -192,10 +194,7 @@ export default function ActivityLogSection({
                       ></i>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{item.name}</div>
-                        <div style={{ fontSize: 12, color: '#71717a' }}>{item.activityType}</div>
-                      </div>
+                      <div style={{ fontWeight: 600 }}>{item.name}</div>
                       <div
                         style={{
                           marginTop: 8,
@@ -218,22 +217,6 @@ export default function ActivityLogSection({
                           </span>{' '}
                           <span style={{ color: '#a1a1aa' }}>distance</span>
                         </span>
-                        {item.averageHeartrate !== null && (
-                          <span>
-                            <span style={{ fontWeight: 500, color: '#dc2626' }}>
-                              {item.averageHeartrate}
-                            </span>{' '}
-                            <span style={{ color: '#a1a1aa' }}>avg bpm</span>
-                          </span>
-                        )}
-                        {item.maxHeartrate !== null && (
-                          <span>
-                            <span style={{ fontWeight: 500, color: '#b91c1c' }}>
-                              {item.maxHeartrate}
-                            </span>{' '}
-                            <span style={{ color: '#a1a1aa' }}>max bpm</span>
-                          </span>
-                        )}
                         {item.calories !== null && (
                           <span>
                             <span style={{ fontWeight: 500, color: '#ea580c' }}>
@@ -299,7 +282,18 @@ export default function ActivityLogSection({
       )}
 
       {showAddForm && onAdd && (
-        <AddActivityModal onAdd={onAdd} onClose={() => setShowAddForm(false)} />
+        <AddActivityModal
+          onAdd={onAdd}
+          onLogWorkout={
+            onLogWorkout
+              ? async (options) => {
+                  await onLogWorkout(options)
+                  setShowAddForm(false)
+                }
+              : undefined
+          }
+          onClose={() => setShowAddForm(false)}
+        />
       )}
       {editingActivity && onEdit && (
         <AddActivityModal

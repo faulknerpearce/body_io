@@ -27,6 +27,9 @@ describe('mapActivityRow', () => {
       averageHeartrate: 132,
       maxHeartrate: 155,
       calories: 650,
+      workoutId: null,
+      workoutSetsLogged: null,
+      exercises: [],
     })
   })
 })

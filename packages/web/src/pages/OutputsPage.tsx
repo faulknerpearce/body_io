@@ -19,6 +19,7 @@ import {
   type ActivityDaySummary,
   type NewActivity,
 } from '../lib/activities'
+import { logWorkout } from '../lib/workouts'
 
 function updateDayActivities(
   days: ActivityDaySummary[],
@@ -50,6 +51,21 @@ export default function OutputsPage() {
 
   async function persistAdd(input: NewActivity) {
     const activity = await addActivity(input)
+    const today = todayISO()
+    setDays((prev) => {
+      const existing = prev.find((day) => day.date === today)
+      if (existing) {
+        return updateDayActivities(prev, today, [...existing.activities, activity])
+      }
+      return [
+        { date: today, activities: [activity], totals: sumActivityTotals([activity]) },
+        ...prev,
+      ]
+    })
+  }
+
+  async function persistLogWorkout(options: { workoutId: string; setsLogged: number }) {
+    const activity = await logWorkout(options)
     const today = todayISO()
     setDays((prev) => {
       const existing = prev.find((day) => day.date === today)
@@ -126,7 +142,7 @@ export default function OutputsPage() {
           Outputs
         </h2>
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-          Log workouts manually — type, duration, distance, heart rate, and calories burned.
+          Log cardio manually or pick a saved workout template with per-exercise sets.
         </p>
       </div>
 
@@ -207,6 +223,7 @@ export default function OutputsPage() {
                   <ActivityLogSection
                     activities={day.activities}
                     onAdd={isToday ? persistAdd : undefined}
+                    onLogWorkout={isToday ? persistLogWorkout : undefined}
                     onEdit={persistUpdate}
                     onDelete={persistDelete}
                     title={`${formatDayLabel(day.date)} Activities`}

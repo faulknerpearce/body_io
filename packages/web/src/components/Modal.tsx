@@ -5,9 +5,10 @@ interface ModalProps {
   titleId: string
   onClose: () => void
   children: ReactNode
+  size?: 'default' | 'wide'
 }
 
-export default function Modal({ titleId, onClose, children }: ModalProps) {
+export default function Modal({ titleId, onClose, children, size = 'default' }: ModalProps) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -24,7 +25,10 @@ export default function Modal({ titleId, onClose, children }: ModalProps) {
       className="modal-overlay"
       onClick={onClose}
     >
-      <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={size === 'wide' ? 'modal-panel modal-panel-wide' : 'modal-panel'}
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
     </div>,

@@ -1,13 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
-import { validateActivity, type Activity, type NewActivity } from '@nutrition-tracker/shared'
+import {
+  resolveLogWorkoutMetrics,
+  validateActivity,
+  type Activity,
+  type NewActivity,
+  type WorkoutSummary,
+} from '@nutrition-tracker/shared'
+import { fetchWorkoutSummaries } from '../lib/workouts'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
 
 const ACTIVITY_TYPES = ['Run', 'Ride', 'Swim', 'Walk', 'Hike', 'Workout', 'Other'] as const
 
+type AddMode = 'manual' | 'workout'
+
 interface AddActivityModalProps {
   activity?: Activity
   onAdd: (activity: NewActivity) => Promise<void>
+  onLogWorkout?: (options: { workoutId: string; setsLogged: number }) => Promise<void>
   onClose: () => void
 }
 
@@ -55,8 +65,17 @@ function parseOptionalFloat(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-export default function AddActivityModal({ activity, onAdd, onClose }: AddActivityModalProps) {
+export default function AddActivityModal({
+  activity,
+  onAdd,
+  onLogWorkout,
+  onClose,
+}: AddActivityModalProps) {
   const isEdit = activity !== undefined
+  const [mode, setMode] = useState<AddMode>('manual')
+  const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState('')
+  const [workoutSetsLogged, setWorkoutSetsLogged] = useState('1')
   const [form, setForm] = useState<FormState>(() =>
     activity ? formFromActivity(activity) : EMPTY_FORM,
   )
@@ -84,6 +103,25 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
     // so the listener is torn down and the next mount gets the latest value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (isEdit || mode !== 'workout') return
+    fetchWorkoutSummaries()
+      .then((data) => {
+        setWorkouts(data)
+        setSelectedWorkoutId((current) => current || data[0]?.id || '')
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load workouts')
+      })
+  }, [isEdit, mode])
+
+  const selectedWorkout = workouts.find((workout) => workout.id === selectedWorkoutId)
+  const workoutSetsNum = Number.parseInt(workoutSetsLogged, 10)
+  const workoutPreviewMetrics =
+    selectedWorkout && Number.isFinite(workoutSetsNum) && workoutSetsNum > 0
+      ? resolveLogWorkoutMetrics(selectedWorkout, workoutSetsNum)
+      : null
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -138,6 +176,33 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
     }
   }
 
+  const submitWorkout = async () => {
+    if (!onLogWorkout || !selectedWorkout) {
+      setError('Select a workout')
+      return
+    }
+
+    const setsLogged = Number.parseInt(workoutSetsLogged, 10)
+    if (!Number.isFinite(setsLogged) || setsLogged <= 0) {
+      setError('Sets must be a positive integer')
+      return
+    }
+
+    setAdding(true)
+    setError(null)
+    try {
+      await onLogWorkout({
+        workoutId: selectedWorkout.id,
+        setsLogged,
+      })
+      close()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to log workout')
+    } finally {
+      setAdding(false)
+    }
+  }
+
   return (
     <Modal titleId="activity-form-title" onClose={close}>
         <h3
@@ -157,6 +222,30 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
             : "Record a workout or activity for today's outputs."}
         </p>
 
+        {!isEdit && onLogWorkout && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            {(['manual', 'workout'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setMode(value)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 9999,
+                  border: mode === value ? '1px solid #134e4b' : '1px solid #e4e4e7',
+                  background: mode === value ? '#134e4b' : 'white',
+                  color: mode === value ? 'white' : '#52525b',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                {value === 'manual' ? 'Manual' : 'From Workout'}
+              </button>
+            ))}
+          </div>
+        )}
+
         {error && (
           <div
             role="alert"
@@ -173,6 +262,111 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
           </div>
         )}
 
+        {!isEdit && mode === 'workout' ? (
+          <>
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="activity-workout" style={labelBase}>
+                Saved workout
+              </label>
+              <select
+                id="activity-workout"
+                value={selectedWorkoutId}
+                onChange={(e) => setSelectedWorkoutId(e.target.value)}
+                style={inputBase}
+              >
+                {workouts.length === 0 ? (
+                  <option value="">No workouts saved yet</option>
+                ) : (
+                  workouts.map((workout) => (
+                    <option key={workout.id} value={workout.id}>
+                      {workout.name} ({workout.exerciseCount} exercises)
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="activity-workout-sets" style={labelBase}>
+                How many sets of this workout did you complete?
+              </label>
+              <input
+                id="activity-workout-sets"
+                type="number"
+                min="1"
+                step="1"
+                value={workoutSetsLogged}
+                onChange={(e) => setWorkoutSetsLogged(e.target.value)}
+                style={inputBase}
+              />
+              <p style={{ fontSize: 12, color: '#a1a1aa', margin: '8px 0 0 0' }}>
+                One set = the full workout from start to finish.
+              </p>
+            </div>
+
+            {selectedWorkout && (
+              <div
+                style={{
+                  marginBottom: 24,
+                  padding: 16,
+                  borderRadius: 16,
+                  background: '#ecfdf5',
+                  color: '#065f46',
+                  fontSize: 13,
+                }}
+              >
+                {selectedWorkout.exerciseCount} exercises in one set
+                {Number.isFinite(workoutSetsNum) && workoutSetsNum > 0 &&
+                  ` · logging ${workoutSetsNum} ${workoutSetsNum === 1 ? 'set' : 'sets'}`}
+                {workoutPreviewMetrics &&
+                  (workoutPreviewMetrics.durationMinutes > 0 ||
+                    workoutPreviewMetrics.calories !== null) && (
+                    <>
+                      {' '}
+                      · {workoutPreviewMetrics.durationMinutes} min
+                      {workoutPreviewMetrics.calories !== null &&
+                        ` · ${workoutPreviewMetrics.calories} kcal`}
+                    </>
+                  )}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={close}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 9999,
+                  border: '1px solid #e4e4e7',
+                  background: 'white',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  color: '#52525b',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitWorkout}
+                disabled={adding || !selectedWorkout}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 9999,
+                  border: 'none',
+                  background: adding || !selectedWorkout ? '#6b7280' : '#134e4b',
+                  color: 'white',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                {adding ? 'Logging...' : 'Log Workout'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
         <div style={{ marginBottom: 16 }}>
           <label htmlFor="activity-name" style={labelBase}>
             Name
@@ -321,6 +515,8 @@ export default function AddActivityModal({ activity, onAdd, onClose }: AddActivi
                 : 'Log Activity'}
           </button>
         </div>
+          </>
+        )}
     </Modal>
   )
 }

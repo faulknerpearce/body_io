@@ -28,6 +28,13 @@ import {
   logRecipeEntry,
   saveRecipe,
 } from './recipeHandlers.js'
+import {
+  deleteWorkout,
+  getWorkout,
+  listWorkouts,
+  logWorkoutEntry,
+  saveWorkout,
+} from './workoutHandlers.js'
 
 export { createAuthenticatedSupabase, type NutritionSupabase } from './supabase.js'
 
@@ -106,7 +113,7 @@ async function resolveRequiredLogDateArg(
 }
 
 export const SERVER_NAME = 'nutrition_tracker'
-export const SERVER_VERSION = '1.2.0'
+export const SERVER_VERSION = '1.3.0'
 
 export const tools: Tool[] = [
   {
@@ -312,6 +319,76 @@ export const tools: Tool[] = [
       ['recipeId'],
     ),
   },
+  {
+    name: 'list_workouts',
+    description:
+      'Nutrition Tracker: list saved workout templates with exercise counts and total target sets.',
+    inputSchema: objectSchema({}),
+  },
+  {
+    name: 'get_workout',
+    description: 'Nutrition Tracker: get a saved workout with all exercise lines.',
+    inputSchema: objectSchema({ id: { type: 'string', description: 'Workout id' } }, ['id']),
+  },
+  {
+    name: 'save_workout',
+    description:
+      'Nutrition Tracker: create or update a saved workout and its exercise lines. Pass id to update.',
+    inputSchema: objectSchema(
+      {
+        id: { type: 'string', description: 'Workout id when updating' },
+        name: { type: 'string', description: 'Workout name' },
+        description: { type: 'string', description: 'Optional description' },
+        icon: { type: 'string' },
+        iconBg: { type: 'string' },
+        iconColor: { type: 'string' },
+        defaultDurationMinutes: {
+          type: 'number',
+          description: 'Minutes for one full set of the workout',
+        },
+        defaultCalories: {
+          type: 'number',
+          description: 'Calories burned for one full set of the workout',
+        },
+        exercises: {
+          type: 'array',
+          description: 'Exercise lines with target reps',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              targetReps: { type: 'number' },
+            },
+            required: ['name', 'targetReps'],
+          },
+        },
+      },
+      ['name', 'exercises'],
+    ),
+  },
+  {
+    name: 'delete_workout',
+    description: 'Nutrition Tracker: delete a saved workout by id.',
+    inputSchema: objectSchema({ id: { type: 'string', description: 'Workout id' } }, ['id']),
+  },
+  {
+    name: 'log_workout',
+    description:
+      'Nutrition Tracker: log one activity from a saved workout. setsLogged is how many full rounds of the workout were completed (default 1).',
+    inputSchema: objectSchema(
+      {
+        workoutId: { type: 'string', description: 'Workout id to log' },
+        setsLogged: {
+          type: 'number',
+          description: 'How many full sets/rounds of the workout were completed (default 1)',
+        },
+        durationMinutes: { type: 'number', description: 'Optional session duration in minutes' },
+        calories: { type: 'number', description: 'Optional calories burned' },
+        date: dateProperty,
+      },
+      ['workoutId'],
+    ),
+  },
 ]
 
 export function createServer(supabase: NutritionSupabase): Server {
@@ -334,7 +411,10 @@ export function createServer(supabase: NutritionSupabase): Server {
   const recipeTools = tools
     .filter((t) => t.name.endsWith('_recipe') || t.name === 'list_recipes')
     .map((t) => t.name)
-  const instructions = `Nutrition Tracker tools for food inputs, saved recipes, and activity outputs. Food: ${foodTools.join(', ')}. Recipes: ${recipeTools.join(', ')}. Activities: ${activityTools.join(', ')}. Use log_recipe or add_food_entry to log meals. All data is scoped to the signed-in user.`
+  const workoutTools = tools
+    .filter((t) => t.name.endsWith('_workout') || t.name === 'list_workouts')
+    .map((t) => t.name)
+  const instructions = `Nutrition Tracker tools for food inputs, saved recipes, saved workouts, and activity outputs. Food: ${foodTools.join(', ')}. Recipes: ${recipeTools.join(', ')}. Workouts: ${workoutTools.join(', ')}. Activities: ${activityTools.join(', ')}. Use log_recipe or add_food_entry to log meals; log_workout or add_activity for outputs. All data is scoped to the signed-in user.`
 
   const server = new Server(
     { name: SERVER_NAME, version: SERVER_VERSION },
@@ -446,6 +526,33 @@ export function createServer(supabase: NutritionSupabase): Server {
         case 'log_recipe': {
           const entry = await logRecipeEntry(supabase, a)
           return { content: [{ type: 'text', text: JSON.stringify(entry) }] }
+        }
+
+        case 'list_workouts': {
+          const workouts = await listWorkouts(supabase)
+          return { content: [{ type: 'text', text: JSON.stringify(workouts) }] }
+        }
+
+        case 'get_workout': {
+          if (typeof a.id !== 'string' || a.id === '') throw new Error('id is required')
+          const workout = await getWorkout(supabase, a.id)
+          return { content: [{ type: 'text', text: JSON.stringify(workout) }] }
+        }
+
+        case 'save_workout': {
+          const workout = await saveWorkout(supabase, a)
+          return { content: [{ type: 'text', text: JSON.stringify(workout) }] }
+        }
+
+        case 'delete_workout': {
+          if (typeof a.id !== 'string' || a.id === '') throw new Error('id is required')
+          const result = await deleteWorkout(supabase, a.id)
+          return { content: [{ type: 'text', text: JSON.stringify(result) }] }
+        }
+
+        case 'log_workout': {
+          const activity = await logWorkoutEntry(supabase, a)
+          return { content: [{ type: 'text', text: JSON.stringify(activity) }] }
         }
 
         default:

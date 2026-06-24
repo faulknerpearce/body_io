@@ -1,6 +1,7 @@
 import {
   buildActivityInsertPayload,
   buildActivityUpdatePayload,
+  mapActivityExerciseRow,
   mapActivityRow,
   offsetDateISO,
   parseActivityInput,
@@ -11,6 +12,35 @@ import {
   type NewActivity,
 } from '@nutrition-tracker/shared'
 import { supabase } from './supabase'
+
+async function attachActivityExercises(activities: Activity[]): Promise<Activity[]> {
+  if (activities.length === 0) return activities
+
+  const workoutActivityIds = activities
+    .filter((activity) => activity.workoutId !== null)
+    .map((activity) => activity.id)
+  if (workoutActivityIds.length === 0) return activities
+
+  const { data, error } = await supabase
+    .from('activity_exercises')
+    .select('*')
+    .in('activity_id', workoutActivityIds)
+    .order('sort_order', { ascending: true })
+  if (error) throw new Error(error.message)
+
+  const exercisesByActivity = new Map<string, ReturnType<typeof mapActivityExerciseRow>[]>()
+  for (const row of data ?? []) {
+    const mapped = mapActivityExerciseRow(row)
+    const list = exercisesByActivity.get(row.activity_id) ?? []
+    list.push(mapped)
+    exercisesByActivity.set(row.activity_id, list)
+  }
+
+  return activities.map((activity) => ({
+    ...activity,
+    exercises: exercisesByActivity.get(activity.id) ?? activity.exercises,
+  }))
+}
 
 export type { Activity, NewActivity }
 
@@ -37,7 +67,7 @@ export async function fetchActivities(date: string = todayISO()): Promise<Activi
     .eq('activity_date', date)
     .order('created_at', { ascending: true })
   if (error) throw new Error(error.message)
-  return (data ?? []).map(mapActivityRow)
+  return attachActivityExercises((data ?? []).map(mapActivityRow))
 }
 
 export async function fetchActivityDaySummaries(daysBack = 30): Promise<ActivityDaySummary[]> {
@@ -53,24 +83,24 @@ export async function fetchActivityDaySummaries(daysBack = 30): Promise<Activity
     .order('created_at', { ascending: true })
   if (error) throw new Error(error.message)
 
-  const byDate = new Map<string, Activity[]>()
-  for (const row of data ?? []) {
-    const date = row.activity_date
-    const list = byDate.get(date) ?? []
-    list.push(mapActivityRow(row))
-    byDate.set(date, list)
+  const activities = await attachActivityExercises((data ?? []).map(mapActivityRow))
+  const grouped = new Map<string, Activity[]>()
+  for (const activity of activities) {
+    const list = grouped.get(activity.activityDate) ?? []
+    list.push(activity)
+    grouped.set(activity.activityDate, list)
   }
 
-  if (!byDate.has(today)) {
-    byDate.set(today, [])
+  if (!grouped.has(today)) {
+    grouped.set(today, [])
   }
 
-  return [...byDate.entries()]
+  return [...grouped.entries()]
     .sort(([a], [b]) => b.localeCompare(a))
-    .map(([date, activities]) => ({
+    .map(([date, dayActivities]) => ({
       date,
-      activities,
-      totals: sumActivityTotals(activities),
+      activities: dayActivities,
+      totals: sumActivityTotals(dayActivities),
     }))
 }
 

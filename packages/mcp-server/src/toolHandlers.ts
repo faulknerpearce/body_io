@@ -5,6 +5,7 @@ import {
   buildUpdatePayload,
   DEFAULT_NUTRITION_GOALS,
   DEFAULT_TIMEZONE,
+  mapActivityExerciseRow,
   mapActivityRow,
   mapRow,
   parseActivityInput,
@@ -126,6 +127,38 @@ export async function getDailyTotalsForDate(supabase: NutritionSupabase, date: s
   return { totals, goals, date }
 }
 
+async function attachActivityExercises(
+  supabase: NutritionSupabase,
+  activities: ReturnType<typeof mapActivityRow>[],
+) {
+  if (activities.length === 0) return activities
+
+  const workoutActivityIds = activities
+    .filter((activity) => activity.workoutId !== null)
+    .map((activity) => activity.id)
+  if (workoutActivityIds.length === 0) return activities
+
+  const { data, error } = await supabase
+    .from('activity_exercises')
+    .select('*')
+    .in('activity_id', workoutActivityIds)
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+
+  const exercisesByActivity = new Map<string, ReturnType<typeof mapActivityExerciseRow>[]>()
+  for (const row of data ?? []) {
+    const mapped = mapActivityExerciseRow(row)
+    const list = exercisesByActivity.get(row.activity_id) ?? []
+    list.push(mapped)
+    exercisesByActivity.set(row.activity_id, list)
+  }
+
+  return activities.map((activity) => ({
+    ...activity,
+    exercises: exercisesByActivity.get(activity.id) ?? activity.exercises,
+  }))
+}
+
 export async function listActivitiesForDate(supabase: NutritionSupabase, date: string) {
   const { data, error } = await supabase
     .from('activities')
@@ -133,7 +166,7 @@ export async function listActivitiesForDate(supabase: NutritionSupabase, date: s
     .eq('activity_date', date)
     .order('created_at', { ascending: true })
   if (error) throw error
-  return (data ?? []).map(mapActivityRow)
+  return attachActivityExercises(supabase, (data ?? []).map(mapActivityRow))
 }
 
 export async function addActivityForDate(

@@ -7,7 +7,7 @@ describe('publicToolManifest', () => {
     const manifest = publicToolManifest()
 
     expect(manifest.serverInfo.name).toBe('nutrition_tracker')
-    expect(manifest.tools).toHaveLength(16)
+    expect(manifest.tools).toHaveLength(21)
 
     for (const tool of manifest.tools) {
       expect(ToolSchema.safeParse(tool).success).toBe(true)

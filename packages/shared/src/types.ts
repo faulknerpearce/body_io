@@ -35,6 +35,14 @@ export type ActivityRow = Database['public']['Tables']['activities']['Row']
 export type ActivityInsert = Database['public']['Tables']['activities']['Insert']
 export type ActivityUpdate = Database['public']['Tables']['activities']['Update']
 
+export interface ActivityExercise {
+  id: string
+  workoutExerciseId: string | null
+  name: string
+  sortOrder: number
+  repsCompleted: number
+}
+
 export interface Activity {
   id: string
   name: string
@@ -45,9 +53,15 @@ export interface Activity {
   averageHeartrate: number | null
   maxHeartrate: number | null
   calories: number | null
+  workoutId: string | null
+  workoutSetsLogged: number | null
+  exercises: ActivityExercise[]
 }
 
-export type NewActivity = Omit<Activity, 'id' | 'activityDate'>
+export type NewActivity = Omit<
+  Activity,
+  'id' | 'activityDate' | 'workoutId' | 'workoutSetsLogged' | 'exercises'
+>
 export type UpdateActivity = Partial<NewActivity>
 
 export type ActivityTotals = {

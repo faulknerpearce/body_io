@@ -10,7 +10,8 @@ describe('activityFormat', () => {
   })
 
   it('formats distances', () => {
-    expect(formatDistance(null)).toBe('—')
+    expect(formatDistance(null)).toBe('0m')
+    expect(formatDistance(0)).toBe('0m')
     expect(formatDistance(850)).toBe('850 m')
     expect(formatDistance(5200)).toBe('5.2 km')
   })

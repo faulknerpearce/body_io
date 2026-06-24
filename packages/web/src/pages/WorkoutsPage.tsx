@@ -1,84 +1,93 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
-import LogRecipeModal from '../components/LogRecipeModal'
-import RecipeEditorModal from '../components/RecipeEditorModal'
-import RecipeViewModal from '../components/RecipeViewModal'
+import type { WorkoutSummary, WorkoutWithExercises } from '@nutrition-tracker/shared'
+import LogWorkoutModal from '../components/LogWorkoutModal'
+import WorkoutEditorModal from '../components/WorkoutEditorModal'
+import WorkoutViewModal from '../components/WorkoutViewModal'
 import {
-  filterAndSortRecipes,
-  RECIPE_SORT_OPTIONS,
-  type RecipeSortOption,
-} from '../lib/recipeFilters'
+  filterAndSortWorkouts,
+  WORKOUT_SORT_OPTIONS,
+  type WorkoutSortOption,
+} from '../lib/workoutFilters'
 import {
-  deleteRecipe,
-  fetchRecipe,
-  fetchRecipeSummaries,
-  logRecipe,
-  saveRecipe,
-} from '../lib/recipes'
+  deleteWorkout,
+  fetchWorkout,
+  fetchWorkoutSummaries,
+  logWorkout,
+  saveWorkout,
+} from '../lib/workouts'
 import { cardSurface, iconTileMd, inputBase, pageTitle, sectionHeader } from '../lib/styles'
 
-export default function RecipesPage() {
-  const [recipes, setRecipes] = useState<RecipeSummary[]>([])
+export default function WorkoutsPage() {
+  const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingRecipe, setEditingRecipe] = useState<RecipeWithIngredients | null | undefined>(
+  const [editingWorkout, setEditingWorkout] = useState<WorkoutWithExercises | null | undefined>(
     undefined,
   )
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [loggingRecipe, setLoggingRecipe] = useState<RecipeSummary | null>(null)
-  const [viewingRecipeId, setViewingRecipeId] = useState<string | null>(null)
+  const [loggingWorkout, setLoggingWorkout] = useState<WorkoutSummary | null>(null)
+  const [viewingWorkoutId, setViewingWorkoutId] = useState<string | null>(null)
   const [logSuccess, setLogSuccess] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<RecipeSortOption>('name-asc')
+  const [sortBy, setSortBy] = useState<WorkoutSortOption>('name-asc')
 
-  const visibleRecipes = useMemo(
-    () => filterAndSortRecipes(recipes, searchQuery, sortBy),
-    [recipes, searchQuery, sortBy],
+  const visibleWorkouts = useMemo(
+    () => filterAndSortWorkouts(workouts, searchQuery, sortBy),
+    [workouts, searchQuery, sortBy],
   )
   const hasActiveFilters = searchQuery.trim() !== '' || sortBy !== 'name-asc'
 
-  const loadRecipes = async () => {
-    const data = await fetchRecipeSummaries()
-    setRecipes(data)
+  const loadWorkouts = async () => {
+    const data = await fetchWorkoutSummaries()
+    setWorkouts(data)
   }
 
   useEffect(() => {
-    fetchRecipeSummaries()
+    fetchWorkoutSummaries()
       .then((data) => {
-        setRecipes(data)
+        setWorkouts(data)
         setLoading(false)
       })
       .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load recipes')
+        setError(err instanceof Error ? err.message : 'Failed to load workouts')
         setLoading(false)
       })
   }, [])
 
-  const openCreate = () => setEditingRecipe(null)
+  const openCreate = () => setEditingWorkout(null)
 
   const openEdit = async (id: string) => {
     try {
-      setEditingRecipe(await fetchRecipe(id))
+      setEditingWorkout(await fetchWorkout(id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load recipe')
+      setError(err instanceof Error ? err.message : 'Failed to load workout')
     }
   }
 
-  const handleLogRecipe = async (servings: number) => {
-    if (!loggingRecipe) return
-    await logRecipe({ recipeId: loggingRecipe.id, servings })
-    setLogSuccess(`Added ${loggingRecipe.name} to today's food log.`)
-    setLoggingRecipe(null)
+  const handleLogWorkout = async (options: {
+    setsLogged: number
+    durationMinutes?: number
+    calories?: number | null
+  }) => {
+    if (!loggingWorkout) return
+    await logWorkout({
+      workoutId: loggingWorkout.id,
+      setsLogged: options.setsLogged,
+      durationMinutes: options.durationMinutes,
+      calories: options.calories,
+    })
+    setLogSuccess(`Added ${loggingWorkout.name} to today's activity log.`)
+    setLoggingWorkout(null)
   }
 
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     setError(null)
     try {
-      await deleteRecipe(id)
-      setRecipes((prev) => prev.filter((recipe) => recipe.id !== id))
+      await deleteWorkout(id)
+      setWorkouts((prev) => prev.filter((workout) => workout.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete recipe')
+      setError(err instanceof Error ? err.message : 'Failed to delete workout')
     } finally {
       setDeletingId(null)
     }
@@ -94,7 +103,7 @@ export default function RecipesPage() {
           className="fa-solid fa-spinner fa-spin"
           style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
         />
-        Loading recipes...
+        Loading workouts...
       </div>
     )
   }
@@ -114,10 +123,10 @@ export default function RecipesPage() {
         <div>
           <p style={sectionHeader}>Templates</p>
           <h2 className="page-title-mobile" style={pageTitle}>
-            Recipes
+            Workouts
           </h2>
           <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-            Save meals with ingredients, then quick-log them from the food log.
+            Save strength routines with exercises, then quick-log them from Outputs.
           </p>
         </div>
         <button
@@ -134,7 +143,7 @@ export default function RecipesPage() {
             cursor: 'pointer',
           }}
         >
-          New Recipe
+          New Workout
         </button>
       </div>
 
@@ -170,7 +179,7 @@ export default function RecipesPage() {
         </div>
       )}
 
-      {recipes.length > 0 && (
+      {workouts.length > 0 && (
         <div
           style={{
             ...cardSurface,
@@ -191,8 +200,17 @@ export default function RecipesPage() {
             className="recipe-toolbar"
           >
             <div>
-              <label htmlFor="recipe-search" style={{ fontSize: 12, fontWeight: 500, color: '#52525b', display: 'block', marginBottom: 6 }}>
-                Search recipes
+              <label
+                htmlFor="workout-search"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#52525b',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
+                Search workouts
               </label>
               <div style={{ position: 'relative' }}>
                 <i
@@ -208,7 +226,7 @@ export default function RecipesPage() {
                   }}
                 />
                 <input
-                  id="recipe-search"
+                  id="workout-search"
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -218,16 +236,25 @@ export default function RecipesPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="recipe-sort" style={{ fontSize: 12, fontWeight: 500, color: '#52525b', display: 'block', marginBottom: 6 }}>
+              <label
+                htmlFor="workout-sort"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: '#52525b',
+                  display: 'block',
+                  marginBottom: 6,
+                }}
+              >
                 Sort by
               </label>
               <select
-                id="recipe-sort"
+                id="workout-sort"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as RecipeSortOption)}
+                onChange={(e) => setSortBy(e.target.value as WorkoutSortOption)}
                 style={{ ...inputBase, paddingRight: 12 }}
               >
-                {RECIPE_SORT_OPTIONS.map((option) => (
+                {WORKOUT_SORT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -247,8 +274,8 @@ export default function RecipesPage() {
             }}
           >
             <span>
-              Showing {visibleRecipes.length} of {recipes.length}{' '}
-              {recipes.length === 1 ? 'recipe' : 'recipes'}
+              Showing {visibleWorkouts.length} of {workouts.length}{' '}
+              {workouts.length === 1 ? 'workout' : 'workouts'}
             </span>
             {hasActiveFilters && (
               <button
@@ -274,13 +301,15 @@ export default function RecipesPage() {
         </div>
       )}
 
-      {recipes.length === 0 ? (
+      {workouts.length === 0 ? (
         <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
-          <p style={{ margin: 0 }}>No recipes yet. Create one to speed up logging.</p>
+          <p style={{ margin: 0 }}>No workouts yet. Create one to speed up logging.</p>
         </div>
-      ) : visibleRecipes.length === 0 ? (
+      ) : visibleWorkouts.length === 0 ? (
         <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>No matching recipes</p>
+          <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>
+            No matching workouts
+          </p>
           <p style={{ margin: 0, fontSize: 13 }}>
             Try a different search term or{' '}
             <button
@@ -303,9 +332,9 @@ export default function RecipesPage() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {visibleRecipes.map((recipe) => (
+          {visibleWorkouts.map((workout) => (
             <div
-              key={recipe.id}
+              key={workout.id}
               style={{
                 ...cardSurface,
                 padding: 20,
@@ -317,17 +346,19 @@ export default function RecipesPage() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-                <div style={{ ...iconTileMd, background: recipe.iconBg }}>
+                <div style={{ ...iconTileMd, background: workout.iconBg }}>
                   <i
-                    className={`fa-solid ${recipe.icon}`}
-                    style={{ color: recipe.iconColor, fontSize: 18 }}
+                    className={`fa-solid ${workout.icon}`}
+                    style={{ color: workout.iconColor, fontSize: 18 }}
                   />
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, color: '#18181b' }}>{recipe.name}</div>
+                  <div style={{ fontWeight: 600, color: '#18181b' }}>{workout.name}</div>
                   <div style={{ fontSize: 12, color: '#71717a', marginTop: 4 }}>
-                    {recipe.ingredientCount} ingredients · {recipe.defaultServings} servings/batch ·{' '}
-                    {recipe.perServingTotals.calories} kcal/serving
+                    {workout.exerciseCount} exercises
+                    {workout.defaultDurationMinutes !== null &&
+                      ` · ${workout.defaultDurationMinutes} min/set`}
+                    {workout.defaultCalories !== null && ` · ${workout.defaultCalories} kcal/set`}
                   </div>
                 </div>
               </div>
@@ -336,7 +367,7 @@ export default function RecipesPage() {
                   type="button"
                   onClick={() => {
                     setLogSuccess(null)
-                    setLoggingRecipe(recipe)
+                    setLoggingWorkout(workout)
                   }}
                   style={{
                     padding: '8px 14px',
@@ -353,7 +384,7 @@ export default function RecipesPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setViewingRecipeId(recipe.id)}
+                  onClick={() => setViewingWorkoutId(workout.id)}
                   style={{
                     padding: '8px 14px',
                     borderRadius: 9999,
@@ -367,7 +398,7 @@ export default function RecipesPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => openEdit(recipe.id)}
+                  onClick={() => openEdit(workout.id)}
                   style={{
                     padding: '8px 14px',
                     borderRadius: 9999,
@@ -381,8 +412,8 @@ export default function RecipesPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleDelete(recipe.id)}
-                  disabled={deletingId === recipe.id}
+                  onClick={() => handleDelete(workout.id)}
+                  disabled={deletingId === workout.id}
                   style={{
                     padding: '8px 14px',
                     borderRadius: 9999,
@@ -393,7 +424,7 @@ export default function RecipesPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  {deletingId === recipe.id ? 'Deleting...' : 'Delete'}
+                  {deletingId === workout.id ? 'Deleting...' : 'Delete'}
                 </button>
               </div>
             </div>
@@ -401,29 +432,29 @@ export default function RecipesPage() {
         </div>
       )}
 
-      {editingRecipe !== undefined && (
-        <RecipeEditorModal
-          recipe={editingRecipe ?? undefined}
-          onClose={() => setEditingRecipe(undefined)}
+      {editingWorkout !== undefined && (
+        <WorkoutEditorModal
+          workout={editingWorkout ?? undefined}
+          onClose={() => setEditingWorkout(undefined)}
           onSave={async (input) => {
-            await saveRecipe(input, editingRecipe?.id)
-            await loadRecipes()
+            await saveWorkout(input, editingWorkout?.id)
+            await loadWorkouts()
           }}
         />
       )}
 
-      {loggingRecipe && (
-        <LogRecipeModal
-          recipe={loggingRecipe}
-          onLog={handleLogRecipe}
-          onClose={() => setLoggingRecipe(null)}
+      {loggingWorkout && (
+        <LogWorkoutModal
+          workout={loggingWorkout}
+          onLog={handleLogWorkout}
+          onClose={() => setLoggingWorkout(null)}
         />
       )}
 
-      {viewingRecipeId && (
-        <RecipeViewModal
-          recipeId={viewingRecipeId}
-          onClose={() => setViewingRecipeId(null)}
+      {viewingWorkoutId && (
+        <WorkoutViewModal
+          workoutId={viewingWorkoutId}
+          onClose={() => setViewingWorkoutId(null)}
         />
       )}
     </div>

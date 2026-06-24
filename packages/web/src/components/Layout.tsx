@@ -13,6 +13,7 @@ const tabs: { route: AppRoute; label: string }[] = [
   { route: 'inputs', label: 'Inputs' },
   { route: 'outputs', label: 'Outputs' },
   { route: 'recipes', label: 'Recipes' },
+  { route: 'workouts', label: 'Workouts' },
 ]
 
 export default function Layout({ children, activeTab }: LayoutProps) {
