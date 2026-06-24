@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useRef } from 'react'
 import type { AppRoute } from '../lib/routing'
 import PageHeader from '../components/layout/PageHeader'
 import PageShell from '../components/layout/PageShell'
@@ -13,7 +13,10 @@ interface InputsZoneProps {
 
 export default function InputsZone({ route }: InputsZoneProps) {
   const isRecipes = route === 'inputs/recipes'
-  const [createRecipeTick, setCreateRecipeTick] = useState(0)
+  const openCreateRecipeRef = useRef<(() => void) | null>(null)
+  const handleOpenCreateReady = useCallback((openCreate: () => void) => {
+    openCreateRecipeRef.current = openCreate
+  }, [])
 
   return (
     <PageShell zone="inputs">
@@ -27,7 +30,7 @@ export default function InputsZone({ route }: InputsZoneProps) {
         }
         actions={
           isRecipes ? (
-            <ZoneButton variant="primary" onClick={() => setCreateRecipeTick((t) => t + 1)}>
+            <ZoneButton variant="primary" onClick={() => openCreateRecipeRef.current?.()}>
               <i className="fa-solid fa-plus" aria-hidden="true" /> New Recipe
             </ZoneButton>
           ) : undefined
@@ -40,7 +43,11 @@ export default function InputsZone({ route }: InputsZoneProps) {
           { route: 'inputs/recipes', label: 'Recipes' },
         ]}
       />
-      {isRecipes ? <RecipesPage createTick={createRecipeTick} /> : <InputsPage />}
+      {isRecipes ? (
+        <RecipesPage onOpenCreateReady={handleOpenCreateReady} />
+      ) : (
+        <InputsPage />
+      )}
     </PageShell>
   )
 }

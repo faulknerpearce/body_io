@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { WorkoutSummary, WorkoutWithExercises } from '@nutrition-tracker/shared'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
@@ -21,10 +21,10 @@ import {
 import { inputBase } from '../lib/styles'
 
 interface WorkoutsPageProps {
-  createTick?: number
+  onOpenCreateReady?: (openCreate: () => void) => void
 }
 
-export default function WorkoutsPage({ createTick = 0 }: WorkoutsPageProps) {
+export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
   const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -61,9 +61,11 @@ export default function WorkoutsPage({ createTick = 0 }: WorkoutsPageProps) {
       })
   }, [])
 
+  const openCreate = useCallback(() => setEditingWorkout(null), [])
+
   useEffect(() => {
-    if (createTick > 0) setEditingWorkout(null)
-  }, [createTick])
+    onOpenCreateReady?.(openCreate)
+  }, [onOpenCreateReady, openCreate])
 
   const openEdit = async (id: string) => {
     try {

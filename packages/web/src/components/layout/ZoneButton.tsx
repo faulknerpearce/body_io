@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { useZoneTheme } from '../../context/ZoneThemeContext'
+import { useZoneTheme } from '../../context/useZoneTheme'
 
 type ZoneButtonVariant = 'primary' | 'secondary' | 'danger'
 

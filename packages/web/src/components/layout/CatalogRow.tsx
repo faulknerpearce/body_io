@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useZoneTheme } from '../../context/ZoneThemeContext'
+import { useZoneTheme } from '../../context/useZoneTheme'
 
 interface CatalogRowProps {
   icon: string

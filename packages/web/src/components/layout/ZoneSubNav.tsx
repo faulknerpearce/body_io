@@ -1,4 +1,4 @@
-import { useZoneTheme } from '../../context/ZoneThemeContext'
+import { useZoneTheme } from '../../context/useZoneTheme'
 import { routeHref, type AppRoute } from '../../lib/routing'
 
 export interface ZoneSubNavItem {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useRef } from 'react'
 import type { AppRoute } from '../lib/routing'
 import PageHeader from '../components/layout/PageHeader'
 import PageShell from '../components/layout/PageShell'
@@ -13,7 +13,10 @@ interface OutputsZoneProps {
 
 export default function OutputsZone({ route }: OutputsZoneProps) {
   const isWorkouts = route === 'outputs/workouts'
-  const [createWorkoutTick, setCreateWorkoutTick] = useState(0)
+  const openCreateWorkoutRef = useRef<(() => void) | null>(null)
+  const handleOpenCreateReady = useCallback((openCreate: () => void) => {
+    openCreateWorkoutRef.current = openCreate
+  }, [])
 
   return (
     <PageShell zone="outputs">
@@ -27,7 +30,7 @@ export default function OutputsZone({ route }: OutputsZoneProps) {
         }
         actions={
           isWorkouts ? (
-            <ZoneButton variant="primary" onClick={() => setCreateWorkoutTick((t) => t + 1)}>
+            <ZoneButton variant="primary" onClick={() => openCreateWorkoutRef.current?.()}>
               <i className="fa-solid fa-plus" aria-hidden="true" /> New Workout
             </ZoneButton>
           ) : undefined
@@ -40,7 +43,11 @@ export default function OutputsZone({ route }: OutputsZoneProps) {
           { route: 'outputs/workouts', label: 'Workouts' },
         ]}
       />
-      {isWorkouts ? <WorkoutsPage createTick={createWorkoutTick} /> : <OutputsPage />}
+      {isWorkouts ? (
+        <WorkoutsPage onOpenCreateReady={handleOpenCreateReady} />
+      ) : (
+        <OutputsPage />
+      )}
     </PageShell>
   )
 }

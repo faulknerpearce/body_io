@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
@@ -21,10 +21,10 @@ import {
 import { inputBase } from '../lib/styles'
 
 interface RecipesPageProps {
-  createTick?: number
+  onOpenCreateReady?: (openCreate: () => void) => void
 }
 
-export default function RecipesPage({ createTick = 0 }: RecipesPageProps) {
+export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
   const [recipes, setRecipes] = useState<RecipeSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -61,9 +61,11 @@ export default function RecipesPage({ createTick = 0 }: RecipesPageProps) {
       })
   }, [])
 
+  const openCreate = useCallback(() => setEditingRecipe(null), [])
+
   useEffect(() => {
-    if (createTick > 0) setEditingRecipe(null)
-  }, [createTick])
+    onOpenCreateReady?.(openCreate)
+  }, [onOpenCreateReady, openCreate])
 
   const openEdit = async (id: string) => {
     try {

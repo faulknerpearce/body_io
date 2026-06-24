@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { ZoneThemeProvider } from '../../context/ZoneThemeContext'
+import { ZoneThemeProvider } from '../../context/ZoneThemeProvider'
 import type { ZoneId } from '../../lib/design-tokens'
 
 interface PageShellProps {

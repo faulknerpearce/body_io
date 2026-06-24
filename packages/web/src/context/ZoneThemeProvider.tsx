@@ -1,7 +1,6 @@
-import { createContext, useContext, type ReactNode } from 'react'
-import { zoneTokens, zoneCssVars, type ZoneId, type ZoneTokens } from '../lib/design-tokens'
-
-const ZoneThemeContext = createContext<ZoneTokens>(zoneTokens.dashboard)
+import type { ReactNode } from 'react'
+import { zoneTokens, zoneCssVars, type ZoneId } from '../lib/design-tokens'
+import { ZoneThemeContext } from './zone-theme-context'
 
 export function ZoneThemeProvider({ zone, children }: { zone: ZoneId; children: ReactNode }) {
   const tokens = zoneTokens[zone]
@@ -12,8 +11,4 @@ export function ZoneThemeProvider({ zone, children }: { zone: ZoneId; children: 
       </div>
     </ZoneThemeContext.Provider>
   )
-}
-
-export function useZoneTheme(): ZoneTokens {
-  return useContext(ZoneThemeContext)
 }
