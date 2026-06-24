@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { WorkoutSummary, WorkoutWithExercises } from '@nutrition-tracker/shared'
+import CatalogRow from '../components/layout/CatalogRow'
+import { PageLoading } from '../components/layout/PageState'
+import ZoneButton from '../components/layout/ZoneButton'
 import LogWorkoutModal from '../components/LogWorkoutModal'
 import WorkoutEditorModal from '../components/WorkoutEditorModal'
 import WorkoutViewModal from '../components/WorkoutViewModal'
@@ -15,9 +18,13 @@ import {
   logWorkout,
   saveWorkout,
 } from '../lib/workouts'
-import { cardSurface, iconTileMd, inputBase, pageTitle, sectionHeader } from '../lib/styles'
+import { inputBase } from '../lib/styles'
 
-export default function WorkoutsPage() {
+interface WorkoutsPageProps {
+  onOpenCreateReady?: (openCreate: () => void) => void
+}
+
+export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
   const [workouts, setWorkouts] = useState<WorkoutSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +61,11 @@ export default function WorkoutsPage() {
       })
   }, [])
 
-  const openCreate = () => setEditingWorkout(null)
+  const openCreate = useCallback(() => setEditingWorkout(null), [])
+
+  useEffect(() => {
+    onOpenCreateReady?.(openCreate)
+  }, [onOpenCreateReady, openCreate])
 
   const openEdit = async (id: string) => {
     try {
@@ -93,60 +104,10 @@ export default function WorkoutsPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div
-        role="status"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading workouts...
-      </div>
-    )
-  }
+  if (loading) return <PageLoading message="Loading workouts..." />
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 16,
-          marginBottom: 32,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <p style={sectionHeader}>Templates</p>
-          <h2 className="page-title-mobile" style={pageTitle}>
-            Workouts
-          </h2>
-          <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 0 0' }}>
-            Save strength routines with exercises, then quick-log them from Outputs.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreate}
-          style={{
-            padding: '10px 20px',
-            borderRadius: 9999,
-            border: 'none',
-            background: '#134e4b',
-            color: 'white',
-            fontSize: 13,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
-          New Workout
-        </button>
-      </div>
-
       {logSuccess && (
         <div
           role="status"
@@ -180,16 +141,7 @@ export default function WorkoutsPage() {
       )}
 
       {workouts.length > 0 && (
-        <div
-          style={{
-            ...cardSurface,
-            padding: 20,
-            marginBottom: 20,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-          }}
-        >
+        <div className="day-accordion" style={{ padding: 20, marginBottom: 20 }}>
           <div
             style={{
               display: 'grid',
@@ -271,6 +223,7 @@ export default function WorkoutsPage() {
               flexWrap: 'wrap',
               fontSize: 12,
               color: '#71717a',
+              marginTop: 16,
             }}
           >
             <span>
@@ -278,35 +231,25 @@ export default function WorkoutsPage() {
               {workouts.length === 1 ? 'workout' : 'workouts'}
             </span>
             {hasActiveFilters && (
-              <button
-                type="button"
+              <ZoneButton
                 onClick={() => {
                   setSearchQuery('')
                   setSortBy('name-asc')
                 }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 9999,
-                  border: '1px solid #e4e4e7',
-                  background: 'white',
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  color: '#52525b',
-                }}
               >
                 Clear filters
-              </button>
+              </ZoneButton>
             )}
           </div>
         </div>
       )}
 
       {workouts.length === 0 ? (
-        <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: 0 }}>No workouts yet. Create one to speed up logging.</p>
         </div>
       ) : visibleWorkouts.length === 0 ? (
-        <div style={{ ...cardSurface, padding: 32, textAlign: 'center', color: '#71717a' }}>
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>
             No matching workouts
           </p>
@@ -319,7 +262,7 @@ export default function WorkoutsPage() {
                 background: 'none',
                 border: 'none',
                 padding: 0,
-                color: '#134e4b',
+                color: 'var(--zone-accent)',
                 fontWeight: 500,
                 cursor: 'pointer',
                 textDecoration: 'underline',
@@ -331,103 +274,47 @@ export default function WorkoutsPage() {
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="catalog-list">
           {visibleWorkouts.map((workout) => (
-            <div
+            <CatalogRow
               key={workout.id}
-              style={{
-                ...cardSurface,
-                padding: 20,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-                <div style={{ ...iconTileMd, background: workout.iconBg }}>
-                  <i
-                    className={`fa-solid ${workout.icon}`}
-                    style={{ color: workout.iconColor, fontSize: 18 }}
-                  />
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, color: '#18181b' }}>{workout.name}</div>
-                  <div style={{ fontSize: 12, color: '#71717a', marginTop: 4 }}>
-                    {workout.exerciseCount} exercises
-                    {workout.defaultDurationMinutes !== null &&
-                      ` · ${workout.defaultDurationMinutes} min/set`}
-                    {workout.defaultCalories !== null && ` · ${workout.defaultCalories} kcal/set`}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLogSuccess(null)
-                    setLoggingWorkout(workout)
-                  }}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: 'none',
-                    background: '#134e4b',
-                    color: 'white',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Add to Log
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewingWorkoutId(workout.id)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #e4e4e7',
-                    background: 'white',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  View
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openEdit(workout.id)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #e4e4e7',
-                    background: 'white',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(workout.id)}
-                  disabled={deletingId === workout.id}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #fecaca',
-                    background: '#fff1f2',
-                    color: '#b91c1c',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {deletingId === workout.id ? 'Deleting...' : 'Delete'}
-                </button>
-              </div>
-            </div>
+              icon={workout.icon}
+              iconBg={workout.iconBg}
+              iconColor={workout.iconColor}
+              title={workout.name}
+              subtitle={[
+                `${workout.exerciseCount} exercises`,
+                workout.defaultDurationMinutes !== null
+                  ? `${workout.defaultDurationMinutes} min/set`
+                  : null,
+                workout.defaultCalories !== null ? `${workout.defaultCalories} kcal/set` : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+              onView={() => setViewingWorkoutId(workout.id)}
+              actions={
+                <>
+                  <ZoneButton
+                    variant="primary"
+                    onClick={() => {
+                      setLogSuccess(null)
+                      setLoggingWorkout(workout)
+                    }}
+                  >
+                    Add to Log
+                  </ZoneButton>
+                  <ZoneButton onClick={() => setViewingWorkoutId(workout.id)}>View</ZoneButton>
+                  <ZoneButton onClick={() => openEdit(workout.id)}>Edit</ZoneButton>
+                  <ZoneButton
+                    variant="danger"
+                    onClick={() => handleDelete(workout.id)}
+                    disabled={deletingId === workout.id}
+                  >
+                    {deletingId === workout.id ? 'Deleting...' : 'Delete'}
+                  </ZoneButton>
+                </>
+              }
+            />
           ))}
         </div>
       )}
@@ -452,10 +339,7 @@ export default function WorkoutsPage() {
       )}
 
       {viewingWorkoutId && (
-        <WorkoutViewModal
-          workoutId={viewingWorkoutId}
-          onClose={() => setViewingWorkoutId(null)}
-        />
+        <WorkoutViewModal workoutId={viewingWorkoutId} onClose={() => setViewingWorkoutId(null)} />
       )}
     </div>
   )

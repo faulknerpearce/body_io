@@ -1,26 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import { useProfileOptional } from '../context/useProfile'
-import { type AppRoute, routeHref } from '../lib/routing'
+import { zoneTokens } from '../lib/design-tokens'
+import {
+  primaryNavRoute,
+  routeHref,
+  routeZone,
+  type AppRoute,
+} from '../lib/routing'
+import MobileTabBar from './layout/MobileTabBar'
 
 interface LayoutProps {
   children: React.ReactNode
-  activeTab: AppRoute
+  activeRoute: AppRoute
 }
 
-const tabs: { route: AppRoute; label: string }[] = [
+const navTabs: { route: 'dashboard' | 'inputs' | 'outputs'; label: string }[] = [
   { route: 'dashboard', label: 'Dashboard' },
   { route: 'inputs', label: 'Inputs' },
   { route: 'outputs', label: 'Outputs' },
-  { route: 'recipes', label: 'Recipes' },
-  { route: 'workouts', label: 'Workouts' },
 ]
 
-export default function Layout({ children, activeTab }: LayoutProps) {
+export default function Layout({ children, activeRoute }: LayoutProps) {
   const { user, signOut } = useAuth()
   const profileContext = useProfileOptional()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement | null>(null)
+  const activeNav = primaryNavRoute(activeRoute)
+  const zone = routeZone(activeRoute)
+  const layoutBg = zone === 'profile' ? zoneTokens.profile.bg : zoneTokens[activeNav === 'dashboard' ? 'dashboard' : activeNav].bg
+
   const displayLabel =
     profileContext?.profile.displayName ??
     (user?.user_metadata?.display_name as string | undefined) ??
@@ -48,66 +57,26 @@ export default function Layout({ children, activeTab }: LayoutProps) {
   }, [menuOpen])
 
   return (
-    <div className="min-h-screen" style={{ background: '#fafafa' }}>
-      <nav style={{ background: 'white', borderBottom: '1px solid #e4e4e7', padding: '20px 0' }}>
-        <div className="max-w-4xl mx-auto px-4">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                background: '#134e4b',
-                borderRadius: 16,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <i className="fa-solid fa-chart-line" style={{ color: 'white', fontSize: 18 }}></i>
-            </div>
-            <span
-              style={{
-                fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                fontSize: 24,
-                fontWeight: 600,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Nutrition Tracker
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              marginTop: 12,
-            }}
-          >
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {tabs.map((tab) => {
-                const active = activeTab === tab.route
-                return (
-                  <a
-                    key={tab.route}
-                    href={routeHref(tab.route)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: 9999,
-                      fontSize: 13,
-                      fontWeight: 500,
-                      textDecoration: 'none',
-                      color: active ? 'white' : '#52525b',
-                      background: active ? '#134e4b' : 'transparent',
-                      border: active ? '1px solid #134e4b' : '1px solid #e4e4e7',
-                    }}
-                  >
-                    {tab.label}
-                  </a>
-                )
-              })}
-            </div>
+    <div className="app-layout" style={{ background: layoutBg }}>
+      <nav className="app-nav">
+        <div className="app-nav-inner">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <a href={routeHref('dashboard')} className="app-nav-brand" style={{ textDecoration: 'none' }}>
+              <div
+                className="app-nav-logo"
+                style={{
+                  background:
+                    activeNav === 'inputs'
+                      ? zoneTokens.inputs.accent
+                      : activeNav === 'outputs'
+                        ? zoneTokens.outputs.accent
+                        : zoneTokens.dashboard.accent,
+                }}
+              >
+                <i className="fa-solid fa-chart-line" aria-hidden="true" />
+              </div>
+              <span className="app-nav-title">Nutrition Tracker</span>
+            </a>
             <div ref={menuRef} style={{ position: 'relative', flexShrink: 0 }}>
               <button
                 type="button"
@@ -118,18 +87,17 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 9999,
-                  border:
-                    activeTab === 'profile' ? '1px solid #134e4b' : '1px solid #e4e4e7',
-                  background: activeTab === 'profile' ? '#134e4b' : '#f4f4f5',
-                  color: activeTab === 'profile' ? 'white' : '#3f3f46',
+                  borderRadius: 10,
+                  border: zone === 'profile' ? '1px solid #27272a' : '1px solid #e4e4e7',
+                  background: zone === 'profile' ? '#27272a' : '#f4f4f5',
+                  color: zone === 'profile' ? 'white' : '#3f3f46',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <i className="fa-solid fa-user" style={{ fontSize: 16 }}></i>
+                <i className="fa-solid fa-user" style={{ fontSize: 16 }} aria-hidden="true" />
               </button>
               {menuOpen && (
                 <div
@@ -141,7 +109,7 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                     minWidth: 200,
                     background: 'white',
                     border: '1px solid #e4e4e7',
-                    borderRadius: 16,
+                    borderRadius: 14,
                     boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
                     padding: 8,
                     zIndex: 50,
@@ -167,21 +135,11 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                       display: 'block',
                       width: '100%',
                       padding: '10px 12px',
-                      borderRadius: 10,
-                      border: 'none',
-                      background: 'transparent',
+                      borderRadius: 8,
                       color: '#3f3f46',
                       fontSize: 13,
                       fontWeight: 500,
-                      cursor: 'pointer',
-                      textAlign: 'left',
                       textDecoration: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#fafafa'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent'
                     }}
                   >
                     Profile
@@ -196,7 +154,7 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                     style={{
                       width: '100%',
                       padding: '10px 12px',
-                      borderRadius: 10,
+                      borderRadius: 8,
                       border: 'none',
                       background: 'transparent',
                       color: '#3f3f46',
@@ -205,12 +163,6 @@ export default function Layout({ children, activeTab }: LayoutProps) {
                       cursor: 'pointer',
                       textAlign: 'left',
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#fafafa'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent'
-                    }}
                   >
                     Log out
                   </button>
@@ -218,11 +170,27 @@ export default function Layout({ children, activeTab }: LayoutProps) {
               )}
             </div>
           </div>
+          <div className="app-nav-tabs">
+            {navTabs.map((tab) => {
+              const active = activeNav === tab.route
+              const accent = zoneTokens[tab.route].accent
+              return (
+                <a
+                  key={tab.route}
+                  href={routeHref(tab.route)}
+                  className={active ? 'app-nav-tab app-nav-tab-active' : 'app-nav-tab'}
+                  style={active ? ({ '--tab-accent': accent } as React.CSSProperties) : undefined}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {tab.label}
+                </a>
+              )
+            })}
+          </div>
         </div>
       </nav>
-      <main className="max-w-4xl mx-auto px-4" style={{ paddingTop: 32, paddingBottom: 64 }}>
-        {children}
-      </main>
+      <main className="app-main">{children}</main>
+      <MobileTabBar activeRoute={activeRoute} />
     </div>
   )
 }

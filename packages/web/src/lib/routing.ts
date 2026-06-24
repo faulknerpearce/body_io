@@ -1,10 +1,24 @@
-export type AppRoute = 'dashboard' | 'inputs' | 'recipes' | 'workouts' | 'outputs' | 'profile'
+export type AppRoute =
+  | 'dashboard'
+  | 'inputs'
+  | 'inputs/recipes'
+  | 'outputs'
+  | 'outputs/workouts'
+  | 'profile'
+
+export type AppZone = 'dashboard' | 'inputs' | 'outputs' | 'profile'
+
+const LEGACY_REDIRECTS: Record<string, AppRoute> = {
+  recipes: 'inputs/recipes',
+  workouts: 'outputs/workouts',
+}
 
 export function parseHashRoute(hash: string): AppRoute {
   const path = hash.replace(/^#/, '').replace(/^\//, '')
+  if (path in LEGACY_REDIRECTS) return LEGACY_REDIRECTS[path]
+  if (path === 'inputs/recipes') return 'inputs/recipes'
+  if (path === 'outputs/workouts') return 'outputs/workouts'
   if (path === 'inputs') return 'inputs'
-  if (path === 'recipes') return 'recipes'
-  if (path === 'workouts') return 'workouts'
   if (path === 'outputs') return 'outputs'
   if (path === 'profile') return 'profile'
   return 'dashboard'
@@ -12,9 +26,29 @@ export function parseHashRoute(hash: string): AppRoute {
 
 export function routeHref(route: AppRoute): string {
   if (route === 'inputs') return '#/inputs'
-  if (route === 'recipes') return '#/recipes'
-  if (route === 'workouts') return '#/workouts'
+  if (route === 'inputs/recipes') return '#/inputs/recipes'
   if (route === 'outputs') return '#/outputs'
+  if (route === 'outputs/workouts') return '#/outputs/workouts'
   if (route === 'profile') return '#/profile'
   return '#/'
+}
+
+export function routeZone(route: AppRoute): AppZone {
+  if (route.startsWith('inputs')) return 'inputs'
+  if (route.startsWith('outputs')) return 'outputs'
+  if (route === 'profile') return 'profile'
+  return 'dashboard'
+}
+
+export function legacyRedirectPath(hash: string): string | null {
+  const path = hash.replace(/^#/, '').replace(/^\//, '')
+  const target = LEGACY_REDIRECTS[path]
+  return target ? routeHref(target) : null
+}
+
+export function primaryNavRoute(route: AppRoute): 'dashboard' | 'inputs' | 'outputs' {
+  const zone = routeZone(route)
+  if (zone === 'inputs') return 'inputs'
+  if (zone === 'outputs') return 'outputs'
+  return 'dashboard'
 }
