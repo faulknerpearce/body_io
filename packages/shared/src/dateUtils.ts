@@ -1,11 +1,42 @@
 import type { ValidationResult } from './validation.js'
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+export const DEFAULT_TIMEZONE = 'UTC'
+
+export function isValidTimeZone(timeZone: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** IANA timezone from the runtime environment (browser or Node). */
+export function detectBrowserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE
+}
 
 export function todayISO(date: Date = new Date()): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
   const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/** Calendar date in an IANA timezone (e.g. America/Los_Angeles). */
+export function todayISOInTimeZone(timeZone: string, date: Date = new Date()): string {
+  const tz = isValidTimeZone(timeZone) ? timeZone : DEFAULT_TIMEZONE
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const y = parts.find((p) => p.type === 'year')?.value
+  const m = parts.find((p) => p.type === 'month')?.value
+  const d = parts.find((p) => p.type === 'day')?.value
+  if (!y || !m || !d) return todayISO(date)
   return `${y}-${m}-${d}`
 }
 
@@ -21,11 +52,18 @@ export function offsetDateISO(days: number, from: Date = new Date()): string {
   return todayISO(date)
 }
 
+function resolveTodayISO(options?: { now?: Date; timeZone?: string }): string {
+  if (options?.timeZone) {
+    return todayISOInTimeZone(options.timeZone, options.now)
+  }
+  return todayISO(options?.now)
+}
+
 export function parseLogDate(
   value: unknown,
-  options?: { fallback?: string; allowFuture?: boolean; now?: Date },
+  options?: { fallback?: string; allowFuture?: boolean; now?: Date; timeZone?: string },
 ): ValidationResult<string> {
-  const fallback = options?.fallback
+  const fallback = options?.fallback ?? resolveTodayISO(options)
   const raw =
     typeof value === 'string' && value.trim() !== ''
       ? value.trim()
@@ -47,7 +85,7 @@ export function parseLogDate(
   }
 
   if (!options?.allowFuture) {
-    const today = todayISO(options?.now)
+    const today = resolveTodayISO(options)
     if (raw > today) {
       return { ok: false, error: 'date cannot be in the future' }
     }

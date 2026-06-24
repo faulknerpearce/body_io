@@ -8,7 +8,7 @@ import {
   perServingTotals,
   scaleRecipeToServings,
   sumRecipeIngredients,
-  todayISO,
+  todayISOInTimeZone,
   validateRecipeInput,
   validateServingsLogged,
   type RecipeInput,
@@ -16,6 +16,7 @@ import {
   type RecipeWithIngredients,
 } from '@nutrition-tracker/shared'
 import type { NutritionSupabase } from './supabase.js'
+import { fetchUserTimeZone } from './toolHandlers.js'
 import { requireUserId } from './toolHandlers.js'
 
 export type RecipeToolArgs = Record<string, unknown>
@@ -189,7 +190,11 @@ export async function logRecipeEntry(supabase: NutritionSupabase, args: RecipeTo
   const servings = validateServingsLogged(args.servings ?? 1)
   const totals = scaleRecipeToServings(recipe.batchTotals, recipe.defaultServings, servings)
   const userId = await requireUserId(supabase)
-  const dateParsed = parseLogDate(args.date, { fallback: todayISO() })
+  const timeZone = await fetchUserTimeZone(supabase)
+  const dateParsed = parseLogDate(args.date, {
+    fallback: todayISOInTimeZone(timeZone),
+    timeZone,
+  })
   if (!dateParsed.ok) throw new Error(dateParsed.error)
 
   const { data, error } = await supabase

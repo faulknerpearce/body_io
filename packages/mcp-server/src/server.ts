@@ -4,13 +4,14 @@ import {
   ListToolsRequestSchema,
   type Tool,
 } from '@modelcontextprotocol/sdk/types.js'
-import { parseLogDate, todayISO } from '@nutrition-tracker/shared'
+import { parseLogDate, todayISOInTimeZone } from '@nutrition-tracker/shared'
 import type { NutritionSupabase } from './supabase.js'
 import {
   addActivityForDate,
   addFoodEntryForDate,
   deleteActivity,
   deleteFoodEntry,
+  fetchUserTimeZone,
   getActivityTotalsForDate,
   getDailyTotalsForDate,
   isManageDayLogAction,
@@ -84,14 +85,22 @@ const activityFields = {
   calories: { type: 'number', description: 'Optional calories burned' },
 }
 
-function resolveLogDateArg(value: unknown): string {
-  const parsed = parseLogDate(value, { fallback: todayISO() })
+async function resolveLogDateArg(supabase: NutritionSupabase, value: unknown): Promise<string> {
+  const timeZone = await fetchUserTimeZone(supabase)
+  const parsed = parseLogDate(value, {
+    fallback: todayISOInTimeZone(timeZone),
+    timeZone,
+  })
   if (!parsed.ok) throw new Error(parsed.error)
   return parsed.value
 }
 
-function resolveRequiredLogDateArg(value: unknown): string {
-  const parsed = parseLogDate(value)
+async function resolveRequiredLogDateArg(
+  supabase: NutritionSupabase,
+  value: unknown,
+): Promise<string> {
+  const timeZone = await fetchUserTimeZone(supabase)
+  const parsed = parseLogDate(value, { timeZone })
   if (!parsed.ok) throw new Error(parsed.error)
   return parsed.value
 }
@@ -344,19 +353,19 @@ export function createServer(supabase: NutritionSupabase): Server {
     try {
       switch (name) {
         case 'list_food_entries': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const entries = await listFoodEntriesForDate(supabase, date)
           return { content: [{ type: 'text', text: JSON.stringify(entries) }] }
         }
 
         case 'add_food_entry': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const entry = await addFoodEntryForDate(supabase, date, a)
           return { content: [{ type: 'text', text: JSON.stringify(entry) }] }
         }
 
         case 'update_food_entry': {
-          if (typeof a.date === 'string') a.date = resolveRequiredLogDateArg(a.date)
+          if (typeof a.date === 'string') a.date = await resolveRequiredLogDateArg(supabase, a.date)
           const entry = await updateFoodEntry(supabase, a)
           return { content: [{ type: 'text', text: JSON.stringify(entry) }] }
         }
@@ -367,25 +376,25 @@ export function createServer(supabase: NutritionSupabase): Server {
         }
 
         case 'get_daily_totals': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const result = await getDailyTotalsForDate(supabase, date)
           return { content: [{ type: 'text', text: JSON.stringify(result) }] }
         }
 
         case 'list_activities': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const entries = await listActivitiesForDate(supabase, date)
           return { content: [{ type: 'text', text: JSON.stringify(entries) }] }
         }
 
         case 'add_activity': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const activity = await addActivityForDate(supabase, date, a)
           return { content: [{ type: 'text', text: JSON.stringify(activity) }] }
         }
 
         case 'update_activity': {
-          if (typeof a.date === 'string') a.date = resolveRequiredLogDateArg(a.date)
+          if (typeof a.date === 'string') a.date = await resolveRequiredLogDateArg(supabase, a.date)
           const activity = await updateActivity(supabase, a)
           return { content: [{ type: 'text', text: JSON.stringify(activity) }] }
         }
@@ -396,13 +405,13 @@ export function createServer(supabase: NutritionSupabase): Server {
         }
 
         case 'get_activity_totals': {
-          const date = resolveLogDateArg(a.date)
+          const date = await resolveLogDateArg(supabase, a.date)
           const result = await getActivityTotalsForDate(supabase, date)
           return { content: [{ type: 'text', text: JSON.stringify(result) }] }
         }
 
         case 'manage_day_log': {
-          const date = resolveRequiredLogDateArg(a.date)
+          const date = await resolveRequiredLogDateArg(supabase, a.date)
           if (!isManageDayLogAction(a.action)) {
             throw new Error(
               'action is required (list, add_food, update_food, delete_food, add_activity, update_activity, delete_activity)',

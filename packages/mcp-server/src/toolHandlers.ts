@@ -4,6 +4,7 @@ import {
   buildInsertPayload,
   buildUpdatePayload,
   DEFAULT_NUTRITION_GOALS,
+  DEFAULT_TIMEZONE,
   mapActivityRow,
   mapRow,
   parseActivityInput,
@@ -37,6 +38,18 @@ async function fetchUserGoals(supabase: NutritionSupabase) {
     .maybeSingle()
   if (error) throw error
   return parseNutritionGoals(data?.nutrition_goals ?? DEFAULT_NUTRITION_GOALS)
+}
+
+export async function fetchUserTimeZone(supabase: NutritionSupabase): Promise<string> {
+  const userId = await requireUserId(supabase)
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('time_zone')
+    .eq('id', userId)
+    .maybeSingle()
+  if (error) throw error
+  const tz = data?.time_zone
+  return typeof tz === 'string' && tz.trim() !== '' ? tz : DEFAULT_TIMEZONE
 }
 
 export async function listFoodEntriesForDate(supabase: NutritionSupabase, date: string) {

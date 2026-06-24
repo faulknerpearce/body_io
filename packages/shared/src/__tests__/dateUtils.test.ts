@@ -5,6 +5,7 @@ import {
   parseISODate,
   parseLogDate,
   todayISO,
+  todayISOInTimeZone,
 } from '../dateUtils.js'
 
 describe('todayISO', () => {
@@ -42,6 +43,14 @@ describe('offsetDateISO', () => {
   })
 })
 
+describe('todayISOInTimeZone', () => {
+  it('returns the calendar date in the given IANA timezone', () => {
+    const eveningUtc = new Date('2026-06-24T02:30:00Z')
+    expect(todayISOInTimeZone('America/Los_Angeles', eveningUtc)).toBe('2026-06-23')
+    expect(todayISOInTimeZone('UTC', eveningUtc)).toBe('2026-06-24')
+  })
+})
+
 describe('parseLogDate', () => {
   const now = new Date(2026, 5, 23)
 
@@ -57,10 +66,26 @@ describe('parseLogDate', () => {
     })
   })
 
+  it('defaults fallback to today in the provided timezone', () => {
+    const eveningUtc = new Date('2026-06-24T02:30:00Z')
+    expect(parseLogDate(undefined, { timeZone: 'America/Los_Angeles', now: eveningUtc })).toEqual({
+      ok: true,
+      value: '2026-06-23',
+    })
+  })
+
   it('rejects invalid and future dates', () => {
     expect(parseLogDate('2026-13-01', { now }).ok).toBe(false)
     expect(parseLogDate('06-23-2026', { now }).ok).toBe(false)
     expect(parseLogDate('2026-06-24', { now })).toEqual({
+      ok: false,
+      error: 'date cannot be in the future',
+    })
+  })
+
+  it('rejects future dates relative to the user timezone', () => {
+    const eveningUtc = new Date('2026-06-24T02:30:00Z')
+    expect(parseLogDate('2026-06-24', { timeZone: 'America/Los_Angeles', now: eveningUtc })).toEqual({
       ok: false,
       error: 'date cannot be in the future',
     })

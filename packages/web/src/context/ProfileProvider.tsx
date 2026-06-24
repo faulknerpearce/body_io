@@ -1,5 +1,6 @@
 import {
   DEFAULT_NUTRITION_GOALS,
+  DEFAULT_TIMEZONE,
   validateNutritionGoals,
   validateProfileUpdate,
   type NutritionGoals,
@@ -17,6 +18,7 @@ const FALLBACK_PROFILE: UserProfile = {
   heightCm: null,
   weightKg: null,
   nutritionGoals: DEFAULT_NUTRITION_GOALS,
+  timeZone: DEFAULT_TIMEZONE,
 }
 
 export function ProfileProvider({ children }: { children: ReactNode }) {

@@ -246,6 +246,7 @@ export type Database = {
           age: number | null
           height_cm: number | null
           weight_kg: number | null
+          time_zone: string
           created_at: string
         }
         Insert: {
@@ -255,6 +256,7 @@ export type Database = {
           age?: number | null
           height_cm?: number | null
           weight_kg?: number | null
+          time_zone?: string
           created_at?: string
         }
         Update: {
@@ -264,6 +266,7 @@ export type Database = {
           age?: number | null
           height_cm?: number | null
           weight_kg?: number | null
+          time_zone?: string
           created_at?: string
         }
         Relationships: [

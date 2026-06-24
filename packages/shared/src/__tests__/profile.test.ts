@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { DEFAULT_TIMEZONE } from '../dateUtils.js'
 import { DEFAULT_NUTRITION_GOALS } from '../goals.js'
 import {
   mapProfileRow,
@@ -22,6 +23,7 @@ describe('mapProfileRow', () => {
       age: 32,
       heightCm: 180,
       weightKg: 78.5,
+      timeZone: DEFAULT_TIMEZONE,
     })
   })
 })

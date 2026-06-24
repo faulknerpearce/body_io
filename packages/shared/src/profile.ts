@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEZONE, isValidTimeZone } from './dateUtils.js'
 import { parseNutritionGoals, type NutritionGoals } from './goals.js'
 import type { ValidationResult } from './validation.js'
 
@@ -10,6 +11,8 @@ export interface UserBodyStats {
 export interface UserProfile extends UserBodyStats {
   displayName: string
   nutritionGoals: NutritionGoals
+  /** IANA timezone used for calendar-day food and activity logs. */
+  timeZone: string
 }
 
 export interface ProfileUpdate {
@@ -18,6 +21,7 @@ export interface ProfileUpdate {
   heightCm?: number | null
   weightKg?: number | null
   nutritionGoals?: NutritionGoals
+  timeZone?: string
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -36,12 +40,18 @@ function parseOptionalWeight(raw: unknown): number | null {
   return Math.round(raw * 10) / 10
 }
 
+function parseTimeZone(raw: unknown): string {
+  if (typeof raw === 'string' && isValidTimeZone(raw)) return raw
+  return DEFAULT_TIMEZONE
+}
+
 export function mapProfileRow(row: {
   display_name: string
   nutrition_goals: unknown
   age?: number | null
   height_cm?: number | null
   weight_kg?: number | string | null
+  time_zone?: string | null
 }): UserProfile {
   const weightRaw = row.weight_kg
   const weightKg =
@@ -57,6 +67,7 @@ export function mapProfileRow(row: {
     age: row.age ?? null,
     heightCm: row.height_cm ?? null,
     weightKg: Number.isFinite(weightKg) ? weightKg : null,
+    timeZone: parseTimeZone(row.time_zone),
   }
 }
 
@@ -111,6 +122,10 @@ export function validateProfileUpdate(input: ProfileUpdate): ValidationResult<Pr
     }
   }
 
+  if (input.timeZone !== undefined && !isValidTimeZone(input.timeZone)) {
+    return { ok: false, error: 'timeZone must be a valid IANA timezone' }
+  }
+
   return { ok: true, value: input }
 }
 
@@ -128,6 +143,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
   height_cm?: number | null
   weight_kg?: number | null
   nutrition_goals?: NutritionGoals
+  time_zone?: string
 } {
   const payload: {
     display_name?: string
@@ -135,6 +151,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
     height_cm?: number | null
     weight_kg?: number | null
     nutrition_goals?: NutritionGoals
+    time_zone?: string
   } = {}
 
   if (input.displayName !== undefined) {
@@ -144,6 +161,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
   if (input.heightCm !== undefined) payload.height_cm = input.heightCm
   if (input.weightKg !== undefined) payload.weight_kg = input.weightKg
   if (input.nutritionGoals !== undefined) payload.nutrition_goals = input.nutritionGoals
+  if (input.timeZone !== undefined) payload.time_zone = input.timeZone
 
   return payload
 }
@@ -160,5 +178,9 @@ export function mergeProfileRow(
     age: row.age === undefined ? current.age : (row.age as number | null),
     height_cm: row.height_cm === undefined ? current.heightCm : (row.height_cm as number | null),
     weight_kg: row.weight_kg === undefined ? current.weightKg : (row.weight_kg as number | null),
+    time_zone:
+      row.time_zone === undefined || row.time_zone === null
+        ? current.timeZone
+        : parseTimeZone(row.time_zone),
   })
 }
