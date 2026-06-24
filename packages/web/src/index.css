@@ -85,8 +85,9 @@
     padding: 20px;
   }
 
-  .modal-form-grid {
-    grid-template-columns: 1fr;
+  .modal-form-grid,
+  .recipe-toolbar {
+    grid-template-columns: 1fr !important;
   }
 
   .log-section-header {
