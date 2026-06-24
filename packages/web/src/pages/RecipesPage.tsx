@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
+import LogRecipeModal from '../components/LogRecipeModal'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import {
   deleteRecipe,
   fetchRecipe,
   fetchRecipeSummaries,
+  logRecipe,
   saveRecipe,
 } from '../lib/recipes'
 import { cardSurface, iconTileMd, pageTitle, sectionHeader } from '../lib/styles'
@@ -17,6 +19,8 @@ export default function RecipesPage() {
     undefined,
   )
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [loggingRecipe, setLoggingRecipe] = useState<RecipeSummary | null>(null)
+  const [logSuccess, setLogSuccess] = useState<string | null>(null)
 
   const loadRecipes = async () => {
     const data = await fetchRecipeSummaries()
@@ -43,6 +47,13 @@ export default function RecipesPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load recipe')
     }
+  }
+
+  const handleLogRecipe = async (servings: number) => {
+    if (!loggingRecipe) return
+    await logRecipe({ recipeId: loggingRecipe.id, servings })
+    setLogSuccess(`Added ${loggingRecipe.name} to today's food log.`)
+    setLoggingRecipe(null)
   }
 
   const handleDelete = async (id: string) => {
@@ -112,6 +123,22 @@ export default function RecipesPage() {
         </button>
       </div>
 
+      {logSuccess && (
+        <div
+          role="status"
+          style={{
+            marginBottom: 20,
+            padding: '12px 16px',
+            background: '#ecfdf5',
+            color: '#065f46',
+            borderRadius: 12,
+            fontSize: 13,
+          }}
+        >
+          {logSuccess}
+        </div>
+      )}
+
       {error && (
         <div
           role="alert"
@@ -162,7 +189,26 @@ export default function RecipesPage() {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLogSuccess(null)
+                    setLoggingRecipe(recipe)
+                  }}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 9999,
+                    border: 'none',
+                    background: '#134e4b',
+                    color: 'white',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Add to Log
+                </button>
                 <button
                   type="button"
                   onClick={() => openEdit(recipe.id)}
@@ -207,6 +253,14 @@ export default function RecipesPage() {
             await saveRecipe(input, editingRecipe?.id)
             await loadRecipes()
           }}
+        />
+      )}
+
+      {loggingRecipe && (
+        <LogRecipeModal
+          recipe={loggingRecipe}
+          onLog={handleLogRecipe}
+          onClose={() => setLoggingRecipe(null)}
         />
       )}
     </div>
