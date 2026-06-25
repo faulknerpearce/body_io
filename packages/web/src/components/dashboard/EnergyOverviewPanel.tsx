@@ -147,9 +147,8 @@ export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOv
               color={color}
               size={148}
               strokeWidth={12}
-              centerLabel={balance.net.toLocaleString()}
-              centerSubLabel={`${ring.pct}% of high`}
-              ariaLabel={`Net energy ${balance.net} kilocalories, ${ring.pct} percent of high goal`}
+              centerLabel={`${ring.pct}%`}
+              ariaLabel={`Net energy ${balance.net} kilocalories, ${ring.pct} percent of goal`}
             />
 
             <div style={{ flex: 1, minWidth: 160 }}>

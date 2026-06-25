@@ -92,23 +92,25 @@ export default function ProgressRing({
               fontSize: size >= 140 ? 28 : size >= 100 ? 20 : 16,
               fontWeight: 600,
               lineHeight: 1.1,
-              color: '#18181b',
+              color: centerLabel.endsWith('%') ? color : '#18181b',
               fontVariantNumeric: 'tabular-nums',
             }}
           >
             {centerLabel}
           </span>
         )}
-        <span
-          style={{
-            fontSize: size >= 140 ? 13 : 11,
-            fontWeight: 600,
-            color,
-            marginTop: centerLabel ? 2 : 0,
-          }}
-        >
-          {centerSubLabel ?? `${displayPct}%`}
-        </span>
+        {(!centerLabel || centerSubLabel) && (
+          <span
+            style={{
+              fontSize: size >= 140 ? 13 : 11,
+              fontWeight: 600,
+              color,
+              marginTop: centerLabel ? 2 : 0,
+            }}
+          >
+            {centerSubLabel ?? `${displayPct}%`}
+          </span>
+        )}
       </div>
     </div>
   )
