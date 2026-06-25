@@ -388,6 +388,17 @@ body {
   gap: 16px;
 }
 
+.energy-overview-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.energy-overview-ring {
+  flex-shrink: 0;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -491,6 +502,29 @@ body {
   .dashboard-bento-hero-inner,
   .dashboard-rings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .energy-overview-ring-row {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .energy-overview-ring {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .energy-overview-stats {
+    width: 100%;
+    min-width: 0 !important;
+    text-align: center;
+  }
+
+  .energy-overview-stats-header {
+    justify-content: center;
   }
 
   .modal-panel {
