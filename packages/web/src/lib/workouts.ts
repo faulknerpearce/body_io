@@ -1,5 +1,6 @@
 import {
   buildActivityExerciseInsertPayload,
+  buildForkWorkoutInput,
   buildWorkoutExerciseInsertPayload,
   buildWorkoutInsertPayload,
   mapActivityExerciseRow,
@@ -7,7 +8,6 @@ import {
   mapWorkoutExerciseRow,
   mapWorkoutRow,
   buildWorkoutExerciseSnapshot,
-
   todayISO,
   validateWorkoutInput,
   resolveLogWorkoutMetrics,
@@ -19,6 +19,7 @@ import {
   type WorkoutSummary,
   type WorkoutWithExercises,
 } from '@nutrition-tracker/shared'
+import { markWorkoutShareSaved } from './sharing'
 import { supabase } from './supabase'
 
 async function requireUserId(): Promise<string> {
@@ -153,6 +154,32 @@ export async function saveWorkout(input: WorkoutInput, id?: string): Promise<Wor
 export async function deleteWorkout(id: string): Promise<void> {
   const { error } = await supabase.from('workouts').delete().eq('id', id)
   if (error) throw new Error(error.message)
+}
+
+export async function forkWorkout(
+  sourceWorkoutId: string,
+  shareId?: string,
+): Promise<WorkoutWithExercises> {
+  const source = await fetchWorkout(sourceWorkoutId)
+  const input = buildForkWorkoutInput(source)
+  const userId = await requireUserId()
+  const workoutId = crypto.randomUUID()
+  const payload = buildWorkoutInsertPayload(input, userId, workoutId)
+
+  const { error } = await supabase.from('workouts').insert({
+    ...payload,
+    forked_from_workout_id: sourceWorkoutId,
+  })
+  if (error) throw new Error(error.message)
+
+  await replaceWorkoutExercises(workoutId, userId, input.exercises)
+  const saved = await fetchWorkout(workoutId)
+
+  if (shareId) {
+    await markWorkoutShareSaved(shareId, saved.id)
+  }
+
+  return saved
 }
 
 export async function logWorkout(options: LogWorkoutInput): Promise<Activity> {

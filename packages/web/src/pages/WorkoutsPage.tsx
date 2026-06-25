@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { WorkoutSummary, WorkoutWithExercises } from '@nutrition-tracker/shared'
+import CatalogListTabs from '../components/CatalogListTabs'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
 import LogWorkoutModal from '../components/LogWorkoutModal'
+import ShareModal from '../components/ShareModal'
 import WorkoutEditorModal from '../components/WorkoutEditorModal'
 import WorkoutViewModal from '../components/WorkoutViewModal'
 import {
@@ -11,10 +13,11 @@ import {
   WORKOUT_SORT_OPTIONS,
   type WorkoutSortOption,
 } from '../lib/workoutFilters'
+import { fetchWorkoutsSharedWithMe, type SharedWorkoutItem } from '../lib/sharing'
 import {
   deleteWorkout,
-  fetchWorkout,
   fetchWorkoutSummaries,
+  forkWorkout,
   logWorkout,
   saveWorkout,
 } from '../lib/workouts'
@@ -37,6 +40,11 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
   const [logSuccess, setLogSuccess] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<WorkoutSortOption>('name-asc')
+  const [listTab, setListTab] = useState<'mine' | 'shared'>('mine')
+  const [sharedWorkouts, setSharedWorkouts] = useState<SharedWorkoutItem[]>([])
+  const [sharingWorkout, setSharingWorkout] = useState<{ id: string; name: string } | null>(null)
+  const [viewingShared, setViewingShared] = useState<SharedWorkoutItem | null>(null)
+  const [forkingShareId, setForkingShareId] = useState<string | null>(null)
 
   const visibleWorkouts = useMemo(
     () => filterAndSortWorkouts(workouts, searchQuery, sortBy),
@@ -49,10 +57,16 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
     setWorkouts(data)
   }
 
+  const loadSharedWorkouts = async () => {
+    const data = await fetchWorkoutsSharedWithMe()
+    setSharedWorkouts(data)
+  }
+
   useEffect(() => {
-    fetchWorkoutSummaries()
-      .then((data) => {
-        setWorkouts(data)
+    Promise.all([fetchWorkoutSummaries(), fetchWorkoutsSharedWithMe()])
+      .then(([mine, shared]) => {
+        setWorkouts(mine)
+        setSharedWorkouts(shared)
         setLoading(false)
       })
       .catch((err) => {
@@ -66,14 +80,6 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
   useEffect(() => {
     onOpenCreateReady?.(openCreate)
   }, [onOpenCreateReady, openCreate])
-
-  const openEdit = async (id: string) => {
-    try {
-      setEditingWorkout(await fetchWorkout(id))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load workout')
-    }
-  }
 
   const handleLogWorkout = async (options: {
     setsLogged: number
@@ -89,6 +95,20 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
     })
     setLogSuccess(`Added ${loggingWorkout.name} to today's activity log.`)
     setLoggingWorkout(null)
+  }
+
+  const handleSaveSharedCopy = async (item: SharedWorkoutItem) => {
+    setForkingShareId(item.share.id)
+    setError(null)
+    try {
+      await forkWorkout(item.workout.id, item.share.id)
+      await Promise.all([loadWorkouts(), loadSharedWorkouts()])
+      setLogSuccess(`Saved "${item.workout.name}" to your workouts.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save copy')
+    } finally {
+      setForkingShareId(null)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -140,7 +160,15 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
         </div>
       )}
 
-      {workouts.length > 0 && (
+      <CatalogListTabs
+        activeTab={listTab}
+        onChange={setListTab}
+        mineLabel="My workouts"
+        sharedLabel="Shared with me"
+        sharedCount={sharedWorkouts.length}
+      />
+
+      {listTab === 'mine' && workouts.length > 0 && (
         <div className="day-accordion" style={{ padding: 20, marginBottom: 20 }}>
           <div
             style={{
@@ -244,11 +272,11 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
         </div>
       )}
 
-      {workouts.length === 0 ? (
+      {listTab === 'mine' && workouts.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: 0 }}>No workouts yet. Create one to speed up logging.</p>
         </div>
-      ) : visibleWorkouts.length === 0 ? (
+      ) : listTab === 'mine' && visibleWorkouts.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>
             No matching workouts
@@ -273,7 +301,7 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
             .
           </p>
         </div>
-      ) : (
+      ) : listTab === 'mine' ? (
         <div className="catalog-list">
           {visibleWorkouts.map((workout) => (
             <CatalogRow
@@ -304,13 +332,51 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
                     Add to Log
                   </ZoneButton>
                   <ZoneButton onClick={() => setViewingWorkoutId(workout.id)}>View</ZoneButton>
-                  <ZoneButton onClick={() => openEdit(workout.id)}>Edit</ZoneButton>
+                  <ZoneButton
+                    onClick={() => setSharingWorkout({ id: workout.id, name: workout.name })}
+                  >
+                    Share
+                  </ZoneButton>
                   <ZoneButton
                     variant="danger"
                     onClick={() => handleDelete(workout.id)}
                     disabled={deletingId === workout.id}
                   >
                     {deletingId === workout.id ? 'Deleting...' : 'Delete'}
+                  </ZoneButton>
+                </>
+              }
+            />
+          ))}
+        </div>
+      ) : sharedWorkouts.length === 0 ? (
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
+          <p style={{ margin: 0 }}>Nothing shared with you yet.</p>
+        </div>
+      ) : (
+        <div className="catalog-list">
+          {sharedWorkouts.map((item) => (
+            <CatalogRow
+              key={item.share.id}
+              icon={item.workout.icon}
+              iconBg={item.workout.iconBg}
+              iconColor={item.workout.iconColor}
+              title={item.workout.name}
+              subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.workout.exerciseCount} exercises`}
+              onView={() => setViewingShared(item)}
+              actions={
+                <>
+                  <ZoneButton onClick={() => setViewingShared(item)}>View</ZoneButton>
+                  <ZoneButton
+                    variant="primary"
+                    onClick={() => handleSaveSharedCopy(item)}
+                    disabled={!!item.share.savedCopyId || forkingShareId === item.share.id}
+                  >
+                    {item.share.savedCopyId
+                      ? 'Already saved'
+                      : forkingShareId === item.share.id
+                        ? 'Saving...'
+                        : 'Save to my library'}
                   </ZoneButton>
                 </>
               }
@@ -339,7 +405,39 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
       )}
 
       {viewingWorkoutId && (
-        <WorkoutViewModal workoutId={viewingWorkoutId} onClose={() => setViewingWorkoutId(null)} />
+        <WorkoutViewModal
+          workoutId={viewingWorkoutId}
+          onClose={() => setViewingWorkoutId(null)}
+          onEdit={(workout) => {
+            setViewingWorkoutId(null)
+            setEditingWorkout(workout)
+          }}
+          onShare={(workout) => setSharingWorkout({ id: workout.id, name: workout.name })}
+        />
+      )}
+
+      {viewingShared && (
+        <WorkoutViewModal
+          workoutId={viewingShared.workout.id}
+          onClose={() => setViewingShared(null)}
+          mode="shared"
+          ownerDisplayName={viewingShared.share.ownerDisplayName}
+          savedCopyId={viewingShared.share.savedCopyId}
+          savingCopy={forkingShareId === viewingShared.share.id}
+          onSaveCopy={async () => {
+            await handleSaveSharedCopy(viewingShared)
+            setViewingShared(null)
+          }}
+        />
+      )}
+
+      {sharingWorkout && (
+        <ShareModal
+          resourceType="workout"
+          resourceId={sharingWorkout.id}
+          resourceName={sharingWorkout.name}
+          onClose={() => setSharingWorkout(null)}
+        />
       )}
     </div>
   )

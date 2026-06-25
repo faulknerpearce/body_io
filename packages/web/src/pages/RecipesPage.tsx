@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
+import CatalogListTabs from '../components/CatalogListTabs'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
 import LogRecipeModal from '../components/LogRecipeModal'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import RecipeViewModal from '../components/RecipeViewModal'
+import ShareModal from '../components/ShareModal'
 import {
   filterAndSortRecipes,
   RECIPE_SORT_OPTIONS,
@@ -13,11 +15,12 @@ import {
 } from '../lib/recipeFilters'
 import {
   deleteRecipe,
-  fetchRecipe,
   fetchRecipeSummaries,
+  forkRecipe,
   logRecipe,
   saveRecipe,
 } from '../lib/recipes'
+import { fetchRecipesSharedWithMe, type SharedRecipeItem } from '../lib/sharing'
 import { inputBase } from '../lib/styles'
 
 interface RecipesPageProps {
@@ -37,6 +40,11 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
   const [logSuccess, setLogSuccess] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<RecipeSortOption>('name-asc')
+  const [listTab, setListTab] = useState<'mine' | 'shared'>('mine')
+  const [sharedRecipes, setSharedRecipes] = useState<SharedRecipeItem[]>([])
+  const [sharingRecipe, setSharingRecipe] = useState<{ id: string; name: string } | null>(null)
+  const [viewingShared, setViewingShared] = useState<SharedRecipeItem | null>(null)
+  const [forkingShareId, setForkingShareId] = useState<string | null>(null)
 
   const visibleRecipes = useMemo(
     () => filterAndSortRecipes(recipes, searchQuery, sortBy),
@@ -49,10 +57,16 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
     setRecipes(data)
   }
 
+  const loadSharedRecipes = async () => {
+    const data = await fetchRecipesSharedWithMe()
+    setSharedRecipes(data)
+  }
+
   useEffect(() => {
-    fetchRecipeSummaries()
-      .then((data) => {
-        setRecipes(data)
+    Promise.all([fetchRecipeSummaries(), fetchRecipesSharedWithMe()])
+      .then(([mine, shared]) => {
+        setRecipes(mine)
+        setSharedRecipes(shared)
         setLoading(false)
       })
       .catch((err) => {
@@ -67,19 +81,25 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
     onOpenCreateReady?.(openCreate)
   }, [onOpenCreateReady, openCreate])
 
-  const openEdit = async (id: string) => {
-    try {
-      setEditingRecipe(await fetchRecipe(id))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load recipe')
-    }
-  }
-
   const handleLogRecipe = async (servings: number) => {
     if (!loggingRecipe) return
     await logRecipe({ recipeId: loggingRecipe.id, servings })
     setLogSuccess(`Added ${loggingRecipe.name} to today's food log.`)
     setLoggingRecipe(null)
+  }
+
+  const handleSaveSharedCopy = async (item: SharedRecipeItem) => {
+    setForkingShareId(item.share.id)
+    setError(null)
+    try {
+      await forkRecipe(item.recipe.id, item.share.id)
+      await Promise.all([loadRecipes(), loadSharedRecipes()])
+      setLogSuccess(`Saved "${item.recipe.name}" to your recipes.`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save copy')
+    } finally {
+      setForkingShareId(null)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -131,7 +151,15 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
         </div>
       )}
 
-      {recipes.length > 0 && (
+      <CatalogListTabs
+        activeTab={listTab}
+        onChange={setListTab}
+        mineLabel="My recipes"
+        sharedLabel="Shared with me"
+        sharedCount={sharedRecipes.length}
+      />
+
+      {listTab === 'mine' && recipes.length > 0 && (
         <div className="day-accordion" style={{ padding: 20, marginBottom: 20 }}>
           <div
             style={{
@@ -235,11 +263,11 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
         </div>
       )}
 
-      {recipes.length === 0 ? (
+      {listTab === 'mine' && recipes.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: 0 }}>No recipes yet. Create one to speed up logging.</p>
         </div>
-      ) : visibleRecipes.length === 0 ? (
+      ) : listTab === 'mine' && visibleRecipes.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: '#52525b' }}>No matching recipes</p>
           <p style={{ margin: 0, fontSize: 13 }}>
@@ -262,7 +290,7 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
             .
           </p>
         </div>
-      ) : (
+      ) : listTab === 'mine' ? (
         <div className="catalog-list">
           {visibleRecipes.map((recipe) => (
             <CatalogRow
@@ -285,13 +313,49 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
                     Add to Log
                   </ZoneButton>
                   <ZoneButton onClick={() => setViewingRecipeId(recipe.id)}>View</ZoneButton>
-                  <ZoneButton onClick={() => openEdit(recipe.id)}>Edit</ZoneButton>
+                  <ZoneButton onClick={() => setSharingRecipe({ id: recipe.id, name: recipe.name })}>
+                    Share
+                  </ZoneButton>
                   <ZoneButton
                     variant="danger"
                     onClick={() => handleDelete(recipe.id)}
                     disabled={deletingId === recipe.id}
                   >
                     {deletingId === recipe.id ? 'Deleting...' : 'Delete'}
+                  </ZoneButton>
+                </>
+              }
+            />
+          ))}
+        </div>
+      ) : sharedRecipes.length === 0 ? (
+        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
+          <p style={{ margin: 0 }}>Nothing shared with you yet.</p>
+        </div>
+      ) : (
+        <div className="catalog-list">
+          {sharedRecipes.map((item) => (
+            <CatalogRow
+              key={item.share.id}
+              icon={item.recipe.icon}
+              iconBg={item.recipe.iconBg}
+              iconColor={item.recipe.iconColor}
+              title={item.recipe.name}
+              subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.recipe.ingredientCount} ingredients`}
+              onView={() => setViewingShared(item)}
+              actions={
+                <>
+                  <ZoneButton onClick={() => setViewingShared(item)}>View</ZoneButton>
+                  <ZoneButton
+                    variant="primary"
+                    onClick={() => handleSaveSharedCopy(item)}
+                    disabled={!!item.share.savedCopyId || forkingShareId === item.share.id}
+                  >
+                    {item.share.savedCopyId
+                      ? 'Already saved'
+                      : forkingShareId === item.share.id
+                        ? 'Saving...'
+                        : 'Save to my library'}
                   </ZoneButton>
                 </>
               }
@@ -320,7 +384,39 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
       )}
 
       {viewingRecipeId && (
-        <RecipeViewModal recipeId={viewingRecipeId} onClose={() => setViewingRecipeId(null)} />
+        <RecipeViewModal
+          recipeId={viewingRecipeId}
+          onClose={() => setViewingRecipeId(null)}
+          onEdit={(recipe) => {
+            setViewingRecipeId(null)
+            setEditingRecipe(recipe)
+          }}
+          onShare={(recipe) => setSharingRecipe({ id: recipe.id, name: recipe.name })}
+        />
+      )}
+
+      {viewingShared && (
+        <RecipeViewModal
+          recipeId={viewingShared.recipe.id}
+          onClose={() => setViewingShared(null)}
+          mode="shared"
+          ownerDisplayName={viewingShared.share.ownerDisplayName}
+          savedCopyId={viewingShared.share.savedCopyId}
+          savingCopy={forkingShareId === viewingShared.share.id}
+          onSaveCopy={async () => {
+            await handleSaveSharedCopy(viewingShared)
+            setViewingShared(null)
+          }}
+        />
+      )}
+
+      {sharingRecipe && (
+        <ShareModal
+          resourceType="recipe"
+          resourceId={sharingRecipe.id}
+          resourceName={sharingRecipe.name}
+          onClose={() => setSharingRecipe(null)}
+        />
       )}
     </div>
   )
