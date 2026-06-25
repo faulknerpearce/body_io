@@ -32,52 +32,72 @@ export default function ShareModal({
   resourceName,
   onClose,
 }: ShareModalProps) {
+  const loadKey = `${resourceType}:${resourceId}`
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<ShareUserResult[]>([])
   const [searching, setSearching] = useState(false)
   const [existingShares, setExistingShares] = useState<ExistingShare[]>([])
-  const [loadingShares, setLoadingShares] = useState(true)
+  const [loadedFor, setLoadedFor] = useState<string | null>(null)
   const [sharingUserId, setSharingUserId] = useState<string | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  const loadExistingShares = async () => {
-    setLoadingShares(true)
+  const loadingShares = loadedFor !== loadKey
+  const trimmedQuery = query.trim()
+  const visibleResults = trimmedQuery.length < 2 ? [] : results
+
+  const loadExistingShares = async (forKey: string) => {
     try {
-      if (resourceType === 'recipe') {
-        const shares = await fetchRecipeSharesForResource(resourceId)
-        setExistingShares(
-          shares.map((share) => ({
-            id: share.id,
-            label: share.sharedWithDisplayName,
-          })),
-        )
-      } else {
-        const shares = await fetchWorkoutSharesForResource(resourceId)
-        setExistingShares(
-          shares.map((share) => ({
-            id: share.id,
-            label: share.sharedWithDisplayName,
-          })),
-        )
-      }
+      const shares =
+        resourceType === 'recipe'
+          ? await fetchRecipeSharesForResource(resourceId)
+          : await fetchWorkoutSharesForResource(resourceId)
+
+      setExistingShares(
+        shares.map((share) => ({
+          id: share.id,
+          label: share.sharedWithDisplayName,
+        })),
+      )
+      setLoadedFor(forKey)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load shares')
-    } finally {
-      setLoadingShares(false)
     }
   }
 
   useEffect(() => {
-    loadExistingShares()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resourceId, resourceType])
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const shares =
+          resourceType === 'recipe'
+            ? await fetchRecipeSharesForResource(resourceId)
+            : await fetchWorkoutSharesForResource(resourceId)
+
+        if (cancelled) return
+
+        setExistingShares(
+          shares.map((share) => ({
+            id: share.id,
+            label: share.sharedWithDisplayName,
+          })),
+        )
+        setLoadedFor(loadKey)
+      } catch (err) {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : 'Failed to load shares')
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [loadKey, resourceId, resourceType])
 
   useEffect(() => {
-    const trimmed = query.trim()
-    if (trimmed.length < 2) {
-      setResults([])
+    if (trimmedQuery.length < 2) {
       return
     }
 
@@ -85,7 +105,7 @@ export default function ShareModal({
       setSearching(true)
       setError(null)
       try {
-        setResults(await findUsersForShare(trimmed))
+        setResults(await findUsersForShare(trimmedQuery))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Search failed')
         setResults([])
@@ -95,7 +115,7 @@ export default function ShareModal({
     }, 300)
 
     return () => window.clearTimeout(timer)
-  }, [query])
+  }, [trimmedQuery])
 
   const handleShare = async (user: ShareUserResult) => {
     setSharingUserId(user.id)
@@ -110,7 +130,7 @@ export default function ShareModal({
       setSuccess(`Shared with ${user.displayName}`)
       setQuery('')
       setResults([])
-      await loadExistingShares()
+      await loadExistingShares(loadKey)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to share')
     } finally {
@@ -127,7 +147,7 @@ export default function ShareModal({
       } else {
         await revokeWorkoutShare(shareId)
       }
-      await loadExistingShares()
+      await loadExistingShares(loadKey)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to revoke share')
     } finally {
@@ -163,11 +183,13 @@ export default function ShareModal({
         autoFocus
       />
 
-      {searching && <p style={{ fontSize: 12, color: '#a1a1aa', margin: '0 0 12px 0' }}>Searching...</p>}
+      {searching && trimmedQuery.length >= 2 && (
+        <p style={{ fontSize: 12, color: '#a1a1aa', margin: '0 0 12px 0' }}>Searching...</p>
+      )}
 
-      {results.length > 0 && (
+      {visibleResults.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-          {results.map((user) => (
+          {visibleResults.map((user) => (
             <button
               key={user.id}
               type="button"
@@ -198,7 +220,7 @@ export default function ShareModal({
         </div>
       )}
 
-      {query.trim().length >= 2 && !searching && results.length === 0 && (
+      {trimmedQuery.length >= 2 && !searching && visibleResults.length === 0 && (
         <p style={{ fontSize: 12, color: '#a1a1aa', margin: '0 0 16px 0' }}>No users found.</p>
       )}
 

@@ -12,6 +12,27 @@ interface SegmentRingProps {
 
 const RING_TRANSITION = 'stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
 
+function buildSegmentArcs(
+  segments: readonly MacroSegment[],
+  circumference: number,
+  total: number,
+) {
+  let offset = 0
+  return segments
+    .filter((s) => s.calories > 0)
+    .map((segment) => {
+      const fraction = total > 0 ? segment.calories / total : 0
+      const length = circumference * fraction
+      const arc = {
+        ...segment,
+        dashArray: `${length} ${circumference - length}`,
+        dashOffset: -offset,
+      }
+      offset += length
+      return arc
+    })
+}
+
 export default function SegmentRing({
   segments,
   size = 160,
@@ -25,20 +46,7 @@ export default function SegmentRing({
   const center = size / 2
   const total = macroTotalCalories(segments)
 
-  let offset = 0
-  const arcs = segments
-    .filter((s) => s.calories > 0)
-    .map((segment) => {
-      const fraction = total > 0 ? segment.calories / total : 0
-      const length = circumference * fraction
-      const arc = {
-        ...segment,
-        dashArray: `${length} ${circumference - length}`,
-        dashOffset: -offset,
-      }
-      offset += length
-      return arc
-    })
+  const arcs = buildSegmentArcs(segments, circumference, total)
 
   return (
     <div>
