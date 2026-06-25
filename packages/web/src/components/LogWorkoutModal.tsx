@@ -5,6 +5,7 @@ import {
   type WorkoutWithExercises,
 } from '@nutrition-tracker/shared'
 import { fetchWorkout } from '../lib/workouts'
+import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
 
@@ -41,7 +42,7 @@ export default function LogWorkoutModal({ workout, onLog, onClose }: LogWorkoutM
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
-    setsRef.current?.focus()
+    focusIfDesktop(setsRef.current)
 
     fetchWorkout(workout.id)
       .then((loaded) => {

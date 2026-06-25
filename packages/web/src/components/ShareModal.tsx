@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ShareUserResult } from '@nutrition-tracker/shared'
 import {
   fetchRecipeSharesForResource,
@@ -9,6 +9,7 @@ import {
   shareRecipe,
   shareWorkout,
 } from '../lib/sharing'
+import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase, primaryButton } from '../lib/styles'
 import Modal from './Modal'
 
@@ -42,6 +43,11 @@ export default function ShareModal({
   const [revokingId, setRevokingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const searchRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    focusIfDesktop(searchRef.current)
+  }, [])
 
   const loadingShares = loadedFor !== loadKey
   const trimmedQuery = query.trim()
@@ -175,12 +181,12 @@ export default function ShareModal({
       </label>
       <input
         id="share-user-search"
+        ref={searchRef}
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search users to share with..."
         style={{ ...inputBase, marginBottom: 12 }}
-        autoFocus
       />
 
       {searching && trimmedQuery.length >= 2 && (

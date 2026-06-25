@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isTouchPrimaryDevice } from '../lib/device'
+import { focusIfDesktop, isTouchPrimaryDevice } from '../lib/device'
 
 describe('isTouchPrimaryDevice', () => {
   afterEach(() => {
@@ -21,5 +21,33 @@ describe('isTouchPrimaryDevice', () => {
     const matchMedia = vi.fn().mockReturnValue({ matches: false })
     vi.stubGlobal('window', { matchMedia })
     expect(isTouchPrimaryDevice()).toBe(false)
+  })
+})
+
+describe('focusIfDesktop', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('does not focus on touch-primary devices', () => {
+    const matchMedia = vi.fn().mockReturnValue({ matches: true })
+    vi.stubGlobal('window', { matchMedia })
+    const focus = vi.fn()
+    focusIfDesktop({ focus } as unknown as HTMLElement)
+    expect(focus).not.toHaveBeenCalled()
+  })
+
+  it('focuses on desktop devices', () => {
+    const matchMedia = vi.fn().mockReturnValue({ matches: false })
+    vi.stubGlobal('window', { matchMedia })
+    const focus = vi.fn()
+    focusIfDesktop({ focus } as unknown as HTMLElement)
+    expect(focus).toHaveBeenCalled()
+  })
+
+  it('ignores null elements', () => {
+    const matchMedia = vi.fn().mockReturnValue({ matches: false })
+    vi.stubGlobal('window', { matchMedia })
+    expect(() => focusIfDesktop(null)).not.toThrow()
   })
 })

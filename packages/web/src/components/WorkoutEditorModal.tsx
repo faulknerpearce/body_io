@@ -9,6 +9,7 @@ import {
 import CatalogListSection from './catalog/CatalogListSection'
 import CatalogModalHeader from './catalog/CatalogModalHeader'
 import IconPicker from './catalog/IconPicker'
+import { focusIfDesktop } from '../lib/device'
 import {
   catalogItemCard,
   inputBase,
@@ -85,7 +86,7 @@ export default function WorkoutEditorModal({ workout, onSave, onClose }: Workout
   const nameRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    nameRef.current?.focus()
+    focusIfDesktop(nameRef.current)
   }, [])
 
   const previewExercises = exercises

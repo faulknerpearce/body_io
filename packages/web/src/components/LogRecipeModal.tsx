@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { scaleRecipeToServings, type RecipeSummary } from '@nutrition-tracker/shared'
+import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
 
@@ -24,7 +25,7 @@ export default function LogRecipeModal({ recipe, onLog, onClose }: LogRecipeModa
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
-    servingsRef.current?.focus()
+    focusIfDesktop(servingsRef.current)
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
