@@ -8,6 +8,7 @@ import {
   type NewFoodEntry,
   type RecipeSummary,
 } from '@nutrition-tracker/shared'
+import { isTouchPrimaryDevice } from '../lib/device'
 import { fetchRecipeSummaries } from '../lib/recipes'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
@@ -142,7 +143,9 @@ export default function AddEntryModal({
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
-    nameRef.current?.focus()
+    if (!isTouchPrimaryDevice()) {
+      nameRef.current?.focus()
+    }
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
