@@ -26,6 +26,11 @@ export async function lookupBarcodeProduct(barcode: string): Promise<MappedBarco
     throw new Error(body?.error ?? 'Failed to look up product')
   }
 
+  const contentType = response.headers?.get('content-type') ?? ''
+  if (contentType && !contentType.includes('application/json')) {
+    throw new Error('Product lookup API is unavailable. Try again or add the entry manually.')
+  }
+
   const data = (await response.json()) as {
     found: boolean
     product?: OpenFoodFactsProduct

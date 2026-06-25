@@ -16,6 +16,7 @@ describe('lookupBarcodeProduct', () => {
   it('maps a found product from the API proxy', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({
         found: true,
         product: {
@@ -53,5 +54,19 @@ describe('lookupBarcodeProduct', () => {
     })
 
     await expect(lookupBarcodeProduct('012345678905')).rejects.toThrow('Product lookup failed')
+  })
+
+  it('throws a clear error when the API returns HTML instead of JSON', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: new Headers({ 'content-type': 'text/html' }),
+      json: async () => {
+        throw new SyntaxError("Unexpected token '<'")
+      },
+    })
+
+    await expect(lookupBarcodeProduct('012345678905')).rejects.toThrow(
+      'Product lookup API is unavailable',
+    )
   })
 })
