@@ -7,13 +7,28 @@ import Modal from './Modal'
 interface RecipeViewModalProps {
   recipeId: string
   onClose: () => void
+  mode?: 'owned' | 'shared'
+  ownerDisplayName?: string
+  savedCopyId?: string | null
+  savingCopy?: boolean
+  onShare?: (recipe: RecipeWithIngredients) => void
+  onSaveCopy?: () => void
 }
 
 function formatMacro(value: number, unit: string): string {
   return `${value}${unit}`
 }
 
-export default function RecipeViewModal({ recipeId, onClose }: RecipeViewModalProps) {
+export default function RecipeViewModal({
+  recipeId,
+  onClose,
+  mode = 'owned',
+  ownerDisplayName,
+  savedCopyId,
+  savingCopy = false,
+  onShare,
+  onSaveCopy,
+}: RecipeViewModalProps) {
   const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -80,6 +95,9 @@ export default function RecipeViewModal({ recipeId, onClose }: RecipeViewModalPr
                 {recipe.name}
               </h3>
               <p style={{ fontSize: 12, color: '#71717a', margin: 0 }}>
+                {mode === 'shared' && ownerDisplayName
+                  ? `Shared by ${ownerDisplayName} · `
+                  : ''}
                 {recipe.defaultServings} servings per batch · {recipe.ingredients.length} ingredients
               </p>
             </div>
@@ -136,7 +154,44 @@ export default function RecipeViewModal({ recipeId, onClose }: RecipeViewModalPr
         </>
       ) : null}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+        {mode === 'owned' && recipe && onShare && (
+          <button
+            type="button"
+            onClick={() => onShare(recipe)}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 9999,
+              border: '1px solid #e4e4e7',
+              background: 'white',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              color: '#134e4b',
+            }}
+          >
+            Share
+          </button>
+        )}
+        {mode === 'shared' && onSaveCopy && (
+          <button
+            type="button"
+            onClick={onSaveCopy}
+            disabled={!!savedCopyId || savingCopy}
+            style={{
+              padding: '10px 20px',
+              borderRadius: 9999,
+              border: 'none',
+              background: savedCopyId ? '#e4e4e7' : '#134e4b',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: savedCopyId ? 'default' : 'pointer',
+              color: savedCopyId ? '#71717a' : 'white',
+            }}
+          >
+            {savedCopyId ? 'Already saved' : savingCopy ? 'Saving...' : 'Save to my library'}
+          </button>
+        )}
         <button
           type="button"
           onClick={onClose}

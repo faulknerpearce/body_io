@@ -88,6 +88,7 @@ export type Database = {
           icon_bg: string
           icon_color: string
           default_servings: number
+          forked_from_recipe_id: string | null
           created_at: string
           updated_at: string
         }
@@ -100,6 +101,7 @@ export type Database = {
           icon_bg?: string
           icon_color?: string
           default_servings?: number
+          forked_from_recipe_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -112,6 +114,7 @@ export type Database = {
           icon_bg?: string
           icon_color?: string
           default_servings?: number
+          forked_from_recipe_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -262,6 +265,7 @@ export type Database = {
           icon_color: string
           default_duration_minutes: number | null
           default_calories: number | null
+          forked_from_workout_id: string | null
           created_at: string
           updated_at: string
         }
@@ -275,6 +279,7 @@ export type Database = {
           icon_color?: string
           default_duration_minutes?: number | null
           default_calories?: number | null
+          forked_from_workout_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -288,6 +293,7 @@ export type Database = {
           icon_color?: string
           default_duration_minutes?: number | null
           default_calories?: number | null
+          forked_from_workout_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -401,6 +407,72 @@ export type Database = {
           },
         ]
       }
+      recipe_shares: {
+        Row: {
+          id: string
+          recipe_id: string
+          owner_id: string
+          shared_with_user_id: string
+          owner_display_name: string
+          shared_with_display_name: string
+          saved_copy_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipe_id: string
+          owner_id: string
+          shared_with_user_id: string
+          owner_display_name: string
+          shared_with_display_name: string
+          saved_copy_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipe_id?: string
+          owner_id?: string
+          shared_with_user_id?: string
+          owner_display_name?: string
+          shared_with_display_name?: string
+          saved_copy_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      workout_shares: {
+        Row: {
+          id: string
+          workout_id: string
+          owner_id: string
+          shared_with_user_id: string
+          owner_display_name: string
+          shared_with_display_name: string
+          saved_copy_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workout_id: string
+          owner_id: string
+          shared_with_user_id: string
+          owner_display_name: string
+          shared_with_display_name: string
+          saved_copy_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workout_id?: string
+          owner_id?: string
+          shared_with_user_id?: string
+          owner_display_name?: string
+          shared_with_display_name?: string
+          saved_copy_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           id: string
@@ -444,7 +516,16 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      find_users_for_share: {
+        Args: { search_query: string }
+        Returns: {
+          id: string
+          display_name: string
+          email_hint: string
+        }[]
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

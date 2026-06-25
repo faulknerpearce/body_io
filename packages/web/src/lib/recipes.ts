@@ -1,4 +1,5 @@
 import {
+  buildForkRecipeInput,
   buildRecipeIngredientInsertPayload,
   buildRecipeInsertPayload,
   mapRecipeIngredientRow,
@@ -16,6 +17,7 @@ import {
   type RecipeWithIngredients,
 } from '@nutrition-tracker/shared'
 import type { FoodEntry } from './entries'
+import { markRecipeShareSaved } from './sharing'
 import { supabase } from './supabase'
 
 async function requireUserId(): Promise<string> {
@@ -153,6 +155,32 @@ export async function saveRecipe(input: RecipeInput, id?: string): Promise<Recip
 export async function deleteRecipe(id: string): Promise<void> {
   const { error } = await supabase.from('recipes').delete().eq('id', id)
   if (error) throw new Error(error.message)
+}
+
+export async function forkRecipe(
+  sourceRecipeId: string,
+  shareId?: string,
+): Promise<RecipeWithIngredients> {
+  const source = await fetchRecipe(sourceRecipeId)
+  const input = buildForkRecipeInput(source)
+  const userId = await requireUserId()
+  const recipeId = crypto.randomUUID()
+  const payload = buildRecipeInsertPayload(input, userId, recipeId)
+
+  const { error } = await supabase.from('recipes').insert({
+    ...payload,
+    forked_from_recipe_id: sourceRecipeId,
+  })
+  if (error) throw new Error(error.message)
+
+  await replaceRecipeIngredients(recipeId, userId, input.ingredients)
+  const saved = await fetchRecipe(recipeId)
+
+  if (shareId) {
+    await markRecipeShareSaved(shareId, saved.id)
+  }
+
+  return saved
 }
 
 export async function logRecipe(options: {
