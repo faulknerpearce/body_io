@@ -17,14 +17,6 @@ import { fetchActivities, type Activity } from '../lib/activities'
 import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { routeHref } from '../lib/routing'
 
-function formatRange(low: number, high: number, unit: string): string {
-  return `${low.toLocaleString()}–${high.toLocaleString()} ${unit}`
-}
-
-function formatCaffeineLimit(limit: number, unit: string): string {
-  return `≤${limit.toLocaleString()} ${unit}`
-}
-
 function SectionHeader({
   label,
   title,
@@ -142,23 +134,11 @@ export default function Dashboard() {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
-        <p style={sectionLabelStyle}>Overview</p>
+        <p style={sectionLabelStyle}>Dashboard</p>
         <h2 className="page-title-mobile" style={pageTitle}>
-          Dashboard
+          Overview
         </h2>
-        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 12px 0' }}>{todayISO()}</p>
-        <div className="dashboard-goal-chips">
-          <span className="dashboard-goal-chip">
-            {formatRange(nutritionGoals.calories.low, nutritionGoals.calories.high, 'kcal')}
-          </span>
-          <span className="dashboard-goal-chip">
-            {formatRange(nutritionGoals.protein.low, nutritionGoals.protein.high, 'g protein')}
-          </span>
-          <span className="dashboard-goal-chip">~{nutritionGoals.carbs.value}g carbs</span>
-          <span className="dashboard-goal-chip">
-            {formatCaffeineLimit(nutritionGoals.caffeine.value, 'mg caffeine')}
-          </span>
-        </div>
+        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 12px 0' }}> Date {todayISO()}</p>
       </div>
 
       <div className="dashboard-bento-hero" style={{ marginBottom: 24 }}>
