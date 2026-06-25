@@ -25,8 +25,7 @@ describe('mapOpenFoodFactsToEntry', () => {
     expect(result.entry.carbs).toBe(25)
     expect(result.entry.fat).toBe(8)
     expect(result.entry.fiber).toBe(3)
-    expect(result.entry.description).toContain('Acme Foods')
-    expect(result.entry.description).toContain('012345678905')
+    expect(result.entry.description).toBe('')
     expect(result.hasCompleteNutrition).toBe(true)
   })
 

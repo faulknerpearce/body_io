@@ -65,11 +65,10 @@ function roundMacro(value: number): number {
 
 export function mapOpenFoodFactsToEntry(
   product: OpenFoodFactsProduct,
-  barcode: string,
+  _barcode: string,
 ): MappedBarcodeProduct {
   const nutriments = product.nutriments ?? {}
   const name = (product.product_name ?? 'Scanned product').trim()
-  const brands = (product.brands ?? '').trim()
   const servingGrams = parseServingGrams(product)
 
   const perServing = {
@@ -118,15 +117,9 @@ export function mapOpenFoodFactsToEntry(
     }
   }
 
-  const descriptionParts = [
-    brands || undefined,
-    `Barcode ${barcode}`,
-    servingNote,
-  ].filter(Boolean)
-
   const entry: NewFoodEntry = {
     name: name || 'Scanned product',
-    description: descriptionParts.join(' · '),
+    description: '',
     calories: roundMacro(macros.calories ?? 0),
     protein: roundMacro(macros.protein ?? 0),
     carbs: roundMacro(macros.carbs ?? 0),
