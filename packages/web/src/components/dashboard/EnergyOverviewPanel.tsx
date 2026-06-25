@@ -21,7 +21,8 @@ const statusBadgeBg: Record<NetBalance['status'], string> = {
   over: '#fee2e2',
 }
 
-function GoalZoneTrack({ balance, max }: { balance: NetBalance; max: number }) {
+function GoalZoneTrack({ balance }: { balance: NetBalance }) {
+  const max = Math.max(balance.goalHigh, balance.net, 1)
   const lowPct = max > 0 ? (balance.goalLow / max) * 100 : 0
   const highPct = max > 0 ? (balance.goalHigh / max) * 100 : 0
   const netPct = max > 0 ? Math.min((balance.net / max) * 100, 100) : 0
@@ -125,17 +126,41 @@ function GoalZoneTrack({ balance, max }: { balance: NetBalance; max: number }) {
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          fontSize: 10,
-          fontWeight: 500,
-          color: '#71717a',
+          alignItems: 'center',
+          gap: 12,
+          fontSize: 12,
+          fontWeight: 600,
           fontVariantNumeric: 'tabular-nums',
         }}
       >
-        <span>0</span>
-        <span style={{ color: '#059669', fontWeight: 600 }}>
-          Goal {balance.goalLow.toLocaleString()}–{balance.goalHigh.toLocaleString()}
+        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: '#a1a1aa',
+            }}
+          >
+            Current
+          </span>
+          <span style={{ color }}>{balance.net.toLocaleString()}</span>
         </span>
-        <span>{max.toLocaleString()}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: '#059669',
+            }}
+          >
+            Goal
+          </span>
+          <span style={{ color: '#059669' }}>{balance.goalHigh.toLocaleString()}</span>
+        </span>
       </div>
     </div>
   )
@@ -203,11 +228,8 @@ export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOv
               />
             </div>
 
-            <div className="energy-overview-stats" style={{ flex: 1, minWidth: 160 }}>
-              <div
-                className="energy-overview-stats-header"
-                style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}
-              >
+            <div className="energy-overview-stats">
+              <div className="energy-overview-stats-header">
                 <div style={{ ...iconTileSm, background: statusBadgeBg[balance.status] }}>
                   <i className="fa-solid fa-bolt" style={{ color, fontSize: 16 }} />
                 </div>
@@ -260,7 +282,7 @@ export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOv
             Energy breakdown
           </p>
           <HorizontalBarChart rows={barRows} />
-          <GoalZoneTrack balance={balance} max={chartMax} />
+          <GoalZoneTrack balance={balance} />
         </div>
       </div>
     </div>

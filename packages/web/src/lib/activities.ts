@@ -65,7 +65,7 @@ export async function fetchActivities(date: string = todayISO()): Promise<Activi
     .from('activities')
     .select('*')
     .eq('activity_date', date)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return attachActivityExercises((data ?? []).map(mapActivityRow))
 }
@@ -80,7 +80,7 @@ export async function fetchActivityDaySummaries(daysBack = 30): Promise<Activity
     .gte('activity_date', startDate)
     .lte('activity_date', today)
     .order('activity_date', { ascending: false })
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
 
   const activities = await attachActivityExercises((data ?? []).map(mapActivityRow))

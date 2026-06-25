@@ -1,16 +1,14 @@
-import type { Activity, NutritionGoals } from '@nutrition-tracker/shared'
-import { buildActivityBarData } from '../../lib/dashboardCharts'
+import type { Activity } from '@nutrition-tracker/shared'
 import { buildActivityMetricConfigs } from '../../lib/activityMetrics'
-import { cardSurface, subtleSurface } from '../../lib/styles'
+import { cardSurface } from '../../lib/styles'
 import { routeHref } from '../../lib/routing'
-import HorizontalBarChart from '../charts/HorizontalBarChart'
+import ActivityMetricCard from '../ActivityMetricCard'
 
 interface ActivityOverviewPanelProps {
   activities: readonly Activity[]
-  goals: NutritionGoals
 }
 
-export default function ActivityOverviewPanel({ activities, goals }: ActivityOverviewPanelProps) {
+export default function ActivityOverviewPanel({ activities }: ActivityOverviewPanelProps) {
   if (activities.length === 0) {
     return (
       <div
@@ -33,59 +31,13 @@ export default function ActivityOverviewPanel({ activities, goals }: ActivityOve
     )
   }
 
-  const barRows = buildActivityBarData(activities, goals.calories.value)
   const metricConfigs = buildActivityMetricConfigs(activities)
 
   return (
-    <div style={{ ...cardSurface, padding: 28 }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: 12,
-          marginBottom: 24,
-        }}
-      >
-        {metricConfigs.map((metric) => (
-          <div
-            key={metric.label}
-            style={{
-              ...subtleSurface,
-              padding: '14px 16px',
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 500, color: '#71717a', marginBottom: 4 }}>
-              {metric.label}
-            </div>
-            <div
-              style={{
-                fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                fontSize: 22,
-                fontWeight: 600,
-                color: metric.color,
-                lineHeight: 1.1,
-              }}
-            >
-              {metric.value}
-            </div>
-            <div style={{ fontSize: 11, color: '#a1a1aa', marginTop: 4 }}>{metric.detail}</div>
-          </div>
-        ))}
-      </div>
-
-      <p
-        style={{
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: '0.08em',
-          color: '#71717a',
-          textTransform: 'uppercase',
-          margin: '0 0 16px 0',
-        }}
-      >
-        Activity breakdown
-      </p>
-      <HorizontalBarChart rows={barRows} />
+    <div className="metric-grid-2">
+      {metricConfigs.map((metric) => (
+        <ActivityMetricCard key={metric.label} config={metric} />
+      ))}
     </div>
   )
 }

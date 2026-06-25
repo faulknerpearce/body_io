@@ -10,7 +10,6 @@ import { useNutritionGoals } from '../context/useProfile'
 import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityOverviewPanel from '../components/dashboard/ActivityOverviewPanel'
 import EnergyOverviewPanel from '../components/dashboard/EnergyOverviewPanel'
-import MacroSplitPanel from '../components/dashboard/MacroSplitPanel'
 import NutritionRingsPanel from '../components/dashboard/NutritionRingsPanel'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
 import { fetchActivities, type Activity } from '../lib/activities'
@@ -128,8 +127,8 @@ export default function Dashboard() {
     nutritionGoals.calories.low,
     nutritionGoals.calories.high,
   )
-  const recentEntries = [...entries].slice(-3).reverse()
-  const recentActivities = [...activities].slice(-3).reverse()
+  const recentEntries = entries.slice(0, 3)
+  const recentActivities = activities.slice(0, 3)
 
   return (
     <div>
@@ -141,9 +140,8 @@ export default function Dashboard() {
         <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 12px 0' }}> Date {todayISO()}</p>
       </div>
 
-      <div className="dashboard-bento-hero" style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 24 }}>
         <EnergyOverviewPanel balance={balance} hasActivities={activities.length > 0} />
-        <MacroSplitPanel totals={foodTotals} />
       </div>
 
       <section style={{ marginBottom: 40 }}>
@@ -163,7 +161,7 @@ export default function Dashboard() {
           href={routeHref('outputs')}
           linkLabel="View Outputs"
         />
-        <ActivityOverviewPanel activities={activities} goals={nutritionGoals} />
+        <ActivityOverviewPanel activities={activities} />
       </section>
 
       <section style={{ marginBottom: 32 }}>

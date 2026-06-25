@@ -73,7 +73,7 @@ export default function InputsPage() {
     setDays((prev) => {
       const existing = prev.find((day) => day.date === today)
       if (existing) {
-        return updateDayEntries(prev, today, [...existing.entries, entry])
+        return updateDayEntries(prev, today, [entry, ...existing.entries])
       }
       return [{ date: today, entries: [entry], totals: sumTotals([entry]) }, ...prev]
     })
@@ -85,7 +85,7 @@ export default function InputsPage() {
     setDays((prev) => {
       const existing = prev.find((day) => day.date === today)
       if (existing) {
-        return updateDayEntries(prev, today, [...existing.entries, entry])
+        return updateDayEntries(prev, today, [entry, ...existing.entries])
       }
       return [{ date: today, entries: [entry], totals: sumTotals([entry]) }, ...prev]
     })

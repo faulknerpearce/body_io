@@ -363,13 +363,6 @@ body {
   border: 1px solid #e4e4e7;
 }
 
-.dashboard-bento-hero {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 16px;
-  align-items: stretch;
-}
-
 .dashboard-bento-hero-inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -385,13 +378,29 @@ body {
 
 .energy-overview-ring-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 20px;
-  flex-wrap: wrap;
+  text-align: center;
 }
 
 .energy-overview-ring {
-  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.energy-overview-stats {
+  width: 100%;
+  max-width: 360px;
+}
+
+.energy-overview-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .modal-overlay {
@@ -520,33 +529,9 @@ body {
   .metric-grid-2,
   .metric-grid-auto,
   .metric-grid-stats,
-  .dashboard-bento-hero,
   .dashboard-bento-hero-inner,
   .dashboard-rings-grid {
     grid-template-columns: 1fr;
-  }
-
-  .energy-overview-ring-row {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 16px;
-  }
-
-  .energy-overview-ring {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .energy-overview-stats {
-    width: 100%;
-    min-width: 0 !important;
-    text-align: center;
-  }
-
-  .energy-overview-stats-header {
-    justify-content: center;
   }
 
   .modal-panel {

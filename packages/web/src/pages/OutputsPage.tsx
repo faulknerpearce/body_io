@@ -55,7 +55,7 @@ export default function OutputsPage() {
     setDays((prev) => {
       const existing = prev.find((day) => day.date === today)
       if (existing) {
-        return updateDayActivities(prev, today, [...existing.activities, activity])
+        return updateDayActivities(prev, today, [activity, ...existing.activities])
       }
       return [
         { date: today, activities: [activity], totals: sumActivityTotals([activity]) },
@@ -70,7 +70,7 @@ export default function OutputsPage() {
     setDays((prev) => {
       const existing = prev.find((day) => day.date === today)
       if (existing) {
-        return updateDayActivities(prev, today, [...existing.activities, activity])
+        return updateDayActivities(prev, today, [activity, ...existing.activities])
       }
       return [
         { date: today, activities: [activity], totals: sumActivityTotals([activity]) },

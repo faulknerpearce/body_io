@@ -1,11 +1,4 @@
-import {
-  formatDistance,
-  formatDuration,
-  sumActivityTotals,
-  type Activity,
-  type NetBalance,
-  type Totals,
-} from '@nutrition-tracker/shared'
+import { type NetBalance, type Totals } from '@nutrition-tracker/shared'
 
 export interface RingProgress {
   pct: number
@@ -61,50 +54,3 @@ export function macroTotalCalories(segments: readonly MacroSegment[]): number {
   return segments.reduce((sum, s) => sum + s.calories, 0)
 }
 
-const ACTIVITY_TIME_MAX_SECONDS = 7200
-const ACTIVITY_COUNT_MAX = 5
-const ACTIVITY_DISTANCE_FALLBACK_METERS = 10_000
-
-export function buildActivityBarData(
-  activities: readonly Activity[],
-  calorieGoal: number,
-): ActivityBarRow[] {
-  const totals = sumActivityTotals(activities)
-  const count = activities.length
-  const distanceMax = Math.max(totals.distanceMeters, ACTIVITY_DISTANCE_FALLBACK_METERS, 1)
-
-  return [
-    {
-      label: 'Calories Burned',
-      value: totals.calories,
-      displayValue: totals.calories > 0 ? `${totals.calories.toLocaleString()} kcal` : '0 kcal',
-      max: Math.max(calorieGoal, totals.calories, 1),
-      color: '#ea580c',
-      gradient: 'linear-gradient(90deg, #ea580c, #fb923c)',
-    },
-    {
-      label: 'Active Time',
-      value: totals.movingTimeSeconds,
-      displayValue: formatDuration(totals.movingTimeSeconds),
-      max: Math.max(ACTIVITY_TIME_MAX_SECONDS, totals.movingTimeSeconds, 1),
-      color: '#134e4b',
-      gradient: 'linear-gradient(90deg, #134e4b, #14b8a6)',
-    },
-    {
-      label: 'Distance',
-      value: totals.distanceMeters,
-      displayValue: formatDistance(totals.distanceMeters > 0 ? totals.distanceMeters : null),
-      max: distanceMax,
-      color: '#2563eb',
-      gradient: 'linear-gradient(90deg, #2563eb, #60a5fa)',
-    },
-    {
-      label: 'Activities',
-      value: count,
-      displayValue: String(count),
-      max: Math.max(ACTIVITY_COUNT_MAX, count, 1),
-      color: '#059669',
-      gradient: 'linear-gradient(90deg, #059669, #34d399)',
-    },
-  ]
-}

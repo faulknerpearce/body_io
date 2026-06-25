@@ -35,7 +35,7 @@ export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry
     .from('food_entries')
     .select('*')
     .eq('entry_date', date)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []).map(mapRow)
 }
@@ -50,7 +50,7 @@ export async function fetchDaySummaries(daysBack = 30): Promise<DaySummary[]> {
     .gte('entry_date', startDate)
     .lte('entry_date', today)
     .order('entry_date', { ascending: false })
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
 
   const byDate = new Map<string, FoodEntry[]>()
