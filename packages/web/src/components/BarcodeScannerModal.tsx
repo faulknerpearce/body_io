@@ -1,4 +1,6 @@
 import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
+import { normalizeBarcode } from '@nutrition-tracker/shared'
 import { useEffect, useRef, useState } from 'react'
 import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import { lookupBarcodeProduct, ProductNotFoundError } from '../lib/openFoodFacts'
@@ -10,14 +12,25 @@ interface BarcodeScannerModalProps {
   onClose: () => void
 }
 
+function createBarcodeReader(): BrowserMultiFormatReader {
+  const hints = new Map<DecodeHintType, BarcodeFormat[]>()
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.UPC_E,
+  ])
+  return new BrowserMultiFormatReader(hints)
+}
+
 export default function BarcodeScannerModal({
   onProductFound,
   onClose,
 }: BarcodeScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const lookupInFlightRef = useRef(false)
+  const lastScannedRef = useRef<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookingUp, setLookingUp] = useState(false)
@@ -47,12 +60,20 @@ export default function BarcodeScannerModal({
       }
       lookupInFlightRef.current = false
       setLookingUp(false)
+      lastScannedRef.current = null
     }
   }
 
+  const handleRawScan = (raw: string) => {
+    const barcode = normalizeBarcode(raw)
+    if (!barcode || lookupInFlightRef.current) return
+    if (lastScannedRef.current === barcode) return
+    lastScannedRef.current = barcode
+    void lookupBarcode(barcode)
+  }
+
   useEffect(() => {
-    const reader = new BrowserMultiFormatReader()
-    readerRef.current = reader
+    const reader = createBarcodeReader()
     let cancelled = false
 
     async function startCamera() {
@@ -63,10 +84,7 @@ export default function BarcodeScannerModal({
           videoRef.current,
           (result) => {
             if (cancelled || lookupInFlightRef.current || !result) return
-            const text = result.getText()?.trim()
-            if (text && /^\d{8,14}$/.test(text)) {
-              void lookupBarcode(text)
-            }
+            handleRawScan(result.getText())
           },
         )
         if (cancelled) {
@@ -88,14 +106,14 @@ export default function BarcodeScannerModal({
       cancelled = true
       stopCamera()
     }
-    // lookupBarcode closes over stable refs; mount-only camera setup
+    // Mount-only camera setup
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleManualLookup = () => {
-    const barcode = manualBarcode.trim()
-    if (!/^\d{8,14}$/.test(barcode)) {
-      setLookupError('Enter a valid 8–14 digit barcode')
+    const barcode = normalizeBarcode(manualBarcode)
+    if (!barcode) {
+      setLookupError('Enter a valid barcode with 8–14 digits')
       return
     }
     void lookupBarcode(barcode)
@@ -201,7 +219,7 @@ export default function BarcodeScannerModal({
             id="manual-barcode"
             type="text"
             inputMode="numeric"
-            pattern="\d*"
+            autoComplete="off"
             value={manualBarcode}
             onChange={(e) => setManualBarcode(e.target.value.replace(/\D/g, ''))}
             placeholder="e.g. 012345678905"

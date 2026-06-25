@@ -19,7 +19,11 @@
     "lint": "npm run lint -w @nutrition-tracker/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run build:shared && npm run test --workspaces --if-present",
+    "test:shared": "npm run test -w @nutrition-tracker/shared",
+    "test:web": "npm run build:shared && npm run test -w @nutrition-tracker/web",
+    "test:mcp": "npm run build:shared && npm run test -w @nutrition-tracker/mcp-server",
+    "test:coverage": "npm run build:shared && npm run test:coverage -w @nutrition-tracker/shared && npm run test:coverage -w @nutrition-tracker/web && npm run test:coverage -w @nutrition-tracker/mcp-server"
   },
   "devDependencies": {
     "prettier": "3.4.2"

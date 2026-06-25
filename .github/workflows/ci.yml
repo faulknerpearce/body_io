@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Install, typecheck, lint, test, build
+  quality:
+    name: Install, typecheck, lint, format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,14 +30,88 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Test
-        run: npm test
+  test-shared:
+    name: Test shared package
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Build web
-        run: npm run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run test:coverage -w @nutrition-tracker/shared
+
+      - name: Upload shared coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-shared
+          path: packages/shared/coverage
+          if-no-files-found: ignore
+
+  test-web:
+    name: Test web package
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build:shared
+      - run: npm run test:coverage -w @nutrition-tracker/web
+
+      - name: Upload web coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-web
+          path: packages/web/coverage
+          if-no-files-found: ignore
+
+  test-mcp:
+    name: Test MCP server package
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build:shared
+      - run: npm run test:coverage -w @nutrition-tracker/mcp-server
+
+      - name: Upload MCP coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-mcp
+          path: packages/mcp-server/coverage
+          if-no-files-found: ignore
+
+  build:
+    name: Build web app
+    runs-on: ubuntu-latest
+    needs: [test-shared, test-web, test-mcp]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
         env:
-          # Vite reads these at build time and embeds them in the client bundle.
-          # The dev workflow points Vite at packages/mcp-server/.env, so CI
-          # provides the same vars here.
           VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
           VITE_SUPABASE_ANON_KEY: ci-placeholder
