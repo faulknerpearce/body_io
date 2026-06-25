@@ -23,26 +23,38 @@ function createBarcodeReader(): BrowserMultiFormatReader {
   return new BrowserMultiFormatReader(hints)
 }
 
+async function pickRearCameraId(): Promise<string | undefined> {
+  const devices = await BrowserMultiFormatReader.listVideoInputDevices()
+  if (devices.length === 0) return undefined
+
+  const rear = devices.find((device) => /back|rear|environment/i.test(device.label))
+  return rear?.deviceId ?? devices[devices.length - 1]?.deviceId
+}
+
 export default function BarcodeScannerModal({
   onProductFound,
   onClose,
 }: BarcodeScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
+  const sessionRef = useRef(0)
   const lookupInFlightRef = useRef(false)
   const lastScannedRef = useRef<string | null>(null)
+  const onProductFoundRef = useRef(onProductFound)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookingUp, setLookingUp] = useState(false)
   const [manualBarcode, setManualBarcode] = useState('')
 
+  onProductFoundRef.current = onProductFound
+
   const stopCamera = () => {
     controlsRef.current?.stop()
     controlsRef.current = null
-    BrowserMultiFormatReader.releaseAllStreams()
   }
 
-  const lookupBarcode = async (barcode: string) => {
+  const runLookup = async (barcode: string) => {
     if (lookupInFlightRef.current) return
     lookupInFlightRef.current = true
     setLookingUp(true)
@@ -51,7 +63,7 @@ export default function BarcodeScannerModal({
 
     try {
       const product = await lookupBarcodeProduct(barcode)
-      onProductFound(product)
+      onProductFoundRef.current(product)
     } catch (err) {
       if (err instanceof ProductNotFoundError) {
         setLookupError('Product not found. Try another barcode or add the entry manually.')
@@ -61,54 +73,72 @@ export default function BarcodeScannerModal({
       lookupInFlightRef.current = false
       setLookingUp(false)
       lastScannedRef.current = null
+      sessionRef.current += 1
     }
   }
 
-  const handleRawScan = (raw: string) => {
-    const barcode = normalizeBarcode(raw)
-    if (!barcode || lookupInFlightRef.current) return
-    if (lastScannedRef.current === barcode) return
-    lastScannedRef.current = barcode
-    void lookupBarcode(barcode)
+  const startCamera = async () => {
+    const sessionId = sessionRef.current
+    const video = videoRef.current
+    if (!video) return
+
+    const reader = readerRef.current ?? createBarcodeReader()
+    readerRef.current = reader
+
+    try {
+      const deviceId = await pickRearCameraId()
+      if (sessionId !== sessionRef.current) return
+
+      const controls = await reader.decodeFromVideoDevice(deviceId, video, (result) => {
+        if (sessionId !== sessionRef.current || lookupInFlightRef.current || !result) return
+
+        const barcode = normalizeBarcode(result.getText())
+        if (!barcode || lastScannedRef.current === barcode) return
+
+        lastScannedRef.current = barcode
+        void runLookup(barcode)
+      })
+
+      if (sessionId !== sessionRef.current) {
+        controls.stop()
+        return
+      }
+
+      controlsRef.current = controls
+      setCameraError(null)
+    } catch {
+      if (sessionId !== sessionRef.current) return
+      setCameraError('Camera access denied or unavailable. Enter the barcode manually below.')
+    }
   }
 
   useEffect(() => {
-    const reader = createBarcodeReader()
     let cancelled = false
-
-    async function startCamera() {
-      if (!videoRef.current) return
-      try {
-        const controls = await reader.decodeFromVideoDevice(
-          undefined,
-          videoRef.current,
-          (result) => {
-            if (cancelled || lookupInFlightRef.current || !result) return
-            handleRawScan(result.getText())
-          },
-        )
-        if (cancelled) {
-          controls.stop()
-          return
-        }
-        controlsRef.current = controls
-        setCameraError(null)
-      } catch {
-        if (!cancelled) {
-          setCameraError('Camera access denied or unavailable. Enter the barcode manually below.')
-        }
-      }
-    }
-
-    void startCamera()
+    const boot = window.setTimeout(() => {
+      if (!cancelled) void startCamera()
+    }, 50)
 
     return () => {
       cancelled = true
+      window.clearTimeout(boot)
+      sessionRef.current += 1
       stopCamera()
+      window.setTimeout(() => {
+        BrowserMultiFormatReader.releaseAllStreams()
+      }, 200)
     }
     // Mount-only camera setup
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (!lookupError || lookingUp) return
+    const restart = window.setTimeout(() => {
+      void startCamera()
+    }, 300)
+    return () => window.clearTimeout(restart)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lookupError, lookingUp])
 
   const handleManualLookup = () => {
     const barcode = normalizeBarcode(manualBarcode)
@@ -116,7 +146,8 @@ export default function BarcodeScannerModal({
       setLookupError('Enter a valid barcode with 8–14 digits')
       return
     }
-    void lookupBarcode(barcode)
+    lastScannedRef.current = barcode
+    void runLookup(barcode)
   }
 
   return (
@@ -164,14 +195,15 @@ export default function BarcodeScannerModal({
       >
         <video
           ref={videoRef}
+          autoPlay
+          muted
+          playsInline
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
             display: cameraError ? 'none' : 'block',
           }}
-          muted
-          playsInline
         />
         {cameraError && (
           <div
@@ -222,7 +254,7 @@ export default function BarcodeScannerModal({
             autoComplete="off"
             value={manualBarcode}
             onChange={(e) => setManualBarcode(e.target.value.replace(/\D/g, ''))}
-            placeholder="e.g. 012345678905"
+            placeholder="e.g. 0036000291452"
             style={{ ...inputBase, flex: 1 }}
             disabled={lookingUp}
           />
