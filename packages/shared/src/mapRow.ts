@@ -14,5 +14,6 @@ export function mapRow(row: FoodRow): FoodEntry {
     caffeine: row.caffeine,
     fat: row.fat ?? 0,
     fiber: row.fiber ?? 0,
+    loggedAt: row.created_at,
   }
 }

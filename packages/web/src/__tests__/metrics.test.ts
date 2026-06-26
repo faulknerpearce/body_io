@@ -14,6 +14,7 @@ function entry(partial: Partial<FoodEntry> & Pick<FoodEntry, 'id' | 'name'>): Fo
     fat: 0,
     fiber: 0,
     caffeine: 0,
+    loggedAt: '2026-06-22T08:00:00Z',
     ...partial,
   }
 }

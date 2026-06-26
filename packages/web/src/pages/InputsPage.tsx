@@ -1,6 +1,6 @@
 import { formatDayLabel, shiftISODate, sumTotals, todayISO } from '@nutrition-tracker/shared'
 import { useEffect, useMemo, useState } from 'react'
-import { useNutritionGoals } from '../context/useProfile'
+import { useNutritionGoals, useProfile } from '../context/useProfile'
 import AddEntryModal from '../components/AddEntryModal'
 import BarcodeScannerModal from '../components/BarcodeScannerModal'
 import CollapsiblePanel from '../components/layout/CollapsiblePanel'
@@ -9,6 +9,7 @@ import ZoneButton from '../components/layout/ZoneButton'
 import { PageError, PageLoading } from '../components/layout/PageState'
 import FoodLogEntryStats from '../components/FoodLogEntryStats'
 import FoodLogSection from '../components/FoodLogSection'
+import HourlyConsumptionChart from '../components/charts/HourlyConsumptionChart'
 import MetricCard from '../components/MetricCard'
 import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import {
@@ -36,6 +37,7 @@ function emptyDaySummary(date: string): DaySummary {
 
 export default function InputsPage() {
   const nutritionGoals = useNutritionGoals()
+  const { profile } = useProfile()
   const [days, setDays] = useState<DaySummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -207,6 +209,13 @@ export default function InputsPage() {
             ))}
           </div>
           <FoodLogEntryStats entries={activeDay.entries} />
+        </CollapsiblePanel>
+
+        <CollapsiblePanel
+          title="Eating Times"
+          subtitle={`When food was logged on ${formatDayLabel(selectedDate).toLowerCase()}`}
+        >
+          <HourlyConsumptionChart entries={activeDay.entries} timeZone={profile.timeZone} />
         </CollapsiblePanel>
 
         <CollapsiblePanel

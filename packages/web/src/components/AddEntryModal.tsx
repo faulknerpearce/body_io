@@ -73,7 +73,7 @@ function formFromEntry(entry: FoodEntry): FormState {
 }
 
 function formFromNewEntry(entry: NewFoodEntry): FormState {
-  return formFromEntry({ ...entry, id: 'prefill' })
+  return formFromEntry({ ...entry, id: 'prefill', loggedAt: '' })
 }
 
 function iconFromNewEntry(entry: NewFoodEntry): IconOption {

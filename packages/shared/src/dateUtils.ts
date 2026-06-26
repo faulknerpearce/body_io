@@ -101,6 +101,18 @@ export function parseLogDate(
   return { ok: true, value: raw }
 }
 
+/** Local hour (0–23) for an ISO timestamp in an IANA timezone. */
+export function hourInTimeZone(iso: string, timeZone: string): number {
+  const tz = isValidTimeZone(timeZone) ? timeZone : DEFAULT_TIMEZONE
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: 'numeric',
+    hourCycle: 'h23',
+  }).formatToParts(new Date(iso))
+  const hour = parts.find((part) => part.type === 'hour')?.value
+  return hour ? parseInt(hour, 10) : 0
+}
+
 export function formatDayLabel(iso: string, now: Date = new Date()): string {
   const today = todayISO(now)
   const yesterday = offsetDateISO(1, now)

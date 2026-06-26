@@ -17,9 +17,10 @@ export interface FoodEntry {
   caffeine: number
   fat: number
   fiber: number
+  loggedAt: string
 }
 
-export type NewFoodEntry = Omit<FoodEntry, 'id'>
+export type NewFoodEntry = Omit<FoodEntry, 'id' | 'loggedAt'>
 export type UpdateFoodEntry = Partial<NewFoodEntry>
 
 export type Totals = {

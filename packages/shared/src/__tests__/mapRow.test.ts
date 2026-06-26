@@ -47,11 +47,13 @@ describe('mapRow', () => {
       caffeine: 130,
       fat: 4,
       fiber: 1,
+      loggedAt: '2026-06-22T08:00:00Z',
     })
   })
 
-  it('does not include created_at or entry_date on the FoodEntry', () => {
-    const result = mapRow(makeRow())
+  it('maps created_at to loggedAt', () => {
+    const result = mapRow(makeRow({ created_at: '2026-06-22T15:30:00Z' }))
+    expect(result.loggedAt).toBe('2026-06-22T15:30:00Z')
     expect(result).not.toHaveProperty('created_at')
     expect(result).not.toHaveProperty('entry_date')
   })

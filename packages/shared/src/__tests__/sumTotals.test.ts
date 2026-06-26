@@ -16,6 +16,7 @@ function makeEntry(overrides: Partial<FoodEntry> = {}): FoodEntry {
     caffeine: 0,
     fat: 0,
     fiber: 0,
+    loggedAt: '2026-06-22T08:00:00Z',
     ...overrides,
   }
 }

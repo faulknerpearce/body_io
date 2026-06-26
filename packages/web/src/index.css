@@ -663,3 +663,86 @@ body {
     font-size: 40px !important;
   }
 }
+
+.hourly-chart-wrap {
+  padding-top: 20px;
+}
+
+.hourly-chart-tooltip {
+  min-height: 28px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #18181b;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.hourly-chart-tooltip-idle {
+  color: #d4d4d8;
+}
+
+.hourly-chart-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.hourly-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(22px, 1fr));
+  gap: 2px;
+  min-width: 576px;
+}
+
+.hourly-chart-bars {
+  align-items: end;
+  height: 140px;
+}
+
+.hourly-chart-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+  cursor: default;
+}
+
+.hourly-chart-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition:
+    height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.hourly-chart-bar-filled {
+  background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+  box-shadow: 0 0 8px #05966933;
+}
+
+.hourly-chart-bar-empty {
+  background: #e4e4e7;
+}
+
+.hourly-chart-cell:hover .hourly-chart-bar-filled,
+.hourly-chart-cell:focus-within .hourly-chart-bar-filled {
+  filter: brightness(1.1);
+  box-shadow: 0 0 12px #05966955;
+}
+
+.hourly-chart-axis {
+  margin-top: 8px;
+}
+
+.hourly-chart-axis-label {
+  font-size: 9px;
+  color: #a1a1aa;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.2;
+}
