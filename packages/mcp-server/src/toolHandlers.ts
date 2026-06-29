@@ -56,10 +56,15 @@ export async function fetchUserTimeZone(supabase: NutritionSupabase): Promise<st
   return typeof tz === 'string' && tz.trim() !== '' ? tz : DEFAULT_TIMEZONE
 }
 
+export const FOOD_ENTRY_DELETE_FORBIDDEN =
+  'Entry not found or you do not have permission to delete it'
+
 export async function listFoodEntriesForDate(supabase: NutritionSupabase, date: string) {
+  const userId = await requireUserId(supabase)
   const { data, error } = await supabase
     .from('food_entries')
     .select('*')
+    .eq('user_id', userId)
     .eq('entry_date', date)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -133,8 +138,13 @@ export async function updateFoodEntry(supabase: NutritionSupabase, args: ToolArg
 
 export async function deleteFoodEntry(supabase: NutritionSupabase, args: ToolArgs) {
   if (typeof args.id !== 'string' || args.id === '') throw new Error('id is required')
-  const { error } = await supabase.from('food_entries').delete().eq('id', args.id)
+  const { data, error } = await supabase
+    .from('food_entries')
+    .delete()
+    .eq('id', args.id)
+    .select('id')
   if (error) throw error
+  if (!data?.length) throw new Error(FOOD_ENTRY_DELETE_FORBIDDEN)
   return { ok: true as const }
 }
 

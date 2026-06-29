@@ -53,6 +53,7 @@ export default function InputsPage({
   const [showAddForm, setShowAddForm] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [prefillEntry, setPrefillEntry] = useState<FoodEntryWrite | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const today = todayISO()
   const isToday = selectedDate === today
@@ -203,15 +204,21 @@ export default function InputsPage({
   }
 
   async function persistDelete(id: string) {
-    await deleteEntry(id)
-    setDays((prev) =>
-      prev.map((day) => {
-        const entries = day.entries.filter((entry) => entry.id !== id)
-        return entries.length === day.entries.length
-          ? day
-          : { ...day, entries, totals: sumTotals(entries) }
-      }),
-    )
+    setDeleteError(null)
+    try {
+      await deleteEntry(id)
+      setDays((prev) =>
+        prev.map((day) => {
+          const entries = day.entries.filter((entry) => entry.id !== id)
+          return entries.length === day.entries.length
+            ? day
+            : { ...day, entries, totals: sumTotals(entries) }
+        }),
+      )
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete entry')
+      throw err
+    }
   }
 
   if (loading) return <PageLoading message="Loading food logs..." />
@@ -257,6 +264,22 @@ export default function InputsPage({
               : `${countLabel} · Edit or remove entries from this day`
           })()}
         >
+          {deleteError && (
+            <div
+              role="alert"
+              style={{
+                marginTop: 16,
+                padding: '12px 16px',
+                borderRadius: 12,
+                border: '1px solid #fecaca',
+                background: '#fef2f2',
+                color: '#b91c1c',
+                fontSize: 13,
+              }}
+            >
+              {deleteError}
+            </div>
+          )}
           <FoodLogSection
             entries={activeDay.entries}
             logDate={selectedDate}

@@ -88,8 +88,6 @@ export default function FoodLogSection({
     setDeleting(id)
     try {
       await onDelete(id)
-    } catch (err) {
-      console.error('Failed to delete entry:', err)
     } finally {
       setDeleting(null)
     }
