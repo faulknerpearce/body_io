@@ -34,10 +34,15 @@ async function requireUserId(): Promise<string> {
   return user.id
 }
 
+export const FOOD_ENTRY_DELETE_FORBIDDEN =
+  'Entry not found or you do not have permission to delete it'
+
 export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry[]> {
+  const userId = await requireUserId()
   const { data, error } = await supabase
     .from('food_entries')
     .select('*')
+    .eq('user_id', userId)
     .eq('entry_date', date)
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
@@ -45,12 +50,14 @@ export async function fetchEntries(date: string = todayISO()): Promise<FoodEntry
 }
 
 export async function fetchDaySummaries(daysBack = 30): Promise<DaySummary[]> {
+  const userId = await requireUserId()
   const today = todayISO()
   const startDate = offsetDateISO(daysBack)
 
   const { data, error } = await supabase
     .from('food_entries')
     .select('*')
+    .eq('user_id', userId)
     .gte('entry_date', startDate)
     .lte('entry_date', today)
     .order('entry_date', { ascending: false })
@@ -116,8 +123,9 @@ export async function updateEntry(id: string, input: FoodEntryWrite): Promise<Fo
 }
 
 export async function deleteEntry(id: string): Promise<void> {
-  const { error } = await supabase.from('food_entries').delete().eq('id', id)
+  const { data, error } = await supabase.from('food_entries').delete().eq('id', id).select('id')
   if (error) throw new Error(error.message)
+  if (!data?.length) throw new Error(FOOD_ENTRY_DELETE_FORBIDDEN)
 }
 
 export async function forkEntry(foodEntryId: string, shareId?: string): Promise<FoodEntry> {
