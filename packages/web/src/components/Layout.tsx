@@ -33,10 +33,9 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
   const layoutBg = zone === 'profile' ? zoneTokens.profile.bg : zoneTokens[activeNav === 'dashboard' ? 'dashboard' : activeNav].bg
 
   const displayLabel =
-    profileContext?.profile.displayName ??
-    (user?.user_metadata?.display_name as string | undefined) ??
-    user?.email ??
-    'Account'
+    profileContext && !profileContext.loading
+      ? profileContext.profile.displayName
+      : (user?.email?.split('@')[0] ?? 'Account')
 
   useEffect(() => {
     if (!user) {
