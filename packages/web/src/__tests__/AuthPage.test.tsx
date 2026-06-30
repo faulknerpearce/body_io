@@ -33,7 +33,9 @@ describe('AuthPage', () => {
   it('calls signIn with email and password', async () => {
     const signIn = vi.fn().mockResolvedValue({ error: null })
     const user = userEvent.setup()
-    const { container } = renderWithProviders(<AuthPage />, { auth: createAuthContextValue({ signIn }) })
+    const { container } = renderWithProviders(<AuthPage />, {
+      auth: createAuthContextValue({ signIn }),
+    })
     const form = getAuthForm(container)
 
     await user.type(within(form).getByLabelText('Email'), 'alex@example.com')
@@ -48,7 +50,9 @@ describe('AuthPage', () => {
   it('shows sign-in errors', async () => {
     const signIn = vi.fn().mockResolvedValue({ error: 'Invalid credentials' })
     const user = userEvent.setup()
-    const { container } = renderWithProviders(<AuthPage />, { auth: createAuthContextValue({ signIn }) })
+    const { container } = renderWithProviders(<AuthPage />, {
+      auth: createAuthContextValue({ signIn }),
+    })
     const form = getAuthForm(container)
 
     await user.type(within(form).getByLabelText('Email'), 'alex@example.com')
@@ -61,7 +65,9 @@ describe('AuthPage', () => {
   it('creates an account and shows a success message', async () => {
     const signUp = vi.fn().mockResolvedValue({ error: null })
     const user = userEvent.setup()
-    const { container } = renderWithProviders(<AuthPage />, { auth: createAuthContextValue({ signUp }) })
+    const { container } = renderWithProviders(<AuthPage />, {
+      auth: createAuthContextValue({ signUp }),
+    })
     const form = getAuthForm(container)
 
     await user.click(screen.getAllByRole('button', { name: 'Sign up' })[0]!)
@@ -73,6 +79,8 @@ describe('AuthPage', () => {
     await waitFor(() => {
       expect(signUp).toHaveBeenCalledWith('alex@example.com', 'secret12', 'Alex')
     })
-    expect(await screen.findByRole('status')).toHaveTextContent('Account created. You are signed in.')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Account created. You are signed in.',
+    )
   })
 })

@@ -42,7 +42,9 @@ describe('Layout', () => {
       <Layout activeRoute="dashboard">
         <div>Content</div>
       </Layout>,
-      { profile: createProfileContextValue({ profile: { ...mockProfile, displayName: 'Jordan' } }) },
+      {
+        profile: createProfileContextValue({ profile: { ...mockProfile, displayName: 'Jordan' } }),
+      },
     )
 
     await user.click(screen.getByRole('button', { name: 'Account menu' }))
@@ -96,7 +98,9 @@ describe('Layout', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Account menu, 3 new shared items' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Account menu, 3 new shared items' }),
+      ).toBeInTheDocument()
     })
   })
 })
