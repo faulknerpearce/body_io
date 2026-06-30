@@ -61,4 +61,4 @@ single, focused change set.
 ## Open / not addressed
 
 - **Cloudflare Pages rootless-functions**: still uses the shim pattern. Removing the shim requires Cloudflare's `[build]` config and is out of scope for this pass.
-- **React component tests**: `packages/web` has vitest and lib-level unit tests, but no `@testing-library/react` component tests yet.
+
