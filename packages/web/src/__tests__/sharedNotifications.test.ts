@@ -23,8 +23,6 @@ describe('isShareNew', () => {
   })
 
   it('compares timestamps with different ISO formats', () => {
-    expect(
-      isShareNew('2026-06-28T12:00:00.000000+00:00', '2026-06-28T11:00:00.000Z'),
-    ).toBe(true)
+    expect(isShareNew('2026-06-28T12:00:00.000000+00:00', '2026-06-28T11:00:00.000Z')).toBe(true)
   })
 })
