@@ -1,8 +1,20 @@
+import type { RecipeShareRecord } from '@nutrition-tracker/shared'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ShareModal from '../components/ShareModal'
 import { renderWithProviders } from './testUtils'
+
+const mockRecipeShare: RecipeShareRecord = {
+  id: 'share-1',
+  recipeId: 'recipe-1',
+  ownerId: 'user-1',
+  sharedWithUserId: 'user-2',
+  ownerDisplayName: 'Alex',
+  sharedWithDisplayName: 'Jordan',
+  savedCopyId: null,
+  createdAt: '2026-06-30T12:00:00Z',
+}
 
 vi.mock('../lib/device', () => ({
   focusIfDesktop: vi.fn(),
@@ -24,17 +36,13 @@ vi.mock('../lib/sharing', () => ({
   revokeActivityShare: vi.fn(),
 }))
 
-import {
-  fetchRecipeSharesForResource,
-  findUsersForShare,
-  shareRecipe,
-} from '../lib/sharing'
+import { fetchRecipeSharesForResource, findUsersForShare, shareRecipe } from '../lib/sharing'
 
 describe('ShareModal', () => {
   beforeEach(() => {
     vi.mocked(fetchRecipeSharesForResource).mockResolvedValue([])
     vi.mocked(findUsersForShare).mockResolvedValue([])
-    vi.mocked(shareRecipe).mockResolvedValue(undefined)
+    vi.mocked(shareRecipe).mockResolvedValue(mockRecipeShare)
   })
 
   it('renders the recipe share title and resource name', async () => {
