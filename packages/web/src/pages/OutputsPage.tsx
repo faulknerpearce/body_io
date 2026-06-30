@@ -169,10 +169,12 @@ export default function OutputsPage({ onOpenLogActivityReady }: OutputsPageProps
     <>
       <DayNavigator
         date={selectedDate}
+        isToday={isToday}
         compact
         canGoForward={selectedDate < today}
         onPrevious={() => setSelectedDate((date) => shiftISODate(date, -1))}
         onNext={() => setSelectedDate((date) => shiftISODate(date, 1))}
+        onGoToToday={() => setSelectedDate(today)}
       />
 
       <div className={`inputs-day-content${isToday ? ' inputs-day-content-today' : ''}`}>
