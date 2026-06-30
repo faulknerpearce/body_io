@@ -11,6 +11,7 @@ interface RecipeComboboxProps {
   onChange: (recipeId: string) => void
   disabled?: boolean
   emptyMessage?: string
+  placeholder?: string
 }
 
 export default function RecipeCombobox({
@@ -21,6 +22,7 @@ export default function RecipeCombobox({
   onChange,
   disabled = false,
   emptyMessage = 'No recipes yet',
+  placeholder = 'Type recipe name',
 }: RecipeComboboxProps) {
   const listboxId = useId()
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -128,10 +130,10 @@ export default function RecipeCombobox({
         aria-haspopup="listbox"
         aria-activedescendant={activeOptionId}
         value={displayValue}
-        placeholder={recipes.length === 0 ? emptyMessage : 'Search recipes...'}
+        placeholder={recipes.length === 0 ? emptyMessage : placeholder}
         disabled={disabled || recipes.length === 0}
         onChange={(event) => handleInputChange(event.target.value)}
-        onFocus={() => openList(selectedRecipe?.name ?? '')}
+        onFocus={() => openList(selectedRecipe ? selectedRecipe.name : '')}
         onKeyDown={handleKeyDown}
         style={inputBase}
         autoComplete="off"

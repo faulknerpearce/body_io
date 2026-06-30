@@ -41,6 +41,22 @@ const recipes = [
 ]
 
 describe('RecipeCombobox', () => {
+  it('starts empty with a type-to-search placeholder when nothing is selected', () => {
+    renderWithProviders(
+      <RecipeCombobox
+        id="entry-recipe"
+        label="Saved recipe"
+        recipes={recipes}
+        value=""
+        onChange={vi.fn()}
+      />,
+    )
+
+    const combobox = screen.getByRole('combobox', { name: 'Saved recipe' })
+    expect(combobox).toHaveValue('')
+    expect(combobox).toHaveAttribute('placeholder', 'Type recipe name')
+  })
+
   it('exposes combobox semantics and the selected recipe label', () => {
     renderWithProviders(
       <RecipeCombobox

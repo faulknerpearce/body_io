@@ -319,15 +319,7 @@ export default function AddEntryModal({
     if (isEdit || mode !== 'recipe') return
     fetchRecipeSummaries()
       .then((data) => {
-        const sortedRecipes = sortRecipesByName(data)
-        setRecipes(sortedRecipes)
-        setSelectedRecipeId((current) => {
-          const nextRecipeId = current || sortedRecipes[0]?.id || ''
-          setRecipeServingWeightGrams(
-            servingWeightForRecipe(sortedRecipes.find((recipe) => recipe.id === nextRecipeId)),
-          )
-          return nextRecipeId
-        })
+        setRecipes(sortRecipesByName(data))
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Failed to load recipes')
@@ -350,6 +342,7 @@ export default function AddEntryModal({
     setRecipePortionUnit('servings')
     setRecipePortionQuantity('1')
     setRecipeServingWeightGrams('100')
+    setSelectedRecipeId('')
     setRecipeLogTime(currentTimeInputValue(timeZone))
     setError(null)
     onClose()
