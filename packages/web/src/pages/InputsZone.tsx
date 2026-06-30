@@ -1,6 +1,8 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { AppRoute } from '../lib/routing'
+import GoToTodayButton from '../components/layout/GoToTodayButton'
 import PageHeader from '../components/layout/PageHeader'
+import type { DayNavHeaderState } from '../lib/dayNavState'
 import PageShell from '../components/layout/PageShell'
 import ZoneButton from '../components/layout/ZoneButton'
 import ZoneSubNav from '../components/layout/ZoneSubNav'
@@ -16,6 +18,7 @@ export default function InputsZone({ route }: InputsZoneProps) {
   const openCreateRecipeRef = useRef<(() => void) | null>(null)
   const openAddEntryRef = useRef<(() => void) | null>(null)
   const openBarcodeScannerRef = useRef<(() => void) | null>(null)
+  const [dayNavState, setDayNavState] = useState<DayNavHeaderState | null>(null)
   const handleOpenCreateReady = useCallback((openCreate: () => void) => {
     openCreateRecipeRef.current = openCreate
   }, [])
@@ -24,6 +27,9 @@ export default function InputsZone({ route }: InputsZoneProps) {
   }, [])
   const handleOpenBarcodeScannerReady = useCallback((openBarcodeScanner: () => void) => {
     openBarcodeScannerRef.current = openBarcodeScanner
+  }, [])
+  const handleDayNavStateReady = useCallback((state: DayNavHeaderState | null) => {
+    setDayNavState(state)
   }, [])
 
   return (
@@ -46,9 +52,17 @@ export default function InputsZone({ route }: InputsZoneProps) {
               <ZoneButton variant="secondary" onClick={() => openBarcodeScannerRef.current?.()}>
                 <i className="fa-solid fa-barcode" aria-hidden="true" /> Scan Barcode
               </ZoneButton>
-              <ZoneButton variant="primary" onClick={() => openAddEntryRef.current?.()}>
-                <i className="fa-solid fa-plus" aria-hidden="true" /> Add Entry
-              </ZoneButton>
+              <div className="page-header-primary-action">
+                <ZoneButton variant="primary" onClick={() => openAddEntryRef.current?.()}>
+                  <i className="fa-solid fa-plus" aria-hidden="true" /> Add Entry
+                </ZoneButton>
+                {dayNavState && !dayNavState.isToday && (
+                  <GoToTodayButton
+                    onClick={dayNavState.onGoToToday}
+                    className="page-header-today-button"
+                  />
+                )}
+              </div>
             </>
           )
         }
@@ -66,6 +80,7 @@ export default function InputsZone({ route }: InputsZoneProps) {
         <InputsPage
           onOpenAddEntryReady={handleOpenAddEntryReady}
           onOpenBarcodeScannerReady={handleOpenBarcodeScannerReady}
+          onDayNavStateReady={handleDayNavStateReady}
         />
       )}
     </PageShell>

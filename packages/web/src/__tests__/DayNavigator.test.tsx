@@ -5,7 +5,31 @@ import DayNavigator from '../components/layout/DayNavigator'
 import { renderWithProviders } from './testUtils'
 
 describe('DayNavigator', () => {
-  it('shows a Today button when viewing a historical date', () => {
+  it('does not show a Today control in the inline navigator on desktop', () => {
+    renderWithProviders(
+      <DayNavigator
+        date="2026-06-15"
+        isToday={false}
+        compact
+        onPrevious={vi.fn()}
+        onNext={vi.fn()}
+        onGoToToday={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: "Jump to today's log" })).not.toBeInTheDocument()
+    expect(screen.getByText('Monday')).toBeInTheDocument()
+    expect(screen.getByText('June 15')).toBeInTheDocument()
+  })
+
+  it('shows a Today pill in the mobile dock when viewing a historical date', () => {
+    const matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(max-width: 639px)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+    vi.stubGlobal('window', { ...window, matchMedia })
+
     renderWithProviders(
       <DayNavigator
         date="2026-06-15"
@@ -18,28 +42,18 @@ describe('DayNavigator', () => {
     )
 
     expect(screen.getByRole('button', { name: "Jump to today's log" })).toHaveTextContent('Today')
-    expect(screen.getByText('Viewing Jun 15, 2026')).toBeInTheDocument()
+    expect(screen.getByRole('toolbar', { name: 'Day navigation' })).toBeInTheDocument()
   })
 
-  it('hides the Today button when already on today', () => {
-    renderWithProviders(
-      <DayNavigator
-        date="2026-06-30"
-        isToday
-        compact
-        onPrevious={vi.fn()}
-        onNext={vi.fn()}
-        onGoToToday={vi.fn()}
-      />,
-    )
-
-    expect(screen.queryByRole('button', { name: "Jump to today's log" })).not.toBeInTheDocument()
-    expect(screen.queryByText(/Viewing /)).not.toBeInTheDocument()
-  })
-
-  it('calls onGoToToday when the Today button is clicked', async () => {
+  it('calls onGoToToday when the mobile Today pill is clicked', async () => {
     const user = userEvent.setup()
     const onGoToToday = vi.fn()
+    const matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query === '(max-width: 639px)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+    vi.stubGlobal('window', { ...window, matchMedia })
 
     renderWithProviders(
       <DayNavigator
@@ -56,7 +70,7 @@ describe('DayNavigator', () => {
     expect(onGoToToday).toHaveBeenCalledTimes(1)
   })
 
-  it('shows history context in non-compact mode', () => {
+  it('shows entry meta in non-compact mode', () => {
     renderWithProviders(
       <DayNavigator
         date="2026-06-15"
@@ -68,7 +82,6 @@ describe('DayNavigator', () => {
       />,
     )
 
-    expect(screen.getByText('Viewing Jun 15, 2026')).toBeInTheDocument()
-    expect(screen.queryByText('3 entries')).not.toBeInTheDocument()
+    expect(screen.getByText('3 entries')).toBeInTheDocument()
   })
 })
