@@ -68,34 +68,18 @@ function SharedSection({
 function SharedCatalogActions({
   resourceLabel,
   onView,
-  onDismiss,
-  dismissing,
-  onPrimary,
-  primaryDisabled,
-  primaryDone,
-  primaryLoading,
-  primaryDoneLabel,
-  primaryActionLabel,
-  primaryIconClass,
+  onAccept,
+  acceptLoading,
+  onDecline,
+  declining,
 }: {
   resourceLabel: string
   onView: () => void
-  onDismiss: () => void
-  dismissing: boolean
-  onPrimary: () => void
-  primaryDisabled: boolean
-  primaryDone: boolean
-  primaryLoading: boolean
-  primaryDoneLabel: string
-  primaryActionLabel: string
-  primaryIconClass: string
+  onAccept: () => void
+  acceptLoading: boolean
+  onDecline: () => void
+  declining: boolean
 }) {
-  const primaryTitle = primaryDone
-    ? primaryDoneLabel
-    : primaryLoading
-      ? `${primaryActionLabel}...`
-      : primaryActionLabel
-
   return (
     <>
       <button
@@ -110,26 +94,22 @@ function SharedCatalogActions({
       <button
         type="button"
         className="delicate-icon-action"
-        onClick={onDismiss}
-        disabled={dismissing}
-        aria-label={`Remove shared ${resourceLabel}`}
-        title={`Remove shared ${resourceLabel}`}
+        onClick={onDecline}
+        disabled={declining || acceptLoading}
+        aria-label={`Decline shared ${resourceLabel}`}
+        title={`Decline shared ${resourceLabel}`}
       >
-        <i className="fa-regular fa-trash-can" />
+        <i className="fa-solid fa-xmark" />
       </button>
       <button
         type="button"
         className="catalog-add-log-button"
-        onClick={onPrimary}
-        disabled={primaryDisabled}
-        aria-label={primaryTitle}
-        title={primaryTitle}
+        onClick={onAccept}
+        disabled={acceptLoading || declining}
+        aria-label={`Accept shared ${resourceLabel}`}
+        title={`Accept shared ${resourceLabel}`}
       >
-        <i
-          className={
-            primaryLoading ? 'fa-solid fa-spinner fa-spin' : `fa-solid ${primaryIconClass}`
-          }
-        />
+        <i className={acceptLoading ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-check'} />
       </button>
     </>
   )
@@ -198,7 +178,8 @@ export default function SharedWithMePage() {
     setSavingEntryId(item.share.id)
     try {
       await forkEntry(item.entry.id, item.share.id)
-      await loadShared()
+      await dismissEntryShare(item.share.id)
+      setEntries((prev) => prev.filter((e) => e.share.id !== item.share.id))
       setViewingEntry(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add entry')
@@ -211,7 +192,8 @@ export default function SharedWithMePage() {
     setSavingRecipeId(item.share.id)
     try {
       await forkRecipe(item.recipe.id, item.share.id)
-      await loadShared()
+      await dismissRecipeShare(item.share.id)
+      setRecipes((prev) => prev.filter((r) => r.share.id !== item.share.id))
       setViewingRecipe(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe')
@@ -224,7 +206,8 @@ export default function SharedWithMePage() {
     setSavingActivityId(item.share.id)
     try {
       await forkActivity(item.activity.id, item.share.id)
-      await loadShared()
+      await dismissActivityShare(item.share.id)
+      setActivities((prev) => prev.filter((a) => a.share.id !== item.share.id))
       setViewingActivity(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add activity')
@@ -237,7 +220,8 @@ export default function SharedWithMePage() {
     setSavingWorkoutId(item.share.id)
     try {
       await forkWorkout(item.workout.id, item.share.id)
-      await loadShared()
+      await dismissWorkoutShare(item.share.id)
+      setWorkouts((prev) => prev.filter((w) => w.share.id !== item.share.id))
       setViewingWorkout(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save workout')
@@ -350,19 +334,10 @@ export default function SharedWithMePage() {
                   <SharedCatalogActions
                     resourceLabel="meal"
                     onView={() => setViewingEntry(item)}
-                    onDismiss={() => handleDismissEntry(item)}
-                    dismissing={dismissingEntryId === item.share.id}
-                    onPrimary={() => handleAddSharedEntry(item)}
-                    primaryDisabled={
-                      !!item.share.savedCopyId ||
-                      savingEntryId === item.share.id ||
-                      dismissingEntryId === item.share.id
-                    }
-                    primaryDone={!!item.share.savedCopyId}
-                    primaryLoading={savingEntryId === item.share.id}
-                    primaryDoneLabel="Already added"
-                    primaryActionLabel="Add to my log"
-                    primaryIconClass="fa-bookmark"
+                    onAccept={() => handleAddSharedEntry(item)}
+                    acceptLoading={savingEntryId === item.share.id}
+                    onDecline={() => handleDismissEntry(item)}
+                    declining={dismissingEntryId === item.share.id}
                   />
                 }
               />
@@ -390,19 +365,10 @@ export default function SharedWithMePage() {
                   <SharedCatalogActions
                     resourceLabel="recipe"
                     onView={() => setViewingRecipe(item)}
-                    onDismiss={() => handleDismissRecipe(item)}
-                    dismissing={dismissingRecipeId === item.share.id}
-                    onPrimary={() => handleSaveSharedRecipe(item)}
-                    primaryDisabled={
-                      !!item.share.savedCopyId ||
-                      savingRecipeId === item.share.id ||
-                      dismissingRecipeId === item.share.id
-                    }
-                    primaryDone={!!item.share.savedCopyId}
-                    primaryLoading={savingRecipeId === item.share.id}
-                    primaryDoneLabel="Already saved"
-                    primaryActionLabel="Save to my library"
-                    primaryIconClass="fa-bookmark"
+                    onAccept={() => handleSaveSharedRecipe(item)}
+                    acceptLoading={savingRecipeId === item.share.id}
+                    onDecline={() => handleDismissRecipe(item)}
+                    declining={dismissingRecipeId === item.share.id}
                   />
                 }
               />
@@ -432,19 +398,10 @@ export default function SharedWithMePage() {
                     <SharedCatalogActions
                       resourceLabel="activity"
                       onView={() => setViewingActivity(item)}
-                      onDismiss={() => handleDismissActivity(item)}
-                      dismissing={dismissingActivityId === item.share.id}
-                      onPrimary={() => handleAddSharedActivity(item)}
-                      primaryDisabled={
-                        !!item.share.savedCopyId ||
-                        savingActivityId === item.share.id ||
-                        dismissingActivityId === item.share.id
-                      }
-                      primaryDone={!!item.share.savedCopyId}
-                      primaryLoading={savingActivityId === item.share.id}
-                      primaryDoneLabel="Already added"
-                      primaryActionLabel="Add to my log"
-                      primaryIconClass="fa-bookmark"
+                      onAccept={() => handleAddSharedActivity(item)}
+                      acceptLoading={savingActivityId === item.share.id}
+                      onDecline={() => handleDismissActivity(item)}
+                      declining={dismissingActivityId === item.share.id}
                     />
                   }
                 />
@@ -473,19 +430,10 @@ export default function SharedWithMePage() {
                   <SharedCatalogActions
                     resourceLabel="workout"
                     onView={() => setViewingWorkout(item)}
-                    onDismiss={() => handleDismissWorkout(item)}
-                    dismissing={dismissingWorkoutId === item.share.id}
-                    onPrimary={() => handleSaveSharedWorkout(item)}
-                    primaryDisabled={
-                      !!item.share.savedCopyId ||
-                      savingWorkoutId === item.share.id ||
-                      dismissingWorkoutId === item.share.id
-                    }
-                    primaryDone={!!item.share.savedCopyId}
-                    primaryLoading={savingWorkoutId === item.share.id}
-                    primaryDoneLabel="Already saved"
-                    primaryActionLabel="Save to my library"
-                    primaryIconClass="fa-bookmark"
+                    onAccept={() => handleSaveSharedWorkout(item)}
+                    acceptLoading={savingWorkoutId === item.share.id}
+                    onDecline={() => handleDismissWorkout(item)}
+                    declining={dismissingWorkoutId === item.share.id}
                   />
                 }
               />
