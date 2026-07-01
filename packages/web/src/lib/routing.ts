@@ -49,9 +49,10 @@ export function legacyRedirectPath(hash: string): string | null {
   return target ? routeHref(target) : null
 }
 
-export function primaryNavRoute(route: AppRoute): 'dashboard' | 'inputs' | 'outputs' {
+export function primaryNavRoute(route: AppRoute): 'dashboard' | 'inputs' | 'outputs' | null {
   const zone = routeZone(route)
   if (zone === 'inputs') return 'inputs'
   if (zone === 'outputs') return 'outputs'
+  if (zone === 'profile') return null
   return 'dashboard'
 }

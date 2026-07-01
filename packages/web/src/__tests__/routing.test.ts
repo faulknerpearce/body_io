@@ -52,6 +52,6 @@ describe('primaryNavRoute', () => {
   it('collapses nested routes to top-level nav tabs', () => {
     expect(primaryNavRoute('inputs/recipes')).toBe('inputs')
     expect(primaryNavRoute('outputs/workouts')).toBe('outputs')
-    expect(primaryNavRoute('profile')).toBe('dashboard')
+    expect(primaryNavRoute('profile')).toBeNull()
   })
 })

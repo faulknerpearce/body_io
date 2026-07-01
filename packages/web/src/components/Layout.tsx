@@ -30,7 +30,7 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
   const menuRef = useRef<HTMLDivElement | null>(null)
   const activeNav = primaryNavRoute(activeRoute)
   const zone = routeZone(activeRoute)
-  const layoutBg = zone === 'profile' ? zoneTokens.profile.bg : zoneTokens[activeNav === 'dashboard' ? 'dashboard' : activeNav].bg
+  const layoutBg = zone === 'profile' ? zoneTokens.profile.bg : zoneTokens[activeNav === 'dashboard' || activeNav === null ? 'dashboard' : activeNav].bg
 
   const displayLabel =
     profileContext && !profileContext.loading
@@ -159,23 +159,6 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
                     {displayLabel}
                   </div>
                   <a
-                    href={routeHref('profile')}
-                    role="menuitem"
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      color: '#3f3f46',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Profile
-                  </a>
-                  <a
                     href={routeHref('shared')}
                     role="menuitem"
                     onClick={() => setMenuOpen(false)}
@@ -212,6 +195,23 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
                         {newShareCount > 9 ? '9+' : newShareCount}
                       </span>
                     )}
+                  </a>
+                  <a
+                    href={routeHref('profile')}
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      color: '#3f3f46',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    Profile
                   </a>
                   <button
                     type="button"
