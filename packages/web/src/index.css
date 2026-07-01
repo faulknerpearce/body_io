@@ -209,7 +209,7 @@ body {
 .catalog-row-actions {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 4px;
   padding: 4px 8px 4px 0;
   flex-wrap: wrap;
 }
@@ -232,9 +232,9 @@ body {
   padding: 0;
   border: none;
   border-radius: 9px;
-  background: none;
+  background: #f4f4f5;
   cursor: pointer;
-  color: #a1a1aa;
+  color: #71717a;
   font-size: 16px;
   line-height: 1;
   -webkit-tap-highlight-color: transparent;
@@ -245,11 +245,12 @@ body {
 }
 
 .delicate-icon-action:hover:not(:disabled) {
-  color: #71717a;
+  color: #52525b;
+  background-color: #e4e4e7;
 }
 
 .delicate-icon-action:active:not(:disabled) {
-  background-color: #f4f4f5;
+  background-color: #d4d4d8;
 }
 
 .delicate-icon-action:disabled {
@@ -260,14 +261,14 @@ body {
 .log-entry-icon-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0;
+  gap: 4px;
   margin-left: auto;
   flex-shrink: 0;
 }
 
 .log-entry-icon-actions .delicate-icon-action + .delicate-icon-action,
 .catalog-row-actions .delicate-icon-action + .delicate-icon-action {
-  margin-left: -2px;
+  margin-left: 0;
 }
 
 .catalog-row-actions .catalog-add-log-button {

@@ -148,41 +148,41 @@ export default function ActivityLogSection({
                         <span style={{ color: '#a1a1aa' }}>kcal burned</span>
                       </span>
                     )}
-                    <span className="log-entry-icon-actions">
-                      <button
-                        type="button"
-                        className="delicate-icon-action"
-                        onClick={() => setSharingActivity(item)}
-                        aria-label="Share activity"
-                        title="Share activity"
-                      >
-                        <i className="fa-regular fa-share-from-square" />
-                      </button>
-                      {onEdit && (
-                        <button
-                          type="button"
-                          className="delicate-icon-action"
-                          onClick={() => setEditingActivity(item)}
-                          aria-label="Edit activity"
-                          title="Edit activity"
-                        >
-                          <i className="fa-regular fa-pen-to-square" />
-                        </button>
-                      )}
-                      {onDelete && (
-                        <button
-                          type="button"
-                          className="delicate-icon-action"
-                          onClick={() => removeActivity(item.id)}
-                          disabled={deleting === item.id}
-                          aria-label="Remove activity"
-                          title="Remove activity"
-                        >
-                          <i className="fa-regular fa-trash-can" />
-                        </button>
-                      )}
-                    </span>
                   </div>
+                </div>
+                <div className="catalog-row-actions">
+                  <button
+                    type="button"
+                    className="delicate-icon-action"
+                    onClick={() => setSharingActivity(item)}
+                    aria-label="Share activity"
+                    title="Share activity"
+                  >
+                    <i className="fa-regular fa-share-from-square" />
+                  </button>
+                  {onEdit && (
+                    <button
+                      type="button"
+                      className="delicate-icon-action"
+                      onClick={() => setEditingActivity(item)}
+                      aria-label="Edit activity"
+                      title="Edit activity"
+                    >
+                      <i className="fa-regular fa-pen-to-square" />
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      type="button"
+                      className="delicate-icon-action"
+                      onClick={() => removeActivity(item.id)}
+                      disabled={deleting === item.id}
+                      aria-label="Remove activity"
+                      title="Remove activity"
+                    >
+                      <i className="fa-regular fa-trash-can" />
+                    </button>
+                  )}
                 </div>
               </div>
             )
