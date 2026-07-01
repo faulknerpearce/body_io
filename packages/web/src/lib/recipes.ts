@@ -154,8 +154,9 @@ export async function saveRecipe(input: RecipeInput, id?: string): Promise<Recip
 }
 
 export async function deleteRecipe(id: string): Promise<void> {
-  const { error } = await supabase.from('recipes').delete().eq('id', id)
+  const { data, error } = await supabase.from('recipes').delete().eq('id', id).select('id')
   if (error) throw new Error(error.message)
+  if (!data?.length) throw new Error('Recipe not found or not owned by you')
 }
 
 export async function forkRecipe(
