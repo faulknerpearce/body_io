@@ -43,7 +43,7 @@ const SERIES: ChartSeries[] = [
   {
     key: 'net',
     label: 'Net',
-    color: '#3D4F7A',
+    color: '#2B5FE8',
     marker: 'filled',
     pick: (row) => row.net,
   },

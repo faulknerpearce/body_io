@@ -4,11 +4,11 @@
   --app-nav-height: 72px;
   --mobile-tab-height: 76px;
   --mobile-day-nav-dock-height: 44px;
-  --nav-center-active: #3d4f7a;
-  --nav-center-blue: #3d4f7a; /* legacy alias — dashboard sky top */
+  --nav-center-active: #2b5fe8;
+  --nav-center-blue: #2b5fe8; /* legacy alias — dashboard sky top */
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --brand-sunset: #ff6b35;
-  --dashboard-sky-top: #3d4f7a;
+  --dashboard-sky-top: #2b5fe8;
 
   /* Neutrals (Golden Hour / iOS-like) */
   --color-text-primary: #1c1c1e;
@@ -58,11 +58,12 @@
   --zone-accent-text: #ffffff;
   --zone-bg: linear-gradient(
     165deg,
-    #3d4f7a 0%,
-    #6b8db5 18%,
-    #b8d4e8 40%,
-    #e8b48a 58%,
-    #ff9f5c 78%,
+    #1e4fd6 0%,
+    #2b5fe8 14%,
+    #5b8def 32%,
+    #a8c8fa 48%,
+    #e8b48a 64%,
+    #ff9f5c 80%,
     #ffdb85 100%
   );
   --zone-card-bg: #ffffff;
@@ -122,14 +123,22 @@
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background: #3d4f7a;
+  /* Follow layout atmosphere so short pages (e.g. Recipes) don't flash a different color */
+  background: var(--layout-bg, var(--zone-bg));
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
+  min-height: 100%;
 }
 
-/* Zone-aware surfaces */
+html {
+  min-height: 100%;
+  background: var(--layout-bg, var(--zone-bg));
+}
+
+/* Zone-aware surfaces — transparent so app-layout sky is continuous on Log + Recipes */
 .zone-root {
   min-height: 100%;
+  background: transparent;
 }
 
 .page-shell {
@@ -585,15 +594,20 @@ body {
   padding: 0;
   margin-bottom: 12px;
   gap: 8px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
+  /* Fully clear — no glass / blur smear over the zone sky */
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-today,
 .zone-root[data-zone='outputs'] .inputs-day-nav-today {
-  border: none;
-  box-shadow: none;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-button,
@@ -652,7 +666,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 16px;
-  --trends-accent: #3d4f7a;
+  --trends-accent: #2b5fe8;
   --trends-sage: #5ba88a;
 }
 

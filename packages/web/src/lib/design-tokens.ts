@@ -3,8 +3,8 @@ export type ZoneId = 'dashboard' | 'inputs' | 'outputs' | 'profile'
 /** Sunset warm accent — primary brand CTAs. */
 export const BRAND_SUNSET = '#FF6B35'
 
-/** Cool slate-blue at the top of the dashboard sky gradient. */
-export const DASHBOARD_SKY_TOP = '#3D4F7A'
+/** Brighter royal blue at the top of the dashboard sky (active, not muted slate). */
+export const DASHBOARD_SKY_TOP = '#2B5FE8'
 
 /** @deprecated Use BRAND_SUNSET — kept as alias for any remaining imports. */
 export const BRAND_BLUE = BRAND_SUNSET
@@ -106,11 +106,12 @@ export const atmosphere = {
 export const zoneGradients: Record<ZoneId, string> = {
   dashboard: `linear-gradient(
     165deg,
-    #3D4F7A 0%,
-    #6B8DB5 18%,
-    #B8D4E8 40%,
-    #E8B48A 58%,
-    #FF9F5C 78%,
+    #1E4FD6 0%,
+    #2B5FE8 14%,
+    #5B8DEF 32%,
+    #A8C8FA 48%,
+    #E8B48A 64%,
+    #FF9F5C 80%,
     #FFDB85 100%
   )`,
   /** Clear peach sunrise — no muddy brown tops */
