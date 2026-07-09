@@ -5,7 +5,6 @@ import ActivityLogSection from '../components/ActivityLogSection'
 import ActivityMetricCard from '../components/ActivityMetricCard'
 import CollapsiblePanel from '../components/layout/CollapsiblePanel'
 import DayNavigator from '../components/layout/DayNavigator'
-import GoToTodayButton from '../components/layout/GoToTodayButton'
 
 import { PageError, PageLoading } from '../components/layout/PageState'
 import { useProfile } from '../context/useProfile'
@@ -168,23 +167,15 @@ export default function OutputsPage({ onOpenLogActivityReady }: OutputsPageProps
 
   return (
     <>
-      <div className="day-nav-shell">
-        <GoToTodayButton
-          className="day-nav-today-corner"
-          isToday={isToday}
-          onClick={() => setSelectedDate(today)}
-        />
-        <DayNavigator
-          date={selectedDate}
-          isToday={isToday}
-          compact
-          showTodayControl={false}
-          canGoForward={selectedDate < today}
-          onPrevious={() => setSelectedDate((date) => shiftISODate(date, -1))}
-          onNext={() => setSelectedDate((date) => shiftISODate(date, 1))}
-          onGoToToday={() => setSelectedDate(today)}
-        />
-      </div>
+      <DayNavigator
+        date={selectedDate}
+        isToday={isToday}
+        compact
+        canGoForward={selectedDate < today}
+        onPrevious={() => setSelectedDate((date) => shiftISODate(date, -1))}
+        onNext={() => setSelectedDate((date) => shiftISODate(date, 1))}
+        onGoToToday={() => setSelectedDate(today)}
+      />
 
       <div className={`inputs-day-content${isToday ? ' inputs-day-content-today' : ''}`}>
         <CollapsiblePanel

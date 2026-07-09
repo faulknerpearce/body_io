@@ -1,5 +1,5 @@
 import { formatDayLabel, formatMonthDayLabel, formatWeekdayHeadline } from '@nutrition-tracker/shared'
-import { useEffect, useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import GoToTodayButton from './GoToTodayButton'
 
 interface DayNavigatorProps {
@@ -11,53 +11,26 @@ interface DayNavigatorProps {
   canGoBack?: boolean
   canGoForward?: boolean
   compact?: boolean
-  /** Keep arrows inline (e.g. embedded in a card) instead of the mobile floating dock. */
-  disableMobileDock?: boolean
-  /**
-   * When false, DayNavigator does not render the calendar control
-   * (parent places it in a card/page header).
-   */
-  showTodayControl?: boolean
   onPrevious: () => void
   onNext: () => void
   onGoToToday?: () => void
-}
-
-function useMobileDayNavDock(): boolean {
-  const [mobile, setMobile] = useState(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false
-    return window.matchMedia('(max-width: 639px)').matches
-  })
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== 'function') return
-
-    const mediaQuery = window.matchMedia('(max-width: 639px)')
-    const onChange = () => setMobile(mediaQuery.matches)
-    mediaQuery.addEventListener('change', onChange)
-    return () => mediaQuery.removeEventListener('change', onChange)
-  }, [])
-
-  return mobile
 }
 
 function NavArrowButton({
   direction,
   disabled,
   onClick,
-  className,
 }: {
   direction: 'previous' | 'next'
   disabled?: boolean
   onClick: () => void
-  className?: string
 }) {
   const isPrevious = direction === 'previous'
 
   return (
     <button
       type="button"
-      className={className ?? 'inputs-day-nav-button'}
+      className="inputs-day-nav-button"
       onClick={onClick}
       disabled={disabled}
       aria-label={isPrevious ? 'Previous day' : 'Next day'}
@@ -67,6 +40,10 @@ function NavArrowButton({
   )
 }
 
+/**
+ * Day browser bar:
+ * [Calendar] [Day / date]  ·················  [←] [→]
+ */
 export default function DayNavigator({
   date,
   isToday,
@@ -76,28 +53,27 @@ export default function DayNavigator({
   canGoBack = true,
   canGoForward = false,
   compact = false,
-  disableMobileDock = false,
-  showTodayControl = true,
   onPrevious,
   onNext,
   onGoToToday,
 }: DayNavigatorProps) {
-  const mobileDock = useMobileDayNavDock() && !disableMobileDock
   const defaultMeta = `${itemCount} ${itemCount === 1 ? itemLabel.singular : itemLabel.plural}`
   const metaContent = meta ?? defaultMeta
   const headline = compact ? formatWeekdayHeadline(date) : formatDayLabel(date)
-  const todayControl =
-    showTodayControl && onGoToToday ? (
-      <GoToTodayButton isToday={isToday} onClick={onGoToToday} />
-    ) : null
 
   return (
-    <>
-      <div
-        className={`inputs-day-nav${isToday ? ' inputs-day-nav-today' : ' inputs-day-nav-history'}${compact ? ' inputs-day-nav-compact' : ''}${mobileDock ? ' inputs-day-nav-mobile-header' : ''}`}
-      >
-        {!mobileDock && (
-          <NavArrowButton direction="previous" disabled={!canGoBack} onClick={onPrevious} />
+    <div
+      className={`inputs-day-nav${isToday ? ' inputs-day-nav-today' : ' inputs-day-nav-history'}${compact ? ' inputs-day-nav-compact' : ''}`}
+      role="group"
+      aria-label="Day navigation"
+    >
+      <div className="inputs-day-nav-leading">
+        {onGoToToday ? (
+          <GoToTodayButton isToday={isToday} onClick={onGoToToday} />
+        ) : (
+          <span className="go-to-today-icon go-to-today-icon-dormant" aria-hidden="true">
+            <i className="fa-regular fa-calendar" />
+          </span>
         )}
 
         <div className="inputs-day-nav-label">
@@ -113,31 +89,12 @@ export default function DayNavigator({
             </>
           )}
         </div>
-
-        {!mobileDock && (
-          <NavArrowButton direction="next" disabled={!canGoForward} onClick={onNext} />
-        )}
       </div>
 
-      {mobileDock && (
-        <div className="inputs-day-nav-mobile-dock" role="toolbar" aria-label="Day navigation">
-          {todayControl ?? <span />}
-          <div className="inputs-day-nav-mobile-arrows">
-            <NavArrowButton
-              direction="previous"
-              disabled={!canGoBack}
-              onClick={onPrevious}
-              className="inputs-day-nav-button inputs-day-nav-button-floating"
-            />
-            <NavArrowButton
-              direction="next"
-              disabled={!canGoForward}
-              onClick={onNext}
-              className="inputs-day-nav-button inputs-day-nav-button-floating"
-            />
-          </div>
-        </div>
-      )}
-    </>
+      <div className="inputs-day-nav-trailing">
+        <NavArrowButton direction="previous" disabled={!canGoBack} onClick={onPrevious} />
+        <NavArrowButton direction="next" disabled={!canGoForward} onClick={onNext} />
+      </div>
+    </div>
   )
 }

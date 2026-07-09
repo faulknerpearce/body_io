@@ -3,7 +3,6 @@ import { netRingProgress } from '../../lib/dashboardCharts'
 import { neutrals, radius, type as typeScale } from '../../lib/design-tokens'
 import ProgressRing from '../charts/ProgressRing'
 import DayNavigator from '../layout/DayNavigator'
-import GoToTodayButton from '../layout/GoToTodayButton'
 import Card from '../ui/Card'
 import OutputCompositionBar from './OutputCompositionBar'
 
@@ -236,30 +235,27 @@ export default function EnergyOverviewPanel({
         >
           Daily energy
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <span
-            title={
-              balance.status === 'under'
-                ? 'Net kcal is below your low goal — still building toward the target range'
-                : balance.status === 'over'
-                  ? 'Net kcal is above your high goal'
-                  : 'Net kcal is within your low–high goal range'
-            }
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '3px 10px',
-              borderRadius: radius.pill,
-              background: statusBadgeBg[balance.status],
-              color,
-              fontSize: 11,
-              fontWeight: 600,
-            }}
-          >
-            {statusLabel[balance.status]}
-          </span>
-          <GoToTodayButton isToday={isToday} onClick={onGoToToday} />
-        </div>
+        <span
+          title={
+            balance.status === 'under'
+              ? 'Net kcal is below your low goal — still building toward the target range'
+              : balance.status === 'over'
+                ? 'Net kcal is above your high goal'
+                : 'Net kcal is within your low–high goal range'
+          }
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '3px 10px',
+            borderRadius: radius.pill,
+            background: statusBadgeBg[balance.status],
+            color,
+            fontSize: 11,
+            fontWeight: 600,
+          }}
+        >
+          {statusLabel[balance.status]}
+        </span>
       </div>
 
       <div className="energy-day-nav" style={{ marginBottom: 12 }}>
@@ -267,8 +263,6 @@ export default function EnergyOverviewPanel({
           date={date}
           isToday={isToday}
           compact
-          disableMobileDock
-          showTodayControl={false}
           canGoBack={canGoBack}
           canGoForward={canGoForward}
           onPrevious={onPrevious}

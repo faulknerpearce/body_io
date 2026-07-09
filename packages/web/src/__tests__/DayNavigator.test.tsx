@@ -5,32 +5,7 @@ import DayNavigator from '../components/layout/DayNavigator'
 import { renderWithProviders } from './testUtils'
 
 describe('DayNavigator', () => {
-  it('does not place a Today control next to the day title', () => {
-    renderWithProviders(
-      <DayNavigator
-        date="2026-06-15"
-        isToday={false}
-        compact
-        showTodayControl={false}
-        onPrevious={vi.fn()}
-        onNext={vi.fn()}
-        onGoToToday={vi.fn()}
-      />,
-    )
-
-    expect(screen.queryByRole('button', { name: 'Jump to today' })).not.toBeInTheDocument()
-    expect(screen.getByText('Monday')).toBeInTheDocument()
-    expect(screen.getByText('June 15')).toBeInTheDocument()
-  })
-
-  it('shows a calendar control in the mobile dock when enabled', () => {
-    const matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query === '(max-width: 639px)',
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }))
-    vi.stubGlobal('window', { ...window, matchMedia })
-
+  it('lays out calendar left, day label, and arrows on the right', () => {
     renderWithProviders(
       <DayNavigator
         date="2026-06-15"
@@ -43,18 +18,30 @@ describe('DayNavigator', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Jump to today' })).toBeInTheDocument()
-    expect(screen.getByRole('toolbar', { name: 'Day navigation' })).toBeInTheDocument()
+    expect(screen.getByText('Monday')).toBeInTheDocument()
+    expect(screen.getByText('June 15')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Previous day' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next day' })).toBeInTheDocument()
   })
 
-  it('calls onGoToToday when the mobile calendar control is clicked', async () => {
+  it('keeps calendar dormant on today', () => {
+    renderWithProviders(
+      <DayNavigator
+        date="2026-06-15"
+        isToday
+        compact
+        onPrevious={vi.fn()}
+        onNext={vi.fn()}
+        onGoToToday={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Viewing today' })).toBeDisabled()
+  })
+
+  it('calls onGoToToday when the calendar is activated on a historical day', async () => {
     const user = userEvent.setup()
     const onGoToToday = vi.fn()
-    const matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query === '(max-width: 639px)',
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }))
-    vi.stubGlobal('window', { ...window, matchMedia })
 
     renderWithProviders(
       <DayNavigator
