@@ -15,8 +15,10 @@ import {
   type RecipeSummary,
 } from '@nutrition-tracker/shared'
 import { focusIfDesktop } from '../lib/device'
+import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import { sortRecipesByName } from '../lib/recipeFilters'
 import { fetchRecipeSummaries } from '../lib/recipes'
+import BarcodeScannerModal from './BarcodeScannerModal'
 import RecipeCombobox from './RecipeCombobox'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
@@ -199,7 +201,6 @@ export default function AddEntryModal({
   onClose,
 }: AddEntryModalProps) {
   const isEdit = entry !== undefined
-  const isScanned = prefill !== undefined && !isEdit
   const [mode, setMode] = useState<AddMode>('manual')
   const [form, setForm] = useState<FormState>(() =>
     entry
@@ -218,6 +219,8 @@ export default function AddEntryModal({
   const [recipePortionUnit, setRecipePortionUnit] = useState<PortionUnit>('servings')
   const [recipePortionQuantity, setRecipePortionQuantity] = useState('1')
   const [recipeServingWeightGrams, setRecipeServingWeightGrams] = useState('100')
+  const [isScanned, setIsScanned] = useState(prefill !== undefined && entry === undefined)
+  const [showScanner, setShowScanner] = useState(false)
 
   const servingWeightForRecipe = (recipe: RecipeSummary | undefined) =>
     recipe?.servingWeightGrams ? String(recipe.servingWeightGrams) : '100'
@@ -240,6 +243,8 @@ export default function AddEntryModal({
   const [error, setError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const showScannerRef = useRef(false)
+  showScannerRef.current = showScanner
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId)
   const recipeServingWeightNum = Number.parseFloat(recipeServingWeightGrams)
   const resolvedRecipeServingWeightGrams =
@@ -300,10 +305,14 @@ export default function AddEntryModal({
     focusIfDesktop(nameRef.current)
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onClose()
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      // Prefer closing the nested scanner so the add form stays open.
+      if (showScannerRef.current) {
+        setShowScanner(false)
+        return
       }
+      onClose()
     }
     document.addEventListener('keydown', onKey)
     return () => {
@@ -314,6 +323,31 @@ export default function AddEntryModal({
     // so the listener is torn down and the next mount gets the latest value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const applyScannedProduct = (product: MappedBarcodeProduct) => {
+    const write: FoodEntryWrite = {
+      ...product.entry,
+      referenceWeightGrams: product.referenceWeightGrams,
+      nutritionBasisNote: product.servingNote,
+    }
+    setMode('manual')
+    setForm((prev) => ({
+      ...formFromNewEntry(write, timeZone),
+      logTime: prev.logTime || currentTimeInputValue(timeZone),
+    }))
+    setSelectedIcon(iconFromNewEntry(write))
+    setReferenceWeightGrams(
+      product.referenceWeightGrams > 0 ? String(product.referenceWeightGrams) : '100',
+    )
+    setPortionUnit(
+      product.servingNote.toLowerCase().includes('per 100g') ? 'grams' : 'servings',
+    )
+    setPortionQuantity('1')
+    setNutritionBasisNote(product.servingNote)
+    setIsScanned(true)
+    setError(null)
+    setShowScanner(false)
+  }
 
   useEffect(() => {
     if (isEdit || mode !== 'recipe') return
@@ -476,6 +510,7 @@ export default function AddEntryModal({
   }
 
   return (
+    <>
     <Modal titleId="entry-form-title" onClose={close}>
       <h3
         id="entry-form-title"
@@ -496,27 +531,59 @@ export default function AddEntryModal({
             : "Log a new food item to today's entries."}
       </p>
 
-      {!isEdit && onLogRecipe && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          {(['manual', 'recipe'] as const).map((value) => (
+      {!isEdit && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 8,
+            marginBottom: 20,
+            alignItems: 'center',
+          }}
+        >
+          {onLogRecipe &&
+            (['manual', 'recipe'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setMode(value)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 9999,
+                  border: mode === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
+                  background: mode === value ? 'var(--zone-accent)' : 'white',
+                  color: mode === value ? 'white' : '#52525b',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                }}
+              >
+                {value === 'manual' ? 'Manual' : 'From Recipe'}
+              </button>
+            ))}
+          {mode === 'manual' && (
             <button
-              key={value}
               type="button"
-              onClick={() => setMode(value)}
+              onClick={() => setShowScanner(true)}
               style={{
                 padding: '8px 14px',
                 borderRadius: 9999,
-                border: mode === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
-                background: mode === value ? 'var(--zone-accent)' : 'white',
-                color: mode === value ? 'white' : '#52525b',
+                border: '1px solid #e4e4e7',
+                background: 'white',
+                color: '#52525b',
                 fontSize: 12,
                 fontWeight: 500,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                marginLeft: onLogRecipe ? 'auto' : 0,
               }}
             >
-              {value === 'manual' ? 'Manual' : 'From Recipe'}
+              <i className="fa-solid fa-barcode" aria-hidden="true" />
+              Scan barcode
             </button>
-          ))}
+          )}
         </div>
       )}
 
@@ -661,9 +728,9 @@ export default function AddEntryModal({
                   aria-pressed={selectedIcon.icon === opt.icon}
                   onClick={() => setSelectedIcon(opt)}
                   style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 12,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 9999,
                     border:
                       selectedIcon.icon === opt.icon
                         ? '2px solid var(--zone-accent)'
@@ -677,7 +744,7 @@ export default function AddEntryModal({
                 >
                   <i
                     className={`fa-solid ${opt.icon}`}
-                    style={{ color: opt.color, fontSize: 18 }}
+                    style={{ color: opt.color, fontSize: 15 }}
                   ></i>
                 </button>
               ))}
@@ -928,5 +995,12 @@ export default function AddEntryModal({
         </>
       )}
     </Modal>
+    {showScanner && (
+      <BarcodeScannerModal
+        onProductFound={applyScannedProduct}
+        onClose={() => setShowScanner(false)}
+      />
+    )}
+    </>
   )
 }

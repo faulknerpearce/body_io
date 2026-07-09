@@ -21,16 +21,16 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
       {icon && (
         <div
           style={{
-            width: 56,
-            height: 56,
+            width: 48,
+            height: 48,
             margin: '0 auto 14px',
-            borderRadius: radius.lg,
+            borderRadius: radius.pill,
             background: 'var(--zone-accent-muted, #f4f4f5)',
             color: 'var(--zone-accent, #52525b)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 22,
+            fontSize: 18,
           }}
           aria-hidden="true"
         >

@@ -376,14 +376,14 @@ html {
 }
 
 .catalog-row-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .catalog-row-text {
@@ -1619,9 +1619,9 @@ html {
 }
 
 .icon-picker-option {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
   border: 2px solid transparent;
   cursor: pointer;
   display: flex;
@@ -1632,7 +1632,7 @@ html {
 }
 
 .icon-picker-option:hover {
-  border-color: #d4d4d8;
+  border-color: rgba(28, 28, 30, 0.1);
 }
 
 .icon-picker-option[aria-selected='true'] {

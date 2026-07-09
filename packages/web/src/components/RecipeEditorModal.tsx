@@ -12,6 +12,7 @@ import CatalogListSection from './catalog/CatalogListSection'
 import CatalogModalHeader from './catalog/CatalogModalHeader'
 import IconPicker from './catalog/IconPicker'
 import { focusIfDesktop } from '../lib/device'
+import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import {
   catalogItemCard,
   inputBase,
@@ -20,6 +21,7 @@ import {
   modalPrimaryButton,
   summaryPanel,
 } from '../lib/styles'
+import BarcodeScannerModal from './BarcodeScannerModal'
 import Modal from './Modal'
 
 interface RecipeEditorModalProps {
@@ -92,6 +94,42 @@ function parseIngredient(form: IngredientForm, sortOrder: number): NewRecipeIngr
   }
 }
 
+function macroField(value: number): string {
+  if (!Number.isFinite(value)) return ''
+  return Number.isInteger(value) ? String(value) : String(value)
+}
+
+function ingredientFromProduct(product: MappedBarcodeProduct): IngredientForm {
+  const { entry } = product
+  const amount =
+    product.referenceWeightGrams > 0
+      ? `${product.referenceWeightGrams}g`
+      : product.servingNote || ''
+  return {
+    name: entry.name,
+    amount,
+    calories: macroField(entry.calories),
+    protein: macroField(entry.protein),
+    carbs: macroField(entry.carbs),
+    fat: macroField(entry.fat),
+    fiber: macroField(entry.fiber),
+    caffeine: macroField(entry.caffeine),
+  }
+}
+
+function isBlankIngredient(row: IngredientForm): boolean {
+  return (
+    !row.name.trim() &&
+    !row.amount.trim() &&
+    row.calories === '' &&
+    row.protein === '' &&
+    row.carbs === '' &&
+    row.fat === '' &&
+    row.fiber === '' &&
+    row.caffeine === ''
+  )
+}
+
 export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEditorModalProps) {
   const isEdit = recipe !== undefined
   const [name, setName] = useState(recipe?.name ?? '')
@@ -110,10 +148,26 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
   )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showScanner, setShowScanner] = useState(false)
   const nameRef = useRef<HTMLInputElement | null>(null)
+  const showScannerRef = useRef(false)
+  showScannerRef.current = showScanner
 
   useEffect(() => {
     focusIfDesktop(nameRef.current)
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      if (showScannerRef.current) {
+        setShowScanner(false)
+        return
+      }
+      onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const previewIngredients = ingredients
@@ -137,6 +191,20 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
 
   const removeIngredientRow = (index: number) => {
     setIngredients((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)))
+  }
+
+  const applyScannedIngredient = (product: MappedBarcodeProduct) => {
+    const next = ingredientFromProduct(product)
+    setIngredients((prev) => {
+      const blankIndex = prev.findIndex(isBlankIngredient)
+      if (blankIndex >= 0) {
+        return prev.map((row, i) => (i === blankIndex ? next : row))
+      }
+      return [...prev, next]
+    })
+    setName((current) => (current.trim() ? current : product.entry.name))
+    setError(null)
+    setShowScanner(false)
   }
 
   const submit = async () => {
@@ -183,6 +251,7 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
   }
 
   return (
+    <>
     <Modal titleId="recipe-editor-title" onClose={onClose} size="wide">
       <CatalogModalHeader
         titleId="recipe-editor-title"
@@ -282,20 +351,40 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
       <CatalogListSection
         title="Ingredients"
         action={
-          <button
-            type="button"
-            onClick={addIngredientRow}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--zone-accent)',
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            + Add ingredient
-          </button>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setShowScanner(true)}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--zone-accent)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <i className="fa-solid fa-barcode" aria-hidden="true" />
+              Scan barcode
+            </button>
+            <button
+              type="button"
+              onClick={addIngredientRow}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--zone-accent)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              + Add ingredient
+            </button>
+          </div>
         }
       >
         {ingredients.map((row, index) => (
@@ -379,5 +468,12 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
         </button>
       </div>
     </Modal>
+    {showScanner && (
+      <BarcodeScannerModal
+        onProductFound={applyScannedIngredient}
+        onClose={() => setShowScanner(false)}
+      />
+    )}
+    </>
   )
 }

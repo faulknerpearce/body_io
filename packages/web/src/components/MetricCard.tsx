@@ -49,7 +49,7 @@ export default function MetricCard({ config }: MetricCardProps) {
           >
             <i
               className={`fa-solid ${config.iconClass}`}
-              style={{ color: config.color, fontSize: 22 }}
+              style={{ color: config.color, fontSize: 16 }}
             ></i>
           </div>
           <div>

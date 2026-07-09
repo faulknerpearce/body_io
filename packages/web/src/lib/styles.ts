@@ -18,20 +18,22 @@ export const subtleSurface: CSSProperties = {
   borderRadius: radius.xl,
 }
 
+/** Compact circular icon chip. */
 export const iconTileSm: CSSProperties = {
   width: 36,
   height: 36,
-  borderRadius: radius.md,
+  borderRadius: radius.pill,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
 }
 
+/** Standard circular icon chip used in headers, metrics, and catalog rows. */
 export const iconTileMd: CSSProperties = {
-  width: 44,
-  height: 44,
-  borderRadius: radius.lg,
+  width: 40,
+  height: 40,
+  borderRadius: radius.pill,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

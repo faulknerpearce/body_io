@@ -42,9 +42,9 @@ export default function NutritionRingsPanel({ entries, goals }: NutritionRingsPa
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <div
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 10,
+                    width: 26,
+                    height: 26,
+                    borderRadius: 9999,
                     background: metric.iconBg,
                     display: 'flex',
                     alignItems: 'center',
@@ -54,7 +54,7 @@ export default function NutritionRingsPanel({ entries, goals }: NutritionRingsPa
                 >
                   <i
                     className={`fa-solid ${metric.iconClass}`}
-                    style={{ color: metric.color, fontSize: 13 }}
+                    style={{ color: metric.color, fontSize: 11 }}
                   />
                 </div>
                 <span style={{ fontSize: 13, fontWeight: 500, color: '#71717a' }}>

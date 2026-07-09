@@ -110,9 +110,9 @@ export default function ActivityLogSection({
               >
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: radius.lg,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 9999,
                     background: 'var(--zone-accent-muted)',
                     display: 'flex',
                     alignItems: 'center',
@@ -122,7 +122,7 @@ export default function ActivityLogSection({
                 >
                   <i
                     className={`fa-solid ${icon}`}
-                    style={{ color: 'var(--zone-accent)', fontSize: 20 }}
+                    style={{ color: 'var(--zone-accent)', fontSize: 15 }}
                   />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>

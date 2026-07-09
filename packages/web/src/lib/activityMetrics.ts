@@ -29,7 +29,7 @@ export function buildActivityMetricConfigs(
           ? `from ${count} ${count === 1 ? 'activity' : 'activities'}`
           : 'no activities logged',
       color: '#ea580c',
-      iconBg: '#fed7aa',
+      iconBg: '#fbf1e8',
       iconClass: 'fa-fire',
     },
     {
@@ -37,7 +37,7 @@ export function buildActivityMetricConfigs(
       value: formatDuration(totals.movingTimeSeconds),
       detail: 'total moving time',
       color: '#0f766e',
-      iconBg: '#ccfbf1',
+      iconBg: '#edf7f5',
       iconClass: 'fa-clock',
     },
     {
@@ -45,7 +45,7 @@ export function buildActivityMetricConfigs(
       value: formatDistance(totals.distanceMeters > 0 ? totals.distanceMeters : null),
       detail: 'total distance covered',
       color: '#0d9488',
-      iconBg: '#ccfbf1',
+      iconBg: '#edf7f5',
       iconClass: 'fa-route',
     },
     {
@@ -53,7 +53,7 @@ export function buildActivityMetricConfigs(
       value: String(count),
       detail: count === 1 ? 'workout logged' : 'workouts logged',
       color: '#059669',
-      iconBg: '#d1fae5',
+      iconBg: '#eef7f2',
       iconClass: 'fa-heart-pulse',
     },
   ]

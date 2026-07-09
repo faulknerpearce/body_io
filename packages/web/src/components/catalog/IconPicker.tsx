@@ -30,7 +30,7 @@ export default function IconPicker({ id, label, options, selected, onSelect }: I
               className="icon-picker-option"
               style={{ background: opt.bg }}
             >
-              <i className={`fa-solid ${opt.icon}`} style={{ color: opt.color, fontSize: 18 }} />
+              <i className={`fa-solid ${opt.icon}`} style={{ color: opt.color, fontSize: 15 }} />
             </button>
           )
         })}

@@ -28,7 +28,7 @@ export default function CatalogModalHeader({
     <div style={{ marginBottom }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ ...iconTileMd, background: iconBg }}>
-          <i className={`fa-solid ${icon}`} style={{ color: iconColor, fontSize: 20 }} aria-hidden />
+          <i className={`fa-solid ${icon}`} style={{ color: iconColor, fontSize: 16 }} aria-hidden />
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
           <TitleTag id={titleId} style={modalTitle}>

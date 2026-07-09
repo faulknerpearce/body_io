@@ -1,7 +1,7 @@
 import type { ValidationResult } from './validation.js'
 
 export const DEFAULT_WORKOUT_ICON = 'fa-dumbbell'
-export const DEFAULT_WORKOUT_ICON_BG = '#ecfdf5'
+export const DEFAULT_WORKOUT_ICON_BG = '#f0f8f4'
 export const DEFAULT_WORKOUT_ICON_COLOR = '#134e4b'
 
 export interface WorkoutExercise {

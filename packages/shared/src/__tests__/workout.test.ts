@@ -86,7 +86,7 @@ describe('buildWorkoutExerciseSnapshot', () => {
     name: 'Calisthenics',
     description: '',
     icon: 'fa-dumbbell',
-    iconBg: '#ecfdf5',
+    iconBg: '#f0f8f4',
     iconColor: '#134e4b',
     defaultDurationMinutes: 20,
     defaultCalories: 220,

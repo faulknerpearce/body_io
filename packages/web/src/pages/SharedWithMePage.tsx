@@ -393,7 +393,7 @@ export default function SharedWithMePage() {
                   key={item.share.id}
                   isNew={isNew(item.share.createdAt)}
                   icon={icon}
-                  iconBg="#ecfdf5"
+                  iconBg="#f0f8f4"
                   iconColor="var(--zone-accent)"
                   title={item.activity.name}
                   subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.activity.activityType}`}

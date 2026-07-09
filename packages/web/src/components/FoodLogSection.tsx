@@ -128,9 +128,9 @@ export default function FoodLogSection({
             >
               <div
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 16,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 9999,
                   background: item.iconBg,
                   display: 'flex',
                   alignItems: 'center',
@@ -138,7 +138,7 @@ export default function FoodLogSection({
                   flexShrink: 0,
                 }}
               >
-                <i className={`fa-solid ${item.icon}`} style={{ color: item.iconColor, fontSize: 22 }} />
+                <i className={`fa-solid ${item.icon}`} style={{ color: item.iconColor, fontSize: 15 }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div>
