@@ -5,8 +5,10 @@ import {
   type TrendsRangePreset,
 } from '@nutrition-tracker/shared'
 import { useState } from 'react'
-import { cardSurface } from '../../lib/styles'
+import { neutrals, radius, status } from '../../lib/design-tokens'
+import { inputBase, labelBase } from '../../lib/styles'
 import { useMediaQuery } from '../../lib/useMediaQuery'
+import Card from '../ui/Card'
 import TrendsChart from './TrendsChart'
 
 interface TrendsPanelProps {
@@ -34,6 +36,10 @@ const VIEW_OPTIONS: { value: TrendsView; label: string }[] = [
   { value: 'chart', label: 'Chart' },
 ]
 
+/** Theme: surplus warm coral, deficit soft sage. */
+const DELTA_SURPLUS = '#E86A3C'
+const DELTA_DEFICIT = '#5BA88A'
+
 function formatDelta(value: number | null): string {
   if (value === null) return '—'
   if (value > 0) return `+${value.toLocaleString()}`
@@ -41,30 +47,38 @@ function formatDelta(value: number | null): string {
 }
 
 function deltaColor(value: number | null): string {
-  if (value === null) return '#a1a1aa'
-  if (value > 0) return '#dc2626'
-  if (value < 0) return '#059669'
-  return '#71717a'
+  if (value === null) return neutrals.textFaint
+  if (value > 0) return DELTA_SURPLUS
+  if (value < 0) return DELTA_DEFICIT
+  return neutrals.textMuted
 }
 
-function TrendSummaryCards({ summary, summaryId }: { summary: ReturnType<typeof summarizeDailyEnergyPeriod>; summaryId: string }) {
+function netColor(value: number): string {
+  if (value > 0) return DELTA_SURPLUS
+  if (value < 0) return DELTA_DEFICIT
+  return neutrals.textMuted
+}
+
+function TrendSummaryCards({
+  summary,
+  summaryId,
+}: {
+  summary: ReturnType<typeof summarizeDailyEnergyPeriod>
+  summaryId: string
+}) {
   return (
-    <div id={summaryId} className="trends-summary-cards" aria-label="Period summary" style={{ marginTop: 20 }}>
-      <div className="trends-summary-card trends-table-summary-total">
+    <div id={summaryId} className="trends-summary-cards" aria-label="Period summary">
+      <div className="trends-summary-card trends-summary-card-total">
         <p className="trends-summary-card-label">Period total</p>
-        <p className="trends-summary-card-value">
-          {summary.netTotal.toLocaleString()} kcal net
-        </p>
+        <p className="trends-summary-card-value">{summary.netTotal.toLocaleString()} kcal net</p>
         <p className="trends-summary-card-meta">
-          {summary.intakeTotal.toLocaleString()} intake ·{' '}
-          {summary.totalOutputTotal.toLocaleString()} output
+          {summary.intakeTotal.toLocaleString()} intake · {summary.totalOutputTotal.toLocaleString()}{' '}
+          output
         </p>
       </div>
-      <div className="trends-summary-card trends-table-summary-average">
+      <div className="trends-summary-card trends-summary-card-average">
         <p className="trends-summary-card-label">Daily average</p>
-        <p className="trends-summary-card-value">
-          {summary.netAverage.toLocaleString()} kcal net
-        </p>
+        <p className="trends-summary-card-value">{summary.netAverage.toLocaleString()} kcal net</p>
         <p className="trends-summary-card-meta">
           {summary.intakeAverage.toLocaleString()} intake ·{' '}
           {summary.totalOutputAverage.toLocaleString()} output
@@ -92,89 +106,57 @@ export default function TrendsPanel({
   const summaryId = 'trends-period-summary'
 
   return (
-    <div style={{ ...cardSurface, padding: 24 }}>
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 8,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 16,
-        }}
-      >
+    <Card tone="neutral" style={{ padding: '18px 20px' }}>
+      <div className="trends-panel-header">
         <div>
-          <p
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '1.5px',
-              color: 'var(--zone-accent)',
-              textTransform: 'uppercase',
-              margin: '0 0 4px 0',
-            }}
-          >
-            Trends
-          </p>
-          <h3
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 22,
-              fontWeight: 600,
-              margin: 0,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Net energy history
-          </h3>
+          <p className="trends-panel-eyebrow">Trends</p>
+          <h3 className="trends-panel-title">Net energy history</h3>
         </div>
 
         <div className="trends-controls">
-          <div className="trends-preset-row">
-            {PRESETS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => onPresetChange(option.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 9999,
-                  border: preset === option.value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
-                  background: preset === option.value ? '#ecfdf5' : 'white',
-                  color: preset === option.value ? 'var(--zone-accent)' : '#52525b',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div className="trends-preset-row" role="group" aria-label="Date range">
+            {PRESETS.map((option) => {
+              const active = preset === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={active ? 'trends-chip trends-chip-active' : 'trends-chip'}
+                  aria-pressed={active}
+                  onClick={() => onPresetChange(option.value)}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
           </div>
           <div className="trends-view-toggle" role="group" aria-label="Trends view">
-            {VIEW_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={
-                  view === option.value
-                    ? 'trends-view-toggle-button trends-view-toggle-button-active'
-                    : 'trends-view-toggle-button'
-                }
-                aria-pressed={view === option.value}
-                onClick={() => setView(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
+            {VIEW_OPTIONS.map((option) => {
+              const active = view === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={
+                    active
+                      ? 'trends-view-toggle-button trends-view-toggle-button-active'
+                      : 'trends-view-toggle-button'
+                  }
+                  aria-pressed={active}
+                  onClick={() => setView(option.value)}
+                >
+                  {option.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
       {preset === 'custom' && (
-        <div className="modal-form-grid" style={{ marginBottom: 16, maxWidth: 420 }}>
+        <div className="modal-form-grid trends-custom-dates">
           <div>
-            <label htmlFor="trends-start" style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>
+            <label htmlFor="trends-start" style={labelBase}>
               Start date
             </label>
             <input
@@ -182,16 +164,11 @@ export default function TrendsPanel({
               type="date"
               value={customStart}
               onChange={(e) => onCustomStartChange(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: 10,
-                border: '1px solid #e4e4e7',
-              }}
+              style={inputBase}
             />
           </div>
           <div>
-            <label htmlFor="trends-end" style={{ display: 'block', fontSize: 12, marginBottom: 6 }}>
+            <label htmlFor="trends-end" style={labelBase}>
               End date
             </label>
             <input
@@ -199,31 +176,35 @@ export default function TrendsPanel({
               type="date"
               value={customEnd}
               onChange={(e) => onCustomEndChange(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                borderRadius: 10,
-                border: '1px solid #e4e4e7',
-              }}
+              style={inputBase}
             />
           </div>
         </div>
       )}
 
       {error && (
-        <p role="alert" style={{ color: '#dc2626', fontSize: 13, marginBottom: 12 }}>
+        <p
+          role="alert"
+          style={{
+            color: status.danger.text,
+            background: status.danger.bg,
+            border: `1px solid ${status.danger.border}`,
+            borderRadius: radius.md,
+            padding: '10px 12px',
+            fontSize: 13,
+            margin: '0 0 12px 0',
+          }}
+        >
           {error}
         </p>
       )}
 
       {loading ? (
-        <p style={{ color: '#71717a', fontSize: 13 }}>Loading trends...</p>
+        <p style={{ color: neutrals.textMuted, fontSize: 13, margin: 0 }}>Loading trends…</p>
       ) : view === 'chart' ? (
         <>
           <TrendsChart rows={rows} />
-          {rows.length > 0 && (
-            <TrendSummaryCards summary={summary} summaryId={summaryId} />
-          )}
+          {rows.length > 0 && <TrendSummaryCards summary={summary} summaryId={summaryId} />}
         </>
       ) : isMobile ? (
         <>
@@ -237,17 +218,17 @@ export default function TrendsPanel({
               >
                 <div className="trends-mobile-card-header">
                   <h4 className="trends-mobile-card-date">{formatDayLabel(row.date)}</h4>
-                  <span
-                    className="trends-mobile-card-net"
-                    style={{ color: row.net >= 0 ? '#dc2626' : '#059669' }}
-                  >
-                    {row.net >= 0 ? '+' : ''}{row.net.toLocaleString()} kcal
+                  <span className="trends-mobile-card-net" style={{ color: netColor(row.net) }}>
+                    {row.net >= 0 ? '+' : ''}
+                    {row.net.toLocaleString()} kcal
                   </span>
                 </div>
                 <div className="trends-mobile-card-fields">
                   <div className="trends-mobile-card-field">
                     <p className="trends-mobile-card-field-label">Intake</p>
-                    <p className="trends-mobile-card-field-value">{row.intakeCalories.toLocaleString()} kcal</p>
+                    <p className="trends-mobile-card-field-value">
+                      {row.intakeCalories.toLocaleString()} kcal
+                    </p>
                   </div>
                   <div className="trends-mobile-card-field">
                     <p className="trends-mobile-card-field-label">BMR</p>
@@ -255,11 +236,15 @@ export default function TrendsPanel({
                   </div>
                   <div className="trends-mobile-card-field">
                     <p className="trends-mobile-card-field-label">Activity</p>
-                    <p className="trends-mobile-card-field-value">{row.activityCalories.toLocaleString()} kcal</p>
+                    <p className="trends-mobile-card-field-value">
+                      {row.activityCalories.toLocaleString()} kcal
+                    </p>
                   </div>
                   <div className="trends-mobile-card-field">
                     <p className="trends-mobile-card-field-label">Total Output</p>
-                    <p className="trends-mobile-card-field-value">{row.totalOutput.toLocaleString()} kcal</p>
+                    <p className="trends-mobile-card-field-value">
+                      {row.totalOutput.toLocaleString()} kcal
+                    </p>
                   </div>
                   <div className="trends-mobile-card-delta">
                     <p className="trends-mobile-card-delta-label">Δ Net</p>
@@ -274,14 +259,15 @@ export default function TrendsPanel({
               </article>
             ))}
           </div>
-          {rows.length > 0 && (
-            <TrendSummaryCards summary={summary} summaryId={summaryId} />
-          )}
+          {rows.length > 0 && <TrendSummaryCards summary={summary} summaryId={summaryId} />}
         </>
       ) : (
         <>
           <div style={{ overflowX: 'auto' }}>
-            <table className="trends-table" aria-describedby={rows.length > 0 ? summaryId : undefined}>
+            <table
+              className="trends-table"
+              aria-describedby={rows.length > 0 ? summaryId : undefined}
+            >
               <caption className="trends-table-caption">
                 Daily net energy breakdown with period totals and averages
               </caption>
@@ -304,7 +290,9 @@ export default function TrendsPanel({
                     <td>{row.bmr.toLocaleString()}</td>
                     <td>{row.activityCalories.toLocaleString()}</td>
                     <td>{row.totalOutput.toLocaleString()}</td>
-                    <td>{row.net.toLocaleString()}</td>
+                    <td style={{ color: netColor(row.net), fontWeight: 600 }}>
+                      {row.net.toLocaleString()}
+                    </td>
                     <td style={{ color: deltaColor(row.netDelta), fontWeight: 600 }}>
                       {formatDelta(row.netDelta)}
                     </td>
@@ -327,7 +315,7 @@ export default function TrendsPanel({
                     <td>{summary.intakeAverage.toLocaleString()}</td>
                     <td>{summary.bmrAverage.toLocaleString()}</td>
                     <td>{summary.activityAverage.toLocaleString()}</td>
-                    <td>{summary.totalOutputTotal.toLocaleString()}</td>
+                    <td>{summary.totalOutputAverage.toLocaleString()}</td>
                     <td>{summary.netAverage.toLocaleString()}</td>
                     <td aria-hidden="true">—</td>
                   </tr>
@@ -335,11 +323,8 @@ export default function TrendsPanel({
               )}
             </table>
           </div>
-          {rows.length > 0 && (
-            <TrendSummaryCards summary={summary} summaryId={summaryId} />
-          )}
         </>
       )}
-    </div>
+    </Card>
   )
 }

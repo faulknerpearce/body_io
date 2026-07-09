@@ -12,10 +12,11 @@ interface ChartSeries {
   pick: (row: DailyEnergySnapshot) => number
 }
 
+/** Golden-hour chart series (peach intake, teal output, sky-top net). */
 const SERIES: ChartSeries[] = [
-  { key: 'intake', label: 'Intake', color: '#ea580c', pick: (row) => row.intakeCalories },
-  { key: 'output', label: 'Total output', color: '#0d9488', pick: (row) => row.totalOutput },
-  { key: 'net', label: 'Net', color: '#2b68e8', pick: (row) => row.net },
+  { key: 'intake', label: 'Intake', color: '#E8893A', pick: (row) => row.intakeCalories },
+  { key: 'output', label: 'Total output', color: '#2F8A9B', pick: (row) => row.totalOutput },
+  { key: 'net', label: 'Net', color: '#3D4F7A', pick: (row) => row.net },
 ]
 
 const CHART_WIDTH = 720
