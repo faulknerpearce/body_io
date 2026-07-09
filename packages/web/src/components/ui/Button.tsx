@@ -70,7 +70,7 @@ export default function Button({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        borderRadius: radius.md,
+        borderRadius: radius.pill,
         fontWeight: 500,
         cursor: disabled ? 'not-allowed' : 'pointer',
         flexShrink: 0,

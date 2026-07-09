@@ -128,15 +128,16 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 10,
-                  border: zone === 'profile' ? '1px solid #27272a' : '1px solid #e4e4e7',
-                  background: zone === 'profile' ? '#27272a' : '#f4f4f5',
-                  color: zone === 'profile' ? 'white' : '#3f3f46',
+                  borderRadius: 9999,
+                  border: zone === 'profile' ? '1px solid #27272a' : '1px solid rgba(28, 28, 30, 0.12)',
+                  background: zone === 'profile' ? '#4A4A58' : 'rgba(255, 255, 255, 0.88)',
+                  color: zone === 'profile' ? 'white' : '#3A3A3C',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
+                  boxShadow: '0 2px 8px rgba(28, 28, 30, 0.08)',
                 }}
               >
                 <i className="fa-solid fa-user" style={{ fontSize: 16 }} aria-hidden="true" />
