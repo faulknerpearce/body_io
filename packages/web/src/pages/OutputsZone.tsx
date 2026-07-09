@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
 import type { AppRoute } from '../lib/routing'
-import GoToTodayButton from '../components/layout/GoToTodayButton'
 import PageHeader from '../components/layout/PageHeader'
 import type { DayNavHeaderState } from '../lib/dayNavState'
 import PageShell from '../components/layout/PageShell'
@@ -44,17 +43,9 @@ export default function OutputsZone({ route }: OutputsZoneProps) {
               <i className="fa-solid fa-plus" aria-hidden="true" /> New Workout
             </ZoneButton>
           ) : (
-            <div className="page-header-primary-action">
-              <ZoneButton variant="primary" onClick={() => openLogActivityRef.current?.()}>
-                <i className="fa-solid fa-plus" aria-hidden="true" /> Log Activity
-              </ZoneButton>
-              {dayNavState && !dayNavState.isToday && (
-                <GoToTodayButton
-                  onClick={dayNavState.onGoToToday}
-                  className="page-header-today-button"
-                />
-              )}
-            </div>
+            <ZoneButton variant="primary" onClick={() => openLogActivityRef.current?.()}>
+              <i className="fa-solid fa-plus" aria-hidden="true" /> Log Activity
+            </ZoneButton>
           )
         }
       />

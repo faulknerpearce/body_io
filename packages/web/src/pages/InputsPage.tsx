@@ -5,6 +5,7 @@ import AddEntryModal from '../components/AddEntryModal'
 import BarcodeScannerModal from '../components/BarcodeScannerModal'
 import CollapsiblePanel from '../components/layout/CollapsiblePanel'
 import DayNavigator from '../components/layout/DayNavigator'
+import GoToTodayButton from '../components/layout/GoToTodayButton'
 
 import { PageError, PageLoading } from '../components/layout/PageState'
 import FoodLogEntryStats from '../components/FoodLogEntryStats'
@@ -239,15 +240,23 @@ export default function InputsPage({
 
   return (
     <>
-      <DayNavigator
-        date={selectedDate}
-        isToday={isToday}
-        compact
-        canGoForward={selectedDate < today}
-        onPrevious={() => setSelectedDate((date) => shiftISODate(date, -1))}
-        onNext={() => setSelectedDate((date) => shiftISODate(date, 1))}
-        onGoToToday={() => setSelectedDate(today)}
-      />
+      <div className="day-nav-shell">
+        <GoToTodayButton
+          className="day-nav-today-corner"
+          isToday={isToday}
+          onClick={() => setSelectedDate(today)}
+        />
+        <DayNavigator
+          date={selectedDate}
+          isToday={isToday}
+          compact
+          showTodayControl={false}
+          canGoForward={selectedDate < today}
+          onPrevious={() => setSelectedDate((date) => shiftISODate(date, -1))}
+          onNext={() => setSelectedDate((date) => shiftISODate(date, 1))}
+          onGoToToday={() => setSelectedDate(today)}
+        />
+      </div>
 
       <div className={`inputs-day-content${isToday ? ' inputs-day-content-today' : ''}`}>
         <CollapsiblePanel

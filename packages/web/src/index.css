@@ -237,7 +237,70 @@ html {
 }
 
 .page-header-today-button {
-  width: 100%;
+  width: auto;
+}
+
+/* Jump-to-today calendar control */
+.go-to-today-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-muted);
+  color: var(--color-text-faint);
+  font-size: 15px;
+  line-height: 1;
+  cursor: default;
+  flex-shrink: 0;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.go-to-today-icon-dormant {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.go-to-today-icon-active {
+  opacity: 1;
+  cursor: pointer;
+  color: var(--zone-accent);
+  border-color: color-mix(in srgb, var(--zone-accent) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--zone-accent) 10%, white);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--zone-accent) 18%, transparent);
+}
+
+.go-to-today-icon-active:hover {
+  background: color-mix(in srgb, var(--zone-accent) 16%, white);
+  color: var(--zone-accent);
+}
+
+.go-to-today-icon-active:active {
+  transform: scale(0.97);
+}
+
+.day-nav-shell {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.day-nav-today-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+/* Room for corner calendar so title doesn't collide */
+.day-nav-shell .inputs-day-nav-compact {
+  padding-right: 44px;
 }
 
 .zone-subnav {

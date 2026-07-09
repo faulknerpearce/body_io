@@ -8,16 +8,13 @@ interface OutputCompositionBarProps {
 }
 
 /** Muted gray — baseline burn (not logged activity). */
-const BMR_COLOR = '#8E8E93'
-const BMR_BASE = '#A1A1A6'
-const BMR_STRIPE = 'rgba(255, 255, 255, 0.45)'
-/** Diagonally hatched muted gray fill. */
+const BMR_COLOR = '#A1A1A6'
+const BMR_BASE = '#C7C7CC'
+/** Minimal diagonal hatch — sparse light strokes over soft gray. */
 const BMR_HATCH = `repeating-linear-gradient(
   -45deg,
-  ${BMR_BASE} 0 4px,
-  color-mix(in srgb, ${BMR_BASE} 78%, #52525b) 4px 5px,
-  ${BMR_BASE} 5px 9px,
-  ${BMR_STRIPE} 9px 11px
+  ${BMR_BASE} 0 7px,
+  rgba(255, 255, 255, 0.55) 7px 8px
 )`
 
 /** Burn coral (outputs accent) — activity share of burn. */

@@ -13,6 +13,11 @@ interface DayNavigatorProps {
   compact?: boolean
   /** Keep arrows inline (e.g. embedded in a card) instead of the mobile floating dock. */
   disableMobileDock?: boolean
+  /**
+   * When false, DayNavigator does not render the calendar control
+   * (parent places it in a card/page header).
+   */
+  showTodayControl?: boolean
   onPrevious: () => void
   onNext: () => void
   onGoToToday?: () => void
@@ -72,6 +77,7 @@ export default function DayNavigator({
   canGoForward = false,
   compact = false,
   disableMobileDock = false,
+  showTodayControl = true,
   onPrevious,
   onNext,
   onGoToToday,
@@ -80,7 +86,10 @@ export default function DayNavigator({
   const defaultMeta = `${itemCount} ${itemCount === 1 ? itemLabel.singular : itemLabel.plural}`
   const metaContent = meta ?? defaultMeta
   const headline = compact ? formatWeekdayHeadline(date) : formatDayLabel(date)
-  const showToday = !isToday && Boolean(onGoToToday)
+  const todayControl =
+    showTodayControl && onGoToToday ? (
+      <GoToTodayButton isToday={isToday} onClick={onGoToToday} />
+    ) : null
 
   return (
     <>
@@ -94,9 +103,6 @@ export default function DayNavigator({
         <div className="inputs-day-nav-label">
           <div className="inputs-day-nav-title-row">
             <div className="inputs-day-nav-title">{headline}</div>
-            {showToday && !mobileDock && onGoToToday && (
-              <GoToTodayButton onClick={onGoToToday} />
-            )}
           </div>
           {compact ? (
             <div className="inputs-day-nav-calendar">{formatMonthDayLabel(date)}</div>
@@ -115,7 +121,7 @@ export default function DayNavigator({
 
       {mobileDock && (
         <div className="inputs-day-nav-mobile-dock" role="toolbar" aria-label="Day navigation">
-          {showToday && onGoToToday ? <GoToTodayButton onClick={onGoToToday} /> : <span />}
+          {todayControl ?? <span />}
           <div className="inputs-day-nav-mobile-arrows">
             <NavArrowButton
               direction="previous"
