@@ -805,63 +805,76 @@ body {
 }
 
 .trends-summary-card {
-  border-radius: var(--radius-xl);
-  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
 }
 
 .trends-summary-card-label {
-  margin: 0 0 6px 0;
-  font-size: 11px;
-  font-weight: 700;
+  margin: 0 0 4px 0;
+  font-size: 10px;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 .trends-summary-card-value {
-  margin: 0 0 4px 0;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.15;
+  margin: 0 0 2px 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
   font-family: var(--font-display);
   letter-spacing: -0.02em;
+  color: var(--color-text-primary);
 }
 
 .trends-summary-card-meta {
   margin: 0;
   font-size: 12px;
   line-height: 1.4;
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 
+/* Informational — quieter than controls; not a filled CTA */
 .trends-summary-card-total {
-  background: var(--trends-accent, #3d4f7a);
-  color: #ffffff;
+  background: rgba(61, 79, 122, 0.08);
+  border-color: rgba(61, 79, 122, 0.16);
 }
 
-.trends-summary-card-total .trends-summary-card-label,
+.trends-summary-card-total .trends-summary-card-label {
+  color: #5c6b8a;
+}
+
 .trends-summary-card-total .trends-summary-card-value {
-  color: #ffffff;
+  color: var(--trends-accent, #3d4f7a);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .trends-summary-card-total .trends-summary-card-meta {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--color-text-muted);
 }
 
 .trends-summary-card-average {
-  background: rgba(91, 168, 138, 0.14);
-  border: 1px solid rgba(91, 168, 138, 0.28);
-  color: #2f6b54;
+  background: rgba(91, 168, 138, 0.1);
+  border-color: rgba(91, 168, 138, 0.2);
 }
 
 .trends-summary-card-average .trends-summary-card-label {
-  color: #3d7a5f;
+  color: #4a7a62;
 }
 
 .trends-summary-card-average .trends-summary-card-value {
-  color: #1f4f3c;
+  color: #2f6b54;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .trends-summary-card-average .trends-summary-card-meta {
-  color: #3d7a5f;
+  color: var(--color-text-muted);
 }
 
 .trends-chart-legend {
@@ -881,10 +894,25 @@ body {
 }
 
 .trends-chart-legend-swatch {
-  width: 16px;
-  height: 4px;
+  width: 18px;
+  height: 3px;
   border-radius: 9999px;
   flex-shrink: 0;
+}
+
+.trends-chart-legend-swatch-net {
+  height: 4px;
+}
+
+.trends-chart-legend-swatch-dashed {
+  height: 0;
+  border-top: 3px dashed transparent;
+  border-radius: 0;
+  background: none !important;
+  /* dash color via border-image not reliable; use backgroundImage inline */
+  min-height: 3px;
+  height: 3px;
+  border: none;
 }
 
 .trends-chart-mobile .trends-chart-legend {
@@ -894,7 +922,11 @@ body {
 }
 
 .trends-chart-mobile .trends-chart-legend-swatch {
-  width: 20px;
+  width: 22px;
+  height: 4px;
+}
+
+.trends-chart-mobile .trends-chart-legend-swatch-net {
   height: 5px;
 }
 

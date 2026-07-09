@@ -11,15 +11,39 @@ interface ChartSeries {
   key: 'intake' | 'output' | 'net'
   label: string
   color: string
+  /** SVG stroke-dasharray; undefined = solid */
+  dash?: string
   pick: (row: DailyEnergySnapshot) => number
 }
 
-/** Golden-hour chart series (peach intake, teal output, sky-top net). */
+/**
+ * Golden-hour series with non-color line styles for accessibility:
+ * Intake solid, Output dashed, Net solid (thicker).
+ */
 const SERIES: ChartSeries[] = [
-  { key: 'intake', label: 'Intake', color: '#E8893A', pick: (row) => row.intakeCalories },
-  { key: 'output', label: 'Total output', color: '#2F8A9B', pick: (row) => row.totalOutput },
-  { key: 'net', label: 'Net', color: '#3D4F7A', pick: (row) => row.net },
+  {
+    key: 'intake',
+    label: 'Intake',
+    color: '#E8893A',
+    pick: (row) => row.intakeCalories,
+  },
+  {
+    key: 'output',
+    label: 'Output',
+    color: '#2F8A9B',
+    dash: '7 5',
+    pick: (row) => row.totalOutput,
+  },
+  {
+    key: 'net',
+    label: 'Net',
+    color: '#3D4F7A',
+    pick: (row) => row.net,
+  },
 ]
+
+/** Hide per-day dots on mobile for ~30-day (and longer) ranges. */
+const MOBILE_HIDE_DOTS_MIN_DAYS = 15
 
 function formatShortDate(iso: string): string {
   return parseISODate(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -151,12 +175,13 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
   }
 
   const formatYTick = isMobile ? formatCompactKcal : (v: number) => v.toLocaleString()
+  const showPoints = !(isMobile && rows.length >= MOBILE_HIDE_DOTS_MIN_DAYS)
 
   return (
     <div className={isMobile ? 'trends-chart trends-chart-mobile' : 'trends-chart'}>
       <div
         role="img"
-        aria-label="Line chart of daily intake, total output, and net calories"
+        aria-label="Line chart of daily intake (solid), output (dashed), and net calories"
         className="trends-chart-canvas"
       >
         <svg
@@ -200,26 +225,34 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
                 fill="none"
                 stroke={series.color}
                 strokeWidth={series.key === 'net' ? layout.netLineWidth : layout.lineWidth}
+                strokeDasharray={series.dash}
                 strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-              {points.map((point, index) => (
-                <circle
-                  key={`${series.key}-${index}`}
-                  cx={point.x}
-                  cy={point.y}
-                  r={series.key === 'net' ? layout.netPointRadius : layout.pointRadius}
-                  fill={series.color}
-                  stroke="#ffffff"
-                  strokeWidth={isMobile ? 1.5 : 1}
-                >
+                strokeLinecap={series.dash ? 'butt' : 'round'}
+              >
+                {!showPoints && (
                   <title>
-                    {`${formatShortDate(rows[index]!.date)} ${series.label}: ${series
-                      .pick(rows[index]!)
-                      .toLocaleString()} kcal`}
+                    {`${series.label} trend over ${rows.length} days`}
                   </title>
-                </circle>
-              ))}
+                )}
+              </path>
+              {showPoints &&
+                points.map((point, index) => (
+                  <circle
+                    key={`${series.key}-${index}`}
+                    cx={point.x}
+                    cy={point.y}
+                    r={series.key === 'net' ? layout.netPointRadius : layout.pointRadius}
+                    fill={series.color}
+                    stroke="#ffffff"
+                    strokeWidth={isMobile ? 1.5 : 1}
+                  >
+                    <title>
+                      {`${formatShortDate(rows[index]!.date)} ${series.label}: ${series
+                        .pick(rows[index]!)
+                        .toLocaleString()} kcal`}
+                    </title>
+                  </circle>
+                ))}
             </g>
           ))}
 
@@ -246,8 +279,21 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
         {SERIES.map((series) => (
           <span key={series.key} className="trends-chart-legend-item">
             <span
-              className="trends-chart-legend-swatch"
-              style={{ background: series.color }}
+              className={
+                series.dash
+                  ? 'trends-chart-legend-swatch trends-chart-legend-swatch-dashed'
+                  : series.key === 'net'
+                    ? 'trends-chart-legend-swatch trends-chart-legend-swatch-net'
+                    : 'trends-chart-legend-swatch'
+              }
+              style={
+                series.dash
+                  ? {
+                      backgroundImage: `repeating-linear-gradient(90deg, ${series.color} 0 6px, transparent 6px 10px)`,
+                      backgroundColor: 'transparent',
+                    }
+                  : { background: series.color }
+              }
             />
             {series.label}
           </span>
@@ -256,7 +302,9 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
 
       {isMobile && rows.length > 0 && (
         <p className="trends-chart-mobile-hint">
-          Tap a point for exact kcal. Y-axis values in thousands shown as k.
+          {showPoints
+            ? 'Tap a point for exact kcal. Y-axis values in thousands shown as k.'
+            : 'Solid lines for longer ranges. Intake solid · Output dashed · Net bold. Y-axis k = thousands.'}
         </p>
       )}
     </div>
