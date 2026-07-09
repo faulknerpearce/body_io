@@ -521,24 +521,25 @@ html {
   cursor: not-allowed;
 }
 
-/* [Calendar] [Day/date]  ·········  [←] [→] */
+/* [Calendar] [Day/date]  ·········  [←] [→] — no bar/chrome, sits on page or parent card */
 .inputs-day-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
-  padding: 12px 16px;
-  border-radius: var(--radius-xxl);
-  background: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow-soft);
+  padding: 4px 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .inputs-day-nav-today {
-  border-color: color-mix(in srgb, var(--zone-accent) 28%, var(--glass-border));
+  border: none;
+  box-shadow: none;
 }
 
 .inputs-day-nav-leading {
@@ -659,12 +660,9 @@ html {
 .zone-root[data-zone='inputs'] .inputs-day-nav,
 .zone-root[data-zone='outputs'] .inputs-day-nav {
   margin-bottom: 12px;
-  /* Light bar on soft zone wash — not full glass smear */
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-title,
@@ -1445,21 +1443,19 @@ html {
   gap: 16px;
 }
 
-/* Day nav inside energy card */
+/* Day nav inside energy card — same free-floating controls on the card surface */
 .energy-day-nav .inputs-day-nav {
   margin-bottom: 0;
-  padding: 8px 10px;
-  background: var(--color-surface-muted);
-  border: 1px solid var(--color-border);
+  padding: 2px 0;
+  background: transparent;
+  border: none;
   box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .energy-day-nav .inputs-day-nav-button {
   width: 36px;
   height: 36px;
-  background: #ffffff;
+  background: var(--color-surface-muted);
   border: 1px solid var(--color-border-strong);
   color: var(--color-text-muted);
 }
