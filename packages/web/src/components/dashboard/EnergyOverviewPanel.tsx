@@ -298,55 +298,20 @@ export default function EnergyOverviewPanel({
         </div>
 
         <div className="energy-overview-stats">
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-            <span
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: 36,
-                fontWeight: 700,
-                letterSpacing: '-0.03em',
-                lineHeight: 1,
-                color: neutrals.textPrimary,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {balance.net.toLocaleString()}
-            </span>
-            <span style={{ fontSize: 14, fontWeight: 500, color: neutrals.textMuted }}>kcal net</span>
+          <div className="energy-overview-net">
+            <span className="energy-overview-net-value">{balance.net.toLocaleString()}</span>
+            <span className="energy-overview-net-unit">kcal net</span>
           </div>
-          <p
-            style={{
-              fontSize: 12,
-              color: neutrals.textMuted,
-              margin: '6px 0 0 0',
-              lineHeight: 1.35,
-            }}
-          >
-            {balance.contextMessage}
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              gap: 16,
-              marginTop: 10,
-              flexWrap: 'wrap',
-            }}
-          >
-            <span style={{ fontSize: 12, color: neutrals.textMuted }}>
-              <strong style={{ color: neutrals.textPrimary, fontWeight: 600 }}>
-                {balance.consumed.toLocaleString()}
-              </strong>{' '}
-              in
+          <div className="energy-overview-io">
+            <span>
+              <strong>{balance.consumed.toLocaleString()}</strong> in
             </span>
-            <span style={{ fontSize: 12, color: neutrals.textMuted }}>
-              <strong style={{ color: neutrals.textPrimary, fontWeight: 600 }}>
-                {balance.burned.toLocaleString()}
-              </strong>{' '}
-              out
+            <span className="energy-overview-io-sep" aria-hidden="true">
+              ·
             </span>
-            {!hasActivities && balance.activityCalories === 0 && (
-              <span style={{ fontSize: 11, color: neutrals.textFaint }}>BMR only</span>
-            )}
+            <span>
+              <strong>{balance.burned.toLocaleString()}</strong> out
+            </span>
           </div>
         </div>
       </div>

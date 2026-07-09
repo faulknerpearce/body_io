@@ -1469,7 +1469,7 @@ html {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   text-align: left;
 }
 
@@ -1484,6 +1484,49 @@ html {
   min-width: 0;
 }
 
+.energy-overview-net {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.energy-overview-net-value {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-overview-net-unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.energy-overview-io {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.energy-overview-io strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-overview-io-sep {
+  color: var(--color-text-faint);
+}
+
 .energy-overview-stats-header {
   display: flex;
   align-items: center;
@@ -1491,16 +1534,42 @@ html {
   margin-bottom: 6px;
 }
 
-@media (max-width: 420px) {
+/* Mobile: ring stacked above centered net figure with breathing room */
+@media (max-width: 639px) {
   .energy-overview-ring-row {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 12px;
+    gap: 22px;
+    padding: 8px 0 4px;
   }
 
   .energy-overview-stats {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .energy-overview-net {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .energy-overview-net-value {
+    font-size: 40px;
+    letter-spacing: -0.04em;
+  }
+
+  .energy-overview-net-unit {
+    font-size: 13px;
+  }
+
+  .energy-overview-io {
+    justify-content: center;
+    margin-top: 12px;
   }
 }
 
