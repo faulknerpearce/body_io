@@ -17,16 +17,21 @@ const statusLabel: Record<NetBalance['status'], string> = {
   over: 'Over goal',
 }
 
+/** Theme-aligned chart colors (golden hour wellness palette). */
+const GOAL_GREEN = '#5BA88A'
+const GOAL_GREEN_SOFT = 'rgba(91, 168, 138, 0.28)'
+const GOAL_GREEN_BORDER = '#4A9A7A'
+
 const statusColor: Record<NetBalance['status'], string> = {
-  under: '#2563eb',
-  in_range: '#059669',
-  over: '#dc2626',
+  under: '#6B8DB5', // soft periwinkle (dashboard sky mid)
+  in_range: GOAL_GREEN,
+  over: '#E86A3C', // warm coral (inputs/sunset family)
 }
 
 const statusBadgeBg: Record<NetBalance['status'], string> = {
-  under: '#dbeafe',
-  in_range: '#d1fae5',
-  over: '#fee2e2',
+  under: 'rgba(107, 141, 181, 0.18)',
+  in_range: 'rgba(91, 168, 138, 0.18)',
+  over: 'rgba(232, 106, 60, 0.16)',
 }
 
 /** Net position on a track with the goal low–high band highlighted. */
@@ -111,8 +116,8 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
             height: trackHeight,
             width: `${Math.max(highPct - lowPct, 0)}%`,
             borderRadius: 9999,
-            background: 'rgba(16, 185, 129, 0.35)',
-            border: '2px solid #059669',
+            background: GOAL_GREEN_SOFT,
+            border: `2px solid ${GOAL_GREEN_BORDER}`,
             boxSizing: 'border-box',
           }}
         />
@@ -167,12 +172,12 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
               fontWeight: 600,
               letterSpacing: '0.06em',
               textTransform: 'uppercase',
-              color: statusColor.in_range,
+              color: GOAL_GREEN,
             }}
           >
             Goal high
           </span>
-          <span style={{ color: statusColor.in_range }}>{balance.goalHigh.toLocaleString()}</span>
+          <span style={{ color: GOAL_GREEN }}>{balance.goalHigh.toLocaleString()}</span>
         </span>
       </div>
     </div>
@@ -182,8 +187,9 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
 export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOverviewPanelProps) {
   const color = statusColor[balance.status]
   const ring = netRingProgress(balance)
+  // Fill only when net is positive; still show true % (including negative) in the center
   const ringFillValue = balance.net > 0 ? balance.net : 0
-  const ringCenterLabel = balance.net < 0 ? '—' : `${Math.max(ring.pct, 0)}%`
+  const ringCenterLabel = `${ring.pct}%`
 
   return (
     <Card tone="neutral" style={{ padding: '16px 18px' }}>
