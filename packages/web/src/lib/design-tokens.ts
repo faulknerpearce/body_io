@@ -123,14 +123,15 @@ export const zoneGradients: Record<ZoneId, string> = {
     #FFE8D4 80%,
     #FFF8F2 100%
   )`,
+  /** Slightly brighter mid-tones; deeper accent handles CTA contrast separately */
   outputs: `linear-gradient(
     165deg,
-    #1E3A4C 0%,
-    #2F6F7E 20%,
-    #5BA3B0 42%,
-    #A8D5D0 65%,
-    #D4EDE8 85%,
-    #F0F7F5 100%
+    #163A48 0%,
+    #1F5F6E 18%,
+    #3D8F9E 40%,
+    #7EC4CE 62%,
+    #C5E8EC 82%,
+    #F2FAFB 100%
   )`,
   profile: `linear-gradient(
     165deg,
@@ -143,12 +144,28 @@ export const zoneGradients: Record<ZoneId, string> = {
   )`,
 }
 
-/** Text that sits directly on the zone sky (not inside white cards). */
+/**
+ * Text on zone sky. Single soft shadow only — multi-layer glow causes
+ * chromatic “vibration” on warm gradients (especially Inputs descriptions).
+ */
 export const onSky = {
   text: '#FFFFFF',
-  textMuted: 'rgba(255, 255, 255, 0.86)',
-  textFaint: 'rgba(255, 255, 255, 0.72)',
-  shadow: '0 1px 2px rgba(0, 0, 0, 0.28), 0 0 18px rgba(0, 0, 0, 0.12)',
+  textMuted: 'rgba(255, 255, 255, 0.96)',
+  textFaint: 'rgba(255, 255, 255, 0.88)',
+  shadow: '0 1px 2px rgba(0, 0, 0, 0.55)',
+  shadowStrong: '0 1px 3px rgba(0, 0, 0, 0.65)',
+} as const
+
+/** Frosted glass surfaces for layered chrome (nav, docks, menus). */
+export const glass = {
+  bg: 'rgba(255, 255, 255, 0.58)',
+  bgStrong: 'rgba(255, 255, 255, 0.72)',
+  bgSoft: 'rgba(255, 255, 255, 0.48)',
+  border: 'rgba(255, 255, 255, 0.55)',
+  borderEdge: 'rgba(28, 28, 30, 0.08)',
+  blur: '18px',
+  shadow: '0 8px 32px rgba(28, 28, 30, 0.1)',
+  shadowSoft: '0 4px 18px rgba(28, 28, 30, 0.08)',
 } as const
 
 export interface ZoneTokens {
@@ -194,13 +211,14 @@ export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   },
   outputs: {
     id: 'outputs',
-    accent: '#2F8A9B',
-    accentMuted: 'rgba(47, 138, 155, 0.16)',
+    // Deeper teal for accessible white-on-accent CTAs (Log Activity, etc.)
+    accent: '#0F6B7C',
+    accentMuted: 'rgba(15, 107, 124, 0.16)',
     accentText: '#ffffff',
     bg: zoneGradients.outputs,
     cardBg: neutrals.surface,
     cardBorder: 'rgba(28, 28, 30, 0.06)',
-    eyebrow: '#1E5A66',
+    eyebrow: '#0C5563',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
@@ -230,6 +248,7 @@ export function zoneCssVars(zone: ZoneTokens): Record<string, string> {
     '--zone-on-sky': zone.onSky,
     '--zone-on-sky-muted': zone.onSkyMuted,
     '--zone-on-sky-shadow': onSky.shadow,
+    '--zone-on-sky-shadow-strong': onSky.shadowStrong,
   }
 }
 

@@ -125,19 +125,24 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
                 aria-expanded={menuOpen}
                 aria-haspopup="true"
                 onClick={() => setMenuOpen((open) => !open)}
+                className={zone === 'profile' ? undefined : 'glass-strong'}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: 9999,
-                  border: zone === 'profile' ? '1px solid #27272a' : '1px solid rgba(28, 28, 30, 0.12)',
-                  background: zone === 'profile' ? '#4A4A58' : 'rgba(255, 255, 255, 0.88)',
+                  border:
+                    zone === 'profile'
+                      ? '1px solid #27272a'
+                      : '1px solid rgba(255, 255, 255, 0.55)',
+                  background: zone === 'profile' ? '#4A4A58' : undefined,
                   color: zone === 'profile' ? 'white' : '#3A3A3C',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  boxShadow: '0 2px 8px rgba(28, 28, 30, 0.08)',
+                  boxShadow:
+                    zone === 'profile' ? '0 2px 8px rgba(28, 28, 30, 0.08)' : undefined,
                 }}
               >
                 <i className="fa-solid fa-user" style={{ fontSize: 16 }} aria-hidden="true" />
@@ -150,15 +155,13 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
               {menuOpen && (
                 <div
                   role="menu"
+                  className="glass-strong account-menu-panel"
                   style={{
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
                     minWidth: 200,
-                    background: 'white',
-                    border: '1px solid #e4e4e7',
-                    borderRadius: 14,
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+                    borderRadius: 16,
                     padding: 8,
                     zIndex: 50,
                   }}
