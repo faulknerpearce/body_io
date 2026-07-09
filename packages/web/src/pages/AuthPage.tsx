@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Alert, Button, Card } from '../components/ui'
 import { useAuth } from '../context/useAuth'
-import { BRAND_SUNSET, neutrals, radius, type, zoneGradients } from '../lib/design-tokens'
+import { DASHBOARD_SKY_TOP, neutrals, radius, type, zoneGradients } from '../lib/design-tokens'
 import { inputBase, labelBase } from '../lib/styles'
 
 type Mode = 'signin' | 'signup'
@@ -49,18 +49,6 @@ export default function AuthPage() {
         position: 'relative',
       }}
     >
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0.07,
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: '180px 180px',
-        }}
-      />
       <Card
         tone="neutral"
         style={{
@@ -76,7 +64,7 @@ export default function AuthPage() {
             width: 44,
             height: 44,
             borderRadius: radius.md,
-            background: BRAND_SUNSET,
+            background: DASHBOARD_SKY_TOP,
             color: 'white',
             display: 'flex',
             alignItems: 'center',

@@ -100,73 +100,60 @@ export const atmosphere = {
 } as const
 
 /**
- * Per-zone sky gradients (top → bottom).
- * Tops stay deep enough for white chrome text; bottoms soften into cream/mist.
+ * Soft zone atmospheres — light washes, not full-bleed skies.
+ * Zone identity comes from accent + subtle page tint, not saturated gradients.
  */
 export const zoneGradients: Record<ZoneId, string> = {
   dashboard: `linear-gradient(
-    165deg,
-    #1E4FD6 0%,
-    #2B5FE8 14%,
-    #5B8DEF 32%,
-    #A8C8FA 48%,
-    #E8B48A 64%,
-    #FF9F5C 80%,
-    #FFDB85 100%
+    180deg,
+    color-mix(in srgb, #2B5FE8 10%, #ffffff) 0%,
+    #F5F7FB 42%,
+    #FAFBFC 100%
   )`,
-  /** Fueling — fresh green canopy into soft mint cream */
+  /** Fueling — soft mint wash */
   inputs: `linear-gradient(
-    165deg,
-    #0B6B45 0%,
-    #1B8A5A 16%,
-    #3DAA75 36%,
-    #7ECFA0 56%,
-    #C5EED4 78%,
-    #F2FBF5 100%
+    180deg,
+    color-mix(in srgb, #0F7A4A 9%, #ffffff) 0%,
+    #F4FAF6 42%,
+    #FAFBFC 100%
   )`,
-  /** Burning — warm coral / ember (former inputs palette) */
+  /** Burning — soft coral wash */
   outputs: `linear-gradient(
-    165deg,
-    #E86A3C 0%,
-    #FF8F5A 18%,
-    #FFB07A 38%,
-    #FFD0A8 58%,
-    #FFE8D4 80%,
-    #FFF8F2 100%
+    180deg,
+    color-mix(in srgb, #E86A3C 9%, #ffffff) 0%,
+    #FFF8F5 42%,
+    #FAFBFC 100%
   )`,
   profile: `linear-gradient(
-    165deg,
-    #3C3C48 0%,
-    #5C5C6E 22%,
-    #8A8A9C 48%,
-    #C5C5D0 72%,
-    #E8E8EE 90%,
-    #F5F5F7 100%
+    180deg,
+    #F0F0F2 0%,
+    #F7F7F8 50%,
+    #FAFAFA 100%
   )`,
 }
 
 /**
- * Text on zone sky. Single soft shadow only — multi-layer glow causes
- * chromatic “vibration” on warm gradients (especially Inputs descriptions).
+ * Page chrome on light atmospheres — dark readable text (no white-on-sky).
+ * CSS vars keep the historic `--zone-on-sky*` names for compatibility.
  */
 export const onSky = {
-  text: '#FFFFFF',
-  textMuted: 'rgba(255, 255, 255, 0.96)',
-  textFaint: 'rgba(255, 255, 255, 0.88)',
-  shadow: '0 1px 2px rgba(0, 0, 0, 0.55)',
-  shadowStrong: '0 1px 3px rgba(0, 0, 0, 0.65)',
+  text: neutrals.textPrimary,
+  textMuted: neutrals.textMuted,
+  textFaint: neutrals.textFaint,
+  shadow: 'none',
+  shadowStrong: 'none',
 } as const
 
 /** Frosted glass surfaces for layered chrome (nav, docks, menus). */
 export const glass = {
-  bg: 'rgba(255, 255, 255, 0.58)',
-  bgStrong: 'rgba(255, 255, 255, 0.72)',
-  bgSoft: 'rgba(255, 255, 255, 0.48)',
-  border: 'rgba(255, 255, 255, 0.55)',
+  bg: 'rgba(255, 255, 255, 0.72)',
+  bgStrong: 'rgba(255, 255, 255, 0.82)',
+  bgSoft: 'rgba(255, 255, 255, 0.62)',
+  border: 'rgba(28, 28, 30, 0.08)',
   borderEdge: 'rgba(28, 28, 30, 0.08)',
-  blur: '18px',
-  shadow: '0 8px 32px rgba(28, 28, 30, 0.1)',
-  shadowSoft: '0 4px 18px rgba(28, 28, 30, 0.08)',
+  blur: '16px',
+  shadow: '0 8px 28px rgba(28, 28, 30, 0.08)',
+  shadowSoft: '0 4px 16px rgba(28, 28, 30, 0.06)',
 } as const
 
 export interface ZoneTokens {
@@ -188,38 +175,38 @@ export interface ZoneTokens {
 export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   dashboard: {
     id: 'dashboard',
-    accent: BRAND_SUNSET,
-    accentMuted: 'rgba(255, 107, 53, 0.16)',
+    accent: DASHBOARD_SKY_TOP,
+    accentMuted: 'rgba(43, 95, 232, 0.12)',
     accentText: '#ffffff',
     bg: zoneGradients.dashboard,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(28, 28, 30, 0.06)',
-    eyebrow: '#8B5A3C',
+    cardBorder: 'rgba(43, 95, 232, 0.1)',
+    eyebrow: '#2B5FE8',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
   inputs: {
     id: 'inputs',
-    // Fuel / nourish — deep green for accessible white-on-accent CTAs
+    // Fuel / nourish — green accents on soft mint page wash
     accent: '#0F7A4A',
-    accentMuted: 'rgba(15, 122, 74, 0.16)',
+    accentMuted: 'rgba(15, 122, 74, 0.12)',
     accentText: '#ffffff',
     bg: zoneGradients.inputs,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(28, 28, 30, 0.06)',
-    eyebrow: '#0B5C38',
+    cardBorder: 'rgba(15, 122, 74, 0.12)',
+    eyebrow: '#0F7A4A',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
   outputs: {
     id: 'outputs',
-    // Burn / effort — coral ember for Log Activity CTAs
+    // Burn / effort — coral accents on soft warm page wash
     accent: '#E86A3C',
-    accentMuted: 'rgba(232, 106, 60, 0.16)',
+    accentMuted: 'rgba(232, 106, 60, 0.12)',
     accentText: '#ffffff',
     bg: zoneGradients.outputs,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    cardBorder: 'rgba(232, 106, 60, 0.12)',
     eyebrow: '#C45A2A',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
@@ -227,11 +214,11 @@ export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   profile: {
     id: 'profile',
     accent: '#4A4A58',
-    accentMuted: 'rgba(74, 74, 88, 0.12)',
+    accentMuted: 'rgba(74, 74, 88, 0.1)',
     accentText: '#ffffff',
     bg: zoneGradients.profile,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    cardBorder: 'rgba(28, 28, 30, 0.08)',
     eyebrow: '#5C5C6E',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,

@@ -52,38 +52,35 @@
   --shadow-elevated: 0 14px 36px rgba(28, 28, 30, 0.1);
   --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-  /* Default zone = dashboard golden hour */
-  --zone-accent: #ff6b35;
-  --zone-accent-muted: rgba(255, 107, 53, 0.16);
+  /* Default zone = soft dashboard wash */
+  --zone-accent: #2b5fe8;
+  --zone-accent-muted: rgba(43, 95, 232, 0.12);
   --zone-accent-text: #ffffff;
   --zone-bg: linear-gradient(
-    165deg,
-    #1e4fd6 0%,
-    #2b5fe8 14%,
-    #5b8def 32%,
-    #a8c8fa 48%,
-    #e8b48a 64%,
-    #ff9f5c 80%,
-    #ffdb85 100%
+    180deg,
+    color-mix(in srgb, #2b5fe8 10%, #ffffff) 0%,
+    #f5f7fb 42%,
+    #fafbfc 100%
   );
   --zone-card-bg: #ffffff;
-  --zone-card-border: rgba(28, 28, 30, 0.06);
-  --zone-eyebrow: #8b5a3c;
-  --zone-on-sky: #ffffff;
-  --zone-on-sky-muted: rgba(255, 255, 255, 0.96);
-  --zone-on-sky-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
-  --zone-on-sky-shadow-strong: 0 1px 3px rgba(0, 0, 0, 0.65);
+  --zone-card-border: rgba(43, 95, 232, 0.1);
+  --zone-eyebrow: #2b5fe8;
+  /* Page chrome on light washes — dark readable text */
+  --zone-on-sky: #1c1c1e;
+  --zone-on-sky-muted: #6c6c70;
+  --zone-on-sky-shadow: none;
+  --zone-on-sky-shadow-strong: none;
   --layout-bg: var(--zone-bg);
 
-  /* Frosted glass (layered chrome) */
-  --glass-bg: rgba(255, 255, 255, 0.58);
-  --glass-bg-strong: rgba(255, 255, 255, 0.72);
-  --glass-bg-soft: rgba(255, 255, 255, 0.48);
-  --glass-border: rgba(255, 255, 255, 0.55);
+  /* Frosted glass (layered chrome on light washes) */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.84);
+  --glass-bg-soft: rgba(255, 255, 255, 0.64);
+  --glass-border: rgba(28, 28, 30, 0.08);
   --glass-border-edge: rgba(28, 28, 30, 0.08);
-  --glass-blur: 18px;
-  --glass-shadow: 0 8px 32px rgba(28, 28, 30, 0.1);
-  --glass-shadow-soft: 0 4px 18px rgba(28, 28, 30, 0.08);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 28px rgba(28, 28, 30, 0.08);
+  --glass-shadow-soft: 0 4px 16px rgba(28, 28, 30, 0.06);
 }
 
 /* Shared glass surfaces for anything layered over the sky */
@@ -169,8 +166,8 @@ html {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   margin: 0 0 4px 0;
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--zone-eyebrow);
+  text-shadow: none;
 }
 
 .page-header-title {
@@ -179,16 +176,16 @@ html {
   margin: 0;
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--color-text-primary);
+  text-shadow: none;
 }
 
-/* Body copy on sky — high opacity white, single crisp shadow (no glow / vibration) */
+/* Body copy on light zone wash — muted, no vibration */
 .page-header-description {
   font-size: 14px;
   font-weight: 500;
-  color: #ffffff;
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--color-text-muted);
+  text-shadow: none;
   margin: 8px 0 0 0;
   max-width: 42rem;
   line-height: 1.5;
@@ -196,28 +193,28 @@ html {
   opacity: 1;
 }
 
-/* Section headers that sit on the sky (outside white cards) */
+/* Section headers on light atmosphere */
 .on-sky-text {
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--color-text-primary);
+  text-shadow: none;
 }
 
 .on-sky-text-muted {
-  color: var(--zone-on-sky);
-  font-weight: 500;
-  text-shadow: var(--zone-on-sky-shadow-strong);
-  opacity: 0.95;
+  color: var(--zone-eyebrow);
+  font-weight: 600;
+  text-shadow: none;
+  opacity: 1;
 }
 
 .on-sky-link {
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--zone-accent);
+  text-shadow: none;
   text-decoration: none;
   font-weight: 600;
 }
 
 .on-sky-link:hover {
-  opacity: 0.9;
+  opacity: 0.85;
   text-decoration: underline;
 }
 
@@ -614,48 +611,49 @@ html {
 .zone-root[data-zone='outputs'] .inputs-day-nav-button {
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  text-shadow: none;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-button:hover:not(:disabled),
 .zone-root[data-zone='outputs'] .inputs-day-nav-button:hover:not(:disabled) {
-  color: var(--zone-on-sky);
-  background: rgba(255, 255, 255, 0.35);
+  color: var(--zone-accent);
+  background: #ffffff;
+  border-color: color-mix(in srgb, var(--zone-accent) 35%, var(--color-border));
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-title,
 .zone-root[data-zone='outputs'] .inputs-day-nav-title {
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow);
+  color: var(--color-text-primary);
+  text-shadow: none;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-date,
 .zone-root[data-zone='outputs'] .inputs-day-nav-date,
 .zone-root[data-zone='inputs'] .inputs-day-nav-calendar,
 .zone-root[data-zone='outputs'] .inputs-day-nav-calendar {
-  color: var(--zone-on-sky-muted);
-  text-shadow: var(--zone-on-sky-shadow);
+  color: var(--color-text-muted);
+  text-shadow: none;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-meta,
 .zone-root[data-zone='outputs'] .inputs-day-nav-meta {
-  color: var(--zone-on-sky-muted);
-  text-shadow: var(--zone-on-sky-shadow);
+  color: var(--color-text-faint);
+  text-shadow: none;
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-history .inputs-day-nav-label,
 .zone-root[data-zone='outputs'] .inputs-day-nav-history .inputs-day-nav-label {
-  color: var(--zone-on-sky);
+  color: var(--zone-accent);
 }
 
 .zone-root[data-zone='inputs'] .inputs-day-nav-today-button,
 .zone-root[data-zone='outputs'] .inputs-day-nav-today-button {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.22);
-  color: var(--zone-on-sky);
+  border-color: color-mix(in srgb, var(--zone-accent) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--zone-accent) 10%, white);
+  color: var(--zone-accent);
 }
 
 /* —— Trends panel (golden-hour) —— */
@@ -1082,35 +1080,35 @@ html {
 .page-state {
   text-align: center;
   padding: 80px 20px;
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--color-text-muted);
+  text-shadow: none;
   font-weight: 500;
 }
 
 .page-state-error {
-  color: var(--zone-on-sky);
+  color: var(--color-danger);
 }
 
 .page-state-icon {
   font-size: 32px;
   margin-bottom: 12px;
   display: block;
-  color: var(--zone-on-sky);
+  color: var(--zone-accent);
 }
 
 .page-state-title {
   font-weight: 600;
   margin: 0 0 4px 0;
-  color: var(--zone-on-sky);
-  text-shadow: var(--zone-on-sky-shadow-strong);
+  color: var(--color-text-primary);
+  text-shadow: none;
 }
 
 .page-state-detail {
   font-size: 13px;
-  color: var(--zone-on-sky);
+  color: var(--color-text-muted);
   margin: 0;
-  text-shadow: var(--zone-on-sky-shadow-strong);
-  opacity: 0.95;
+  text-shadow: none;
+  opacity: 1;
   font-weight: 500;
 }
 
@@ -1121,14 +1119,14 @@ html {
   background-attachment: fixed;
 }
 
-/* Subtle grain / noise for organic premium feel */
+/* Very light grain — barely present on soft washes */
 .app-layout::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.07;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 180px 180px;
