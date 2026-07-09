@@ -192,8 +192,6 @@ export default function Dashboard() {
     )
   }
 
-  const foodTotals = sumTotals(entries)
-  const activityTotals = sumActivityTotals(activities)
   const energyFoodTotals = sumTotals(energyEntries)
   const energyActivityTotals = sumActivityTotals(energyActivities)
   const energyBalance = computeNetBalance(
