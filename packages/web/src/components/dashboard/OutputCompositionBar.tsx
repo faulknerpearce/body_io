@@ -3,8 +3,6 @@ import { neutrals } from '../../lib/design-tokens'
 
 interface OutputCompositionBarProps {
   balance: NetBalance
-  /** When false, copy says "this day" instead of "today". */
-  isToday?: boolean
 }
 
 /** Muted gray — baseline burn (not logged activity). */
@@ -21,11 +19,10 @@ const BMR_HATCH = `repeating-linear-gradient(
 const ACTIVITY_COLOR = '#EA4E2E'
 const ACTIVITY_GRADIENT = 'linear-gradient(90deg, #EA4E2E, #FF7A4A)'
 
-export default function OutputCompositionBar({ balance, isToday = true }: OutputCompositionBarProps) {
+export default function OutputCompositionBar({ balance }: OutputCompositionBarProps) {
   const { bmr, activityCalories, burned } = balance
   const bmrShare = burned > 0 ? (bmr / burned) * 100 : 100
   const activityShare = burned > 0 ? (activityCalories / burned) * 100 : 0
-  const dayWord = isToday ? "today's" : "this day's"
 
   return (
     <div style={{ marginBottom: 14 }}>
@@ -105,7 +102,7 @@ export default function OutputCompositionBar({ balance, isToday = true }: Output
             }}
           />
           BMR {bmr.toLocaleString()} kcal
-          <span style={{ color: neutrals.textFaint }}>(baseline)</span>
+          <span style={{ color: neutrals.textFaint }}>(resting metabolism)</span>
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span
@@ -121,9 +118,6 @@ export default function OutputCompositionBar({ balance, isToday = true }: Output
           Activity {activityCalories.toLocaleString()} kcal
         </span>
       </div>
-      <p style={{ fontSize: 11, color: neutrals.textFaint, margin: '6px 0 0 0', lineHeight: 1.4 }}>
-        Composition of {dayWord} burn — hatched BMR is resting metabolism, not logged activity.
-      </p>
     </div>
   )
 }

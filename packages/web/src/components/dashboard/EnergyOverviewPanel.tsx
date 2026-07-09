@@ -316,7 +316,7 @@ export default function EnergyOverviewPanel({
 
       {/* Output breakdown: BMR vs activity (what makes up burn) */}
       <div style={{ opacity: dayLoading ? 0.55 : 1, transition: 'opacity 0.15s ease' }}>
-        <OutputCompositionBar balance={balance} isToday={isToday} />
+        <OutputCompositionBar balance={balance} />
         <GoalZoneTrack balance={balance} />
       </div>
     </Card>
