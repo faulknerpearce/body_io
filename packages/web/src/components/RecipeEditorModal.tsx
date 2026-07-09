@@ -151,7 +151,10 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
   const [showScanner, setShowScanner] = useState(false)
   const nameRef = useRef<HTMLInputElement | null>(null)
   const showScannerRef = useRef(false)
-  showScannerRef.current = showScanner
+
+  useEffect(() => {
+    showScannerRef.current = showScanner
+  }, [showScanner])
 
   useEffect(() => {
     focusIfDesktop(nameRef.current)

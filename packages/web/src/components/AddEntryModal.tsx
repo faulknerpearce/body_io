@@ -244,7 +244,6 @@ export default function AddEntryModal({
   const nameRef = useRef<HTMLInputElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const showScannerRef = useRef(false)
-  showScannerRef.current = showScanner
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId)
   const recipeServingWeightNum = Number.parseFloat(recipeServingWeightGrams)
   const resolvedRecipeServingWeightGrams =
@@ -299,6 +298,10 @@ export default function AddEntryModal({
           referenceWeightGrams: referenceWeightNum,
         })
       : null
+
+  useEffect(() => {
+    showScannerRef.current = showScanner
+  }, [showScanner])
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null

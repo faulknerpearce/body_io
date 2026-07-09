@@ -118,23 +118,28 @@ export default function Dashboard() {
 
   useEffect(() => {
     let cancelled = false
-    setEnergyLoading(true)
-    Promise.all([fetchEntries(energyDate), fetchActivities(energyDate)])
-      .then(([food, acts]) => {
-        if (cancelled) return
-        setEnergyEntries(food)
-        setEnergyActivities(acts)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          console.error('Failed to load energy day', energyDate, err)
-          setEnergyEntries([])
-          setEnergyActivities([])
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setEnergyLoading(false)
-      })
+    // Defer so the effect does not synchronously set state during render flush (eslint).
+    const kickoff = queueMicrotask(() => {
+      if (cancelled) return
+      setEnergyLoading(true)
+      Promise.all([fetchEntries(energyDate), fetchActivities(energyDate)])
+        .then(([food, acts]) => {
+          if (cancelled) return
+          setEnergyEntries(food)
+          setEnergyActivities(acts)
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            console.error('Failed to load energy day', energyDate, err)
+            setEnergyEntries([])
+            setEnergyActivities([])
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setEnergyLoading(false)
+        })
+    })
+    void kickoff
     return () => {
       cancelled = true
     }
@@ -142,22 +147,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     let cancelled = false
-    setTrendsLoading(true)
-    setTrendsError(null)
+    const kickoff = queueMicrotask(() => {
+      if (cancelled) return
+      setTrendsLoading(true)
+      setTrendsError(null)
 
-    fetchDailyEnergySnapshots(trendsRange.start, trendsRange.end, bmr)
-      .then((rows) => {
-        if (!cancelled) setTrendRows(rows)
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setTrendsError(err instanceof Error ? err.message : 'Failed to load trends')
-          setTrendRows([])
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setTrendsLoading(false)
-      })
+      fetchDailyEnergySnapshots(trendsRange.start, trendsRange.end, bmr)
+        .then((rows) => {
+          if (!cancelled) setTrendRows(rows)
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setTrendsError(err instanceof Error ? err.message : 'Failed to load trends')
+            setTrendRows([])
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setTrendsLoading(false)
+        })
+    })
+    void kickoff
 
     return () => {
       cancelled = true
