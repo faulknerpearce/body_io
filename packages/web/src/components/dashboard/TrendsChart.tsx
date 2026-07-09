@@ -7,24 +7,29 @@ interface TrendsChartProps {
   rows: DailyEnergySnapshot[]
 }
 
+type MarkerStyle = 'hollow' | 'filled' | 'none'
+
 interface ChartSeries {
   key: 'intake' | 'output' | 'net'
   label: string
   color: string
   /** SVG stroke-dasharray; undefined = solid */
   dash?: string
+  /** Point style when dots are shown */
+  marker: MarkerStyle
   pick: (row: DailyEnergySnapshot) => number
 }
 
 /**
- * Golden-hour series with non-color line styles for accessibility:
- * Intake solid, Output dashed, Net solid (thicker).
+ * Golden-hour series with non-color differentiators:
+ * Intake solid + hollow points, Output dashed, Net solid thicker + filled points.
  */
 const SERIES: ChartSeries[] = [
   {
     key: 'intake',
     label: 'Intake',
     color: '#E8893A',
+    marker: 'hollow',
     pick: (row) => row.intakeCalories,
   },
   {
@@ -32,12 +37,14 @@ const SERIES: ChartSeries[] = [
     label: 'Output',
     color: '#2F8A9B',
     dash: '7 5',
+    marker: 'none',
     pick: (row) => row.totalOutput,
   },
   {
     key: 'net',
     label: 'Net',
     color: '#3D4F7A',
+    marker: 'filled',
     pick: (row) => row.net,
   },
 ]
@@ -218,43 +225,47 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
             )
           })}
 
-          {chart.paths.map(({ series, points, line }) => (
-            <g key={series.key}>
-              <path
-                d={line}
-                fill="none"
-                stroke={series.color}
-                strokeWidth={series.key === 'net' ? layout.netLineWidth : layout.lineWidth}
-                strokeDasharray={series.dash}
-                strokeLinejoin="round"
-                strokeLinecap={series.dash ? 'butt' : 'round'}
-              >
-                {!showPoints && (
-                  <title>
-                    {`${series.label} trend over ${rows.length} days`}
-                  </title>
-                )}
-              </path>
-              {showPoints &&
-                points.map((point, index) => (
-                  <circle
-                    key={`${series.key}-${index}`}
-                    cx={point.x}
-                    cy={point.y}
-                    r={series.key === 'net' ? layout.netPointRadius : layout.pointRadius}
-                    fill={series.color}
-                    stroke="#ffffff"
-                    strokeWidth={isMobile ? 1.5 : 1}
-                  >
-                    <title>
-                      {`${formatShortDate(rows[index]!.date)} ${series.label}: ${series
-                        .pick(rows[index]!)
-                        .toLocaleString()} kcal`}
-                    </title>
-                  </circle>
-                ))}
-            </g>
-          ))}
+          {chart.paths.map(({ series, points, line }) => {
+            const drawMarkers = showPoints && series.marker !== 'none'
+            const radius =
+              series.key === 'net' ? layout.netPointRadius : layout.pointRadius
+            const hollow = series.marker === 'hollow'
+            return (
+              <g key={series.key}>
+                <path
+                  d={line}
+                  fill="none"
+                  stroke={series.color}
+                  strokeWidth={series.key === 'net' ? layout.netLineWidth : layout.lineWidth}
+                  strokeDasharray={series.dash}
+                  strokeLinejoin="round"
+                  strokeLinecap={series.dash ? 'butt' : 'round'}
+                >
+                  {!drawMarkers && (
+                    <title>{`${series.label} trend over ${rows.length} days`}</title>
+                  )}
+                </path>
+                {drawMarkers &&
+                  points.map((point, index) => (
+                    <circle
+                      key={`${series.key}-${index}`}
+                      cx={point.x}
+                      cy={point.y}
+                      r={radius}
+                      fill={hollow ? '#ffffff' : series.color}
+                      stroke={hollow ? series.color : '#ffffff'}
+                      strokeWidth={hollow ? (isMobile ? 2.5 : 2) : isMobile ? 1.5 : 1}
+                    >
+                      <title>
+                        {`${formatShortDate(rows[index]!.date)} ${series.label}: ${series
+                          .pick(rows[index]!)
+                          .toLocaleString()} kcal`}
+                      </title>
+                    </circle>
+                  ))}
+              </g>
+            )
+          })}
 
           {rows.map((row, index) =>
             index % chart.labelStride === 0 || index === rows.length - 1 ? (
@@ -275,26 +286,41 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
         </svg>
       </div>
 
-      <div className="trends-chart-legend" aria-hidden="true">
+      <div className="trends-chart-legend" aria-label="Chart legend">
         {SERIES.map((series) => (
           <span key={series.key} className="trends-chart-legend-item">
-            <span
-              className={
-                series.dash
-                  ? 'trends-chart-legend-swatch trends-chart-legend-swatch-dashed'
-                  : series.key === 'net'
-                    ? 'trends-chart-legend-swatch trends-chart-legend-swatch-net'
-                    : 'trends-chart-legend-swatch'
-              }
-              style={
-                series.dash
-                  ? {
-                      backgroundImage: `repeating-linear-gradient(90deg, ${series.color} 0 6px, transparent 6px 10px)`,
-                      backgroundColor: 'transparent',
-                    }
-                  : { background: series.color }
-              }
-            />
+            <span className="trends-chart-legend-mark" aria-hidden="true">
+              {/* Line segment */}
+              <span
+                className={
+                  series.dash
+                    ? 'trends-chart-legend-line trends-chart-legend-line-dashed'
+                    : series.key === 'net'
+                      ? 'trends-chart-legend-line trends-chart-legend-line-net'
+                      : 'trends-chart-legend-line'
+                }
+                style={
+                  series.dash
+                    ? {
+                        backgroundImage: `repeating-linear-gradient(90deg, ${series.color} 0 5px, transparent 5px 9px)`,
+                      }
+                    : { backgroundColor: series.color }
+                }
+              />
+              {/* Marker: hollow intake / filled net / none for dashed output */}
+              {series.marker === 'hollow' && (
+                <span
+                  className="trends-chart-legend-dot trends-chart-legend-dot-hollow"
+                  style={{ borderColor: series.color }}
+                />
+              )}
+              {series.marker === 'filled' && (
+                <span
+                  className="trends-chart-legend-dot trends-chart-legend-dot-filled"
+                  style={{ backgroundColor: series.color, borderColor: series.color }}
+                />
+              )}
+            </span>
             {series.label}
           </span>
         ))}
@@ -303,8 +329,8 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
       {isMobile && rows.length > 0 && (
         <p className="trends-chart-mobile-hint">
           {showPoints
-            ? 'Tap a point for exact kcal. Y-axis values in thousands shown as k.'
-            : 'Solid lines for longer ranges. Intake solid · Output dashed · Net bold. Y-axis k = thousands.'}
+            ? 'Intake: open orange circles · Output: dashed · Net: solid filled. Tap a point for exact kcal.'
+            : 'Intake solid · Output dashed · Net bold solid. Y-axis k = thousands.'}
         </p>
       )}
     </div>

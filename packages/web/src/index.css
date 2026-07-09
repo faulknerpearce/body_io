@@ -880,7 +880,7 @@ body {
 .trends-chart-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 18px;
+  gap: 12px 20px;
   margin-top: 14px;
   font-size: 13px;
   font-weight: 600;
@@ -893,26 +893,52 @@ body {
   gap: 8px;
 }
 
-.trends-chart-legend-swatch {
-  width: 18px;
-  height: 3px;
-  border-radius: 9999px;
+.trends-chart-legend-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 14px;
   flex-shrink: 0;
 }
 
-.trends-chart-legend-swatch-net {
+.trends-chart-legend-line {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 9999px;
+}
+
+.trends-chart-legend-line-net {
   height: 4px;
 }
 
-.trends-chart-legend-swatch-dashed {
-  height: 0;
-  border-top: 3px dashed transparent;
-  border-radius: 0;
-  background: none !important;
-  /* dash color via border-image not reliable; use backgroundImage inline */
-  min-height: 3px;
+.trends-chart-legend-line-dashed {
   height: 3px;
-  border: none;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.trends-chart-legend-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+}
+
+.trends-chart-legend-dot-hollow {
+  background: #ffffff;
+  border: 2px solid currentColor;
+}
+
+.trends-chart-legend-dot-filled {
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(28, 28, 30, 0.08);
 }
 
 .trends-chart-mobile .trends-chart-legend {
@@ -921,13 +947,14 @@ body {
   margin-top: 16px;
 }
 
-.trends-chart-mobile .trends-chart-legend-swatch {
-  width: 22px;
-  height: 4px;
+.trends-chart-mobile .trends-chart-legend-mark {
+  width: 32px;
+  height: 16px;
 }
 
-.trends-chart-mobile .trends-chart-legend-swatch-net {
-  height: 5px;
+.trends-chart-mobile .trends-chart-legend-dot {
+  width: 11px;
+  height: 11px;
 }
 
 .trends-chart-mobile-hint {
