@@ -17,9 +17,9 @@ const BMR_HATCH = `repeating-linear-gradient(
   rgba(255, 255, 255, 0.55) 7px 8px
 )`
 
-/** Burn coral (outputs accent) — activity share of burn. */
-const ACTIVITY_COLOR = '#E86A3C'
-const ACTIVITY_GRADIENT = 'linear-gradient(90deg, #E86A3C, #FF9F5C)'
+/** Burn red-orange (outputs accent) — activity share of burn. */
+const ACTIVITY_COLOR = '#EA4E2E'
+const ACTIVITY_GRADIENT = 'linear-gradient(90deg, #EA4E2E, #FF7A4A)'
 
 export default function OutputCompositionBar({ balance, isToday = true }: OutputCompositionBarProps) {
   const { bmr, activityCalories, burned } = balance

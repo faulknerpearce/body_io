@@ -35,7 +35,7 @@ const SERIES: ChartSeries[] = [
   {
     key: 'output',
     label: 'Output',
-    color: '#E86A3C',
+    color: '#EA4E2E',
     dash: '7 5',
     marker: 'filled',
     pick: (row) => row.totalOutput,

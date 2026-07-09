@@ -35,7 +35,7 @@ const GOAL_GREEN_BORDER = '#4A9A7A'
 const statusColor: Record<NetBalance['status'], string> = {
   under: '#568FEB', // dashboard blue (chroma-matched family)
   in_range: GOAL_GREEN,
-  over: '#E86A3C', // outputs coral
+  over: '#EA4E2E', // outputs red-orange
 }
 
 const statusBadgeBg: Record<NetBalance['status'], string> = {
