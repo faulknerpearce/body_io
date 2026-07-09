@@ -184,15 +184,17 @@ body {
 .zone-subnav {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 0;
   margin-bottom: 24px;
-  padding: 4px;
+  padding: 3px;
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--zone-card-border);
-  border-radius: var(--radius-xxl);
+  /* Full capsule track — active segment uses the same radius so corners nest */
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
 .zone-subnav-item {
@@ -200,14 +202,23 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+  /* Match outer capsule so fill follows the track corners */
+  border-radius: var(--radius-pill);
+  border: none;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   color: #52525b;
   background: transparent;
-  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.zone-subnav-item[aria-current='page'] {
+  /* Border removed — solid fill only; radius matches track */
+  border: none;
 }
 
 .zone-button {

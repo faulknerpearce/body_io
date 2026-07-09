@@ -29,7 +29,6 @@ export default function ZoneSubNav({ items, active }: ZoneSubNavProps) {
                 ? {
                     background: zone.accent,
                     color: zone.accentText,
-                    borderColor: zone.accent,
                   }
                 : undefined
             }

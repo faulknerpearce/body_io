@@ -28,7 +28,6 @@ export default function CatalogListTabs({
             ? {
                 background: 'var(--zone-accent)',
                 color: 'var(--zone-accent-text)',
-                borderColor: 'var(--zone-accent)',
               }
             : undefined
         }
@@ -45,7 +44,6 @@ export default function CatalogListTabs({
             ? {
                 background: 'var(--zone-accent)',
                 color: 'var(--zone-accent-text)',
-                borderColor: 'var(--zone-accent)',
               }
             : undefined
         }
