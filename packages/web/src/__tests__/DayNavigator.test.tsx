@@ -5,7 +5,7 @@ import DayNavigator from '../components/layout/DayNavigator'
 import { renderWithProviders } from './testUtils'
 
 describe('DayNavigator', () => {
-  it('does not show a Today control in the inline navigator on desktop', () => {
+  it('shows a Today control inline on desktop when viewing a historical date', () => {
     renderWithProviders(
       <DayNavigator
         date="2026-06-15"
@@ -17,7 +17,7 @@ describe('DayNavigator', () => {
       />,
     )
 
-    expect(screen.queryByRole('button', { name: "Jump to today's log" })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: "Jump to today's log" })).toHaveTextContent('Today')
     expect(screen.getByText('Monday')).toBeInTheDocument()
     expect(screen.getByText('June 15')).toBeInTheDocument()
   })
