@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import { useProfileOptional } from '../context/useProfile'
-import { zoneCssVars, zoneTokens, type ZoneId } from '../lib/design-tokens'
+import { DASHBOARD_SKY_TOP, zoneCssVars, zoneTokens, type ZoneId } from '../lib/design-tokens'
 import {
   primaryNavRoute,
   routeHref,
@@ -92,7 +92,10 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
         background: layoutBg,
         ...zoneCssVars(atmosphere),
         ['--layout-bg' as string]: layoutBg,
-        ['--nav-center-blue' as string]: zoneTokens.dashboard.accent,
+        /* Center tab active fill = dashboard sky top (not zone accent) */
+        ['--nav-center-active' as string]: DASHBOARD_SKY_TOP,
+        ['--nav-center-blue' as string]: DASHBOARD_SKY_TOP,
+        ['--dashboard-sky-top' as string]: DASHBOARD_SKY_TOP,
       }}
     >
       <nav className="app-nav">

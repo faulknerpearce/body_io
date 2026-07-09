@@ -1,7 +1,10 @@
 export type ZoneId = 'dashboard' | 'inputs' | 'outputs' | 'profile'
 
-/** Sunset warm accent — primary brand for dashboard / center nav. */
+/** Sunset warm accent — primary brand CTAs. */
 export const BRAND_SUNSET = '#FF6B35'
+
+/** Cool slate-blue at the top of the dashboard sky gradient. */
+export const DASHBOARD_SKY_TOP = '#3D4F7A'
 
 /** @deprecated Use BRAND_SUNSET — kept as alias for any remaining imports. */
 export const BRAND_BLUE = BRAND_SUNSET
