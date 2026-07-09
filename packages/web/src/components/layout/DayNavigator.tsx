@@ -11,6 +11,8 @@ interface DayNavigatorProps {
   canGoBack?: boolean
   canGoForward?: boolean
   compact?: boolean
+  /** Keep arrows inline (e.g. embedded in a card) instead of the mobile floating dock. */
+  disableMobileDock?: boolean
   onPrevious: () => void
   onNext: () => void
   onGoToToday?: () => void
@@ -69,11 +71,12 @@ export default function DayNavigator({
   canGoBack = true,
   canGoForward = false,
   compact = false,
+  disableMobileDock = false,
   onPrevious,
   onNext,
   onGoToToday,
 }: DayNavigatorProps) {
-  const mobileDock = useMobileDayNavDock()
+  const mobileDock = useMobileDayNavDock() && !disableMobileDock
   const defaultMeta = `${itemCount} ${itemCount === 1 ? itemLabel.singular : itemLabel.plural}`
   const metaContent = meta ?? defaultMeta
   const headline = compact ? formatWeekdayHeadline(date) : formatDayLabel(date)
@@ -91,6 +94,9 @@ export default function DayNavigator({
         <div className="inputs-day-nav-label">
           <div className="inputs-day-nav-title-row">
             <div className="inputs-day-nav-title">{headline}</div>
+            {showToday && !mobileDock && onGoToToday && (
+              <GoToTodayButton onClick={onGoToToday} />
+            )}
           </div>
           {compact ? (
             <div className="inputs-day-nav-calendar">{formatMonthDayLabel(date)}</div>

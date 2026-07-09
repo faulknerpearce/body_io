@@ -263,6 +263,7 @@ export default function EnergyOverviewPanel({
           date={date}
           isToday={isToday}
           compact
+          disableMobileDock
           canGoBack={canGoBack}
           canGoForward={canGoForward}
           onPrevious={onPrevious}
