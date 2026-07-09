@@ -1,7 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef } from 'react'
 import type { AppRoute } from '../lib/routing'
 import PageHeader from '../components/layout/PageHeader'
-import type { DayNavHeaderState } from '../lib/dayNavState'
 import PageShell from '../components/layout/PageShell'
 import ZoneButton from '../components/layout/ZoneButton'
 import ZoneSubNav from '../components/layout/ZoneSubNav'
@@ -16,15 +15,11 @@ export default function OutputsZone({ route }: OutputsZoneProps) {
   const isWorkouts = route === 'outputs/workouts'
   const openCreateWorkoutRef = useRef<(() => void) | null>(null)
   const openLogActivityRef = useRef<(() => void) | null>(null)
-  const [dayNavState, setDayNavState] = useState<DayNavHeaderState | null>(null)
   const handleOpenCreateReady = useCallback((openCreate: () => void) => {
     openCreateWorkoutRef.current = openCreate
   }, [])
   const handleOpenLogActivityReady = useCallback((openLogActivity: () => void) => {
     openLogActivityRef.current = openLogActivity
-  }, [])
-  const handleDayNavStateReady = useCallback((state: DayNavHeaderState | null) => {
-    setDayNavState(state)
   }, [])
 
   return (
@@ -59,10 +54,7 @@ export default function OutputsZone({ route }: OutputsZoneProps) {
       {isWorkouts ? (
         <WorkoutsPage onOpenCreateReady={handleOpenCreateReady} />
       ) : (
-        <OutputsPage
-          onOpenLogActivityReady={handleOpenLogActivityReady}
-          onDayNavStateReady={handleDayNavStateReady}
-        />
+        <OutputsPage onOpenLogActivityReady={handleOpenLogActivityReady} />
       )}
     </PageShell>
   )

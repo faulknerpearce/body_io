@@ -24,7 +24,6 @@ import {
   type FoodEntryWrite,
 } from '../lib/entries'
 import { logRecipe, saveRecipe } from '../lib/recipes'
-import type { DayNavHeaderState } from '../lib/dayNavState'
 import { buildMetricConfigs } from '../lib/metrics'
 
 function updateDayEntries(days: DaySummary[], date: string, entries: FoodEntry[]): DaySummary[] {
@@ -40,13 +39,11 @@ function emptyDaySummary(date: string): DaySummary {
 interface InputsPageProps {
   onOpenAddEntryReady?: (openAddEntry: () => void) => void
   onOpenBarcodeScannerReady?: (openBarcodeScanner: () => void) => void
-  onDayNavStateReady?: (state: DayNavHeaderState | null) => void
 }
 
 export default function InputsPage({
   onOpenAddEntryReady,
   onOpenBarcodeScannerReady,
-  onDayNavStateReady,
 }: InputsPageProps) {
   const nutritionGoals = useNutritionGoals()
   const { profile } = useProfile()
@@ -123,16 +120,6 @@ export default function InputsPage({
   useEffect(() => {
     onOpenBarcodeScannerReady?.(openBarcodeScanner)
   }, [onOpenBarcodeScannerReady, openBarcodeScanner])
-
-  const goToToday = useCallback(() => {
-    setSelectedDate(todayISO())
-  }, [])
-
-  useEffect(() => {
-    if (!onDayNavStateReady) return
-    onDayNavStateReady({ isToday, onGoToToday: goToToday })
-    return () => onDayNavStateReady(null)
-  }, [isToday, goToToday, onDayNavStateReady])
 
   async function persistAdd(
     input: FoodEntryWrite,

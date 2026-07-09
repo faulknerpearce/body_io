@@ -20,7 +20,6 @@ import {
   type ActivityDaySummary,
   type ActivityWrite,
 } from '../lib/activities'
-import type { DayNavHeaderState } from '../lib/dayNavState'
 import { logWorkout } from '../lib/workouts'
 
 function updateDayActivities(
@@ -39,13 +38,9 @@ function emptyDaySummary(date: string): ActivityDaySummary {
 
 interface OutputsPageProps {
   onOpenLogActivityReady?: (openLogActivity: () => void) => void
-  onDayNavStateReady?: (state: DayNavHeaderState | null) => void
 }
 
-export default function OutputsPage({
-  onOpenLogActivityReady,
-  onDayNavStateReady,
-}: OutputsPageProps) {
+export default function OutputsPage({ onOpenLogActivityReady }: OutputsPageProps) {
   const { profile } = useProfile()
   const [days, setDays] = useState<ActivityDaySummary[]>([])
   const [loading, setLoading] = useState(true)
@@ -108,16 +103,6 @@ export default function OutputsPage({
   useEffect(() => {
     onOpenLogActivityReady?.(openLogActivity)
   }, [onOpenLogActivityReady, openLogActivity])
-
-  const goToToday = useCallback(() => {
-    setSelectedDate(todayISO())
-  }, [])
-
-  useEffect(() => {
-    if (!onDayNavStateReady) return
-    onDayNavStateReady({ isToday, onGoToToday: goToToday })
-    return () => onDayNavStateReady(null)
-  }, [isToday, goToToday, onDayNavStateReady])
 
   async function persistAdd(input: ActivityWrite) {
     const activity = await addActivity(input)
