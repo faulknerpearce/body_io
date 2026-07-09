@@ -107,7 +107,7 @@ const DESKTOP_LAYOUT: ChartLayout = {
   labelFontSize: 11,
   lineWidth: 2.5,
   netLineWidth: 3.5,
-  pointRadius: 3.5,
+  pointRadius: 4.5,
   netPointRadius: 4.5,
   maxXLabels: 10,
 }
@@ -121,7 +121,7 @@ const MOBILE_LAYOUT: ChartLayout = {
   labelFontSize: 12,
   lineWidth: 3,
   netLineWidth: 4,
-  pointRadius: 5,
+  pointRadius: 6,
   netPointRadius: 6,
   maxXLabels: 5,
 }
@@ -227,9 +227,12 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
 
           {chart.paths.map(({ series, points, line }) => {
             const drawMarkers = showPoints && series.marker !== 'none'
-            const radius =
-              series.key === 'net' ? layout.netPointRadius : layout.pointRadius
+            // Output and Net share the larger radius; Intake (hollow) matches that size too
+            const radius = layout.netPointRadius
             const hollow = series.marker === 'hollow'
+            // Thin white rim on filled dots so color fill stays prominent
+            const filledStroke = isMobile ? 1 : 0.75
+            const hollowStroke = isMobile ? 2 : 1.75
             return (
               <g key={series.key}>
                 <path
@@ -254,7 +257,7 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
                       r={radius}
                       fill={hollow ? '#ffffff' : series.color}
                       stroke={hollow ? series.color : '#ffffff'}
-                      strokeWidth={hollow ? (isMobile ? 2.5 : 2) : isMobile ? 1.5 : 1}
+                      strokeWidth={hollow ? hollowStroke : filledStroke}
                     >
                       <title>
                         {`${formatShortDate(rows[index]!.date)} ${series.label}: ${series

@@ -924,8 +924,8 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-sizing: border-box;
@@ -933,12 +933,12 @@ body {
 
 .trends-chart-legend-dot-hollow {
   background: #ffffff;
-  border: 2px solid currentColor;
+  border: 1.75px solid currentColor;
 }
 
 .trends-chart-legend-dot-filled {
-  border: 1.5px solid #ffffff;
-  box-shadow: 0 0 0 1px rgba(28, 28, 30, 0.08);
+  border: 1px solid #ffffff;
+  box-shadow: none;
 }
 
 .trends-chart-mobile .trends-chart-legend {
@@ -953,8 +953,8 @@ body {
 }
 
 .trends-chart-mobile .trends-chart-legend-dot {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
 }
 
 .trends-chart-mobile-hint {
