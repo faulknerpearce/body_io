@@ -152,8 +152,8 @@ function PortionAmountFields({
             style={{
               padding: '8px 14px',
               borderRadius: 9999,
-              border: portionUnit === value ? '1px solid #134e4b' : '1px solid #e4e4e7',
-              background: portionUnit === value ? '#134e4b' : 'white',
+              border: portionUnit === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
+              background: portionUnit === value ? 'var(--zone-accent)' : 'white',
               color: portionUnit === value ? 'white' : '#52525b',
               fontSize: 12,
               fontWeight: 500,
@@ -506,8 +506,8 @@ export default function AddEntryModal({
               style={{
                 padding: '8px 14px',
                 borderRadius: 9999,
-                border: mode === value ? '1px solid #134e4b' : '1px solid #e4e4e7',
-                background: mode === value ? '#134e4b' : 'white',
+                border: mode === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
+                background: mode === value ? 'var(--zone-accent)' : 'white',
                 color: mode === value ? 'white' : '#52525b',
                 fontSize: 12,
                 fontWeight: 500,
@@ -625,7 +625,7 @@ export default function AddEntryModal({
                 padding: '10px 20px',
                 borderRadius: 9999,
                 border: 'none',
-                background: adding || recipes.length === 0 ? '#6b7280' : '#134e4b',
+                background: adding || recipes.length === 0 ? '#6b7280' : 'var(--zone-accent)',
                 color: 'white',
                 fontSize: 13,
                 fontWeight: 500,
@@ -666,7 +666,7 @@ export default function AddEntryModal({
                     borderRadius: 12,
                     border:
                       selectedIcon.icon === opt.icon
-                        ? '2px solid #134e4b'
+                        ? '2px solid var(--zone-accent)'
                         : '2px solid transparent',
                     background: opt.bg,
                     cursor: 'pointer',
@@ -909,7 +909,7 @@ export default function AddEntryModal({
                 padding: '10px 20px',
                 borderRadius: 9999,
                 border: 'none',
-                background: adding ? '#6b7280' : '#134e4b',
+                background: adding ? '#6b7280' : 'var(--zone-accent)',
                 color: 'white',
                 fontSize: 13,
                 fontWeight: 500,

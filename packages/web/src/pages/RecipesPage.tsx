@@ -3,6 +3,7 @@ import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/sh
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
+import { EmptyState } from '../components/ui'
 import LogRecipeModal from '../components/LogRecipeModal'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import RecipeViewModal from '../components/RecipeViewModal'
@@ -231,8 +232,18 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
       )}
 
       {recipes.length === 0 ? (
-        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
-          <p style={{ margin: 0 }}>No recipes yet. Create one to speed up logging.</p>
+        <div className="day-accordion">
+          <EmptyState
+            icon="fa-solid fa-book"
+            title="No recipes yet"
+            description="Create one to speed up logging everyday meals."
+            action={
+              <ZoneButton variant="primary" onClick={() => setEditingRecipe(null)}>
+                <i className="fa-solid fa-plus" aria-hidden="true" />
+                New Recipe
+              </ZoneButton>
+            }
+          />
         </div>
       ) : visibleRecipes.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>

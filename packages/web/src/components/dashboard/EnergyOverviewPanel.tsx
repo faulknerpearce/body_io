@@ -190,7 +190,7 @@ export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOv
               fontSize: 11,
               fontWeight: 600,
               letterSpacing: '1.5px',
-              color: '#134e4b',
+              color: 'var(--zone-accent)',
               textTransform: 'uppercase',
               margin: 0,
             }}

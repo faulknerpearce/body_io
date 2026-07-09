@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { useZoneTheme } from '../../context/useZoneTheme'
+import Button, { type ButtonVariant } from '../ui/Button'
 
 type ZoneButtonVariant = 'primary' | 'secondary' | 'danger'
 
@@ -8,24 +8,18 @@ interface ZoneButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
+/** Zone-aware button. Thin alias over `ui/Button` for existing call sites. */
 export default function ZoneButton({
   variant = 'secondary',
   children,
-  style,
   ...props
 }: ZoneButtonProps) {
-  const zone = useZoneTheme()
-
-  const variantStyle =
-    variant === 'primary'
-      ? { background: zone.accent, color: zone.accentText, border: `1px solid ${zone.accent}` }
-      : variant === 'danger'
-        ? { background: '#fff1f2', color: '#b91c1c', border: '1px solid #fecaca' }
-        : { background: zone.cardBg, color: '#52525b', border: `1px solid ${zone.cardBorder}` }
+  const mapped: ButtonVariant =
+    variant === 'primary' ? 'primary' : variant === 'danger' ? 'danger' : 'secondary'
 
   return (
-    <button type="button" className="zone-button" style={{ ...variantStyle, ...style }} {...props}>
+    <Button variant={mapped} size="sm" className="zone-button" {...props}>
       {children}
-    </button>
+    </Button>
   )
 }

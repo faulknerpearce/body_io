@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
-import { cardSurface } from '../../lib/styles'
+import { neutrals } from '../../lib/design-tokens'
+import Card from '../ui/Card'
 
 interface CollapsiblePanelProps {
   title: string
@@ -17,7 +18,7 @@ export default function CollapsiblePanel({
   const [expanded, setExpanded] = useState(defaultExpanded)
 
   return (
-    <div style={{ ...cardSurface, overflow: 'hidden' }}>
+    <Card tone="neutral">
       <button
         type="button"
         onClick={() => setExpanded((value) => !value)}
@@ -35,13 +36,24 @@ export default function CollapsiblePanel({
         }}
       >
         <div>
-          <div style={{ fontSize: 13, color: '#71717a', fontWeight: 500, marginBottom: 4 }}>{title}</div>
-          {subtitle && <div style={{ fontSize: 12, color: '#a1a1aa' }}>{subtitle}</div>}
+          <div
+            style={{
+              fontSize: 13,
+              color: neutrals.textSubtle,
+              fontWeight: 500,
+              marginBottom: 4,
+            }}
+          >
+            {title}
+          </div>
+          {subtitle && (
+            <div style={{ fontSize: 12, color: neutrals.textFaint }}>{subtitle}</div>
+          )}
         </div>
         <i
           className="fa-solid fa-chevron-down"
           style={{
-            color: '#71717a',
+            color: neutrals.textSubtle,
             fontSize: 14,
             transition: 'transform 0.2s ease',
             transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -53,10 +65,16 @@ export default function CollapsiblePanel({
       </button>
 
       {expanded && (
-        <div className="log-section-content" style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}>
+        <div
+          className="log-section-content"
+          style={{
+            padding: '0 24px 24px',
+            borderTop: `1px solid ${neutrals.surfaceHover}`,
+          }}
+        >
           {children}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

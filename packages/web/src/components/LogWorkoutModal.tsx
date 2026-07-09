@@ -311,7 +311,7 @@ export default function LogWorkoutModal({ workout, onLog, onClose }: LogWorkoutM
             padding: '10px 20px',
             borderRadius: 9999,
             border: 'none',
-            background: logging || loading ? '#6b7280' : '#134e4b',
+            background: logging || loading ? '#6b7280' : 'var(--zone-accent)',
             color: 'white',
             fontSize: 13,
             fontWeight: 500,

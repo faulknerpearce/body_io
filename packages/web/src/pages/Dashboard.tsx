@@ -11,12 +11,14 @@ import {
 } from '@nutrition-tracker/shared'
 import { useEffect, useMemo, useState } from 'react'
 import { useNutritionGoals, useProfile } from '../context/useProfile'
-import { pageTitle, sectionHeader as sectionLabelStyle } from '../lib/styles'
+import { sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityOverviewPanel from '../components/dashboard/ActivityOverviewPanel'
 import EnergyOverviewPanel from '../components/dashboard/EnergyOverviewPanel'
 import NutritionRingsPanel from '../components/dashboard/NutritionRingsPanel'
 import TrendsPanel from '../components/dashboard/TrendsPanel'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
+import PageHeader from '../components/layout/PageHeader'
+import { PageError, PageLoading } from '../components/layout/PageState'
 import { fetchActivities, type Activity } from '../lib/activities'
 import { fetchDailyEnergySnapshots } from '../lib/dailyEnergy'
 import { type FoodEntry, fetchEntries } from '../lib/entries'
@@ -47,7 +49,7 @@ function SectionHeader({
         <p style={sectionLabelStyle}>{label}</p>
         <h3
           style={{
-            fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
+            fontFamily: 'var(--font-display)',
             fontSize: 24,
             margin: 0,
             fontWeight: 600,
@@ -62,7 +64,7 @@ function SectionHeader({
         style={{
           fontSize: 12,
           fontWeight: 500,
-          color: '#134e4b',
+          color: 'var(--zone-accent)',
           textDecoration: 'none',
           flexShrink: 0,
         }}
@@ -137,34 +139,15 @@ export default function Dashboard() {
   }, [trendsRange.start, trendsRange.end, bmr])
 
   if (loading) {
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        style={{ textAlign: 'center', padding: '80px 20px', color: '#a1a1aa' }}
-      >
-        <i
-          className="fa-solid fa-spinner fa-spin"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        Loading dashboard...
-      </div>
-    )
+    return <PageLoading message="Loading dashboard..." />
   }
 
   if (error) {
     return (
-      <div role="alert" style={{ textAlign: 'center', padding: '80px 20px', color: '#dc2626' }}>
-        <i
-          className="fa-solid fa-circle-exclamation"
-          style={{ fontSize: 32, marginBottom: 12, display: 'block' }}
-        />
-        <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>Failed to load dashboard</p>
-        <p style={{ fontSize: 13, color: '#71717a', margin: 0 }}>{error}</p>
-        <p style={{ fontSize: 12, color: '#a1a1aa', marginTop: 16 }}>
-          Check that you are signed in and Supabase is reachable.
-        </p>
-      </div>
+      <PageError
+        message="Failed to load dashboard"
+        detail={`${error} Check that you are signed in and Supabase is reachable.`}
+      />
     )
   }
 
@@ -182,13 +165,11 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div style={{ marginBottom: 32 }}>
-        <p style={sectionLabelStyle}>Dashboard</p>
-        <h2 className="page-title-mobile" style={pageTitle}>
-          Overview
-        </h2>
-        <p style={{ fontSize: 12, color: '#71717a', margin: '8px 0 12px 0' }}> Date {todayISO()}</p>
-      </div>
+      <PageHeader
+        eyebrow="Dashboard"
+        title="Overview"
+        description={`Date ${todayISO()}`}
+      />
 
       <div style={{ marginBottom: 24 }}>
         <EnergyOverviewPanel balance={balance} hasActivities={activities.length > 0} />

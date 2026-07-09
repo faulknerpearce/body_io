@@ -246,7 +246,7 @@ export default function ShareModal({
                 <span style={{ display: 'block', fontWeight: 600, fontSize: 14 }}>{user.displayName}</span>
                 <span style={{ display: 'block', fontSize: 12, color: '#71717a' }}>{user.emailHint}</span>
               </span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: '#134e4b' }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--zone-accent)' }}>
                 {sharingUserId === user.id ? 'Sharing...' : 'Share'}
               </span>
             </button>

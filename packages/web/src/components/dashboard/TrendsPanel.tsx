@@ -109,7 +109,7 @@ export default function TrendsPanel({
               fontSize: 11,
               fontWeight: 600,
               letterSpacing: '1.5px',
-              color: '#134e4b',
+              color: 'var(--zone-accent)',
               textTransform: 'uppercase',
               margin: '0 0 4px 0',
             }}
@@ -139,9 +139,9 @@ export default function TrendsPanel({
                 style={{
                   padding: '8px 12px',
                   borderRadius: 9999,
-                  border: preset === option.value ? '1px solid #134e4b' : '1px solid #e4e4e7',
+                  border: preset === option.value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
                   background: preset === option.value ? '#ecfdf5' : 'white',
-                  color: preset === option.value ? '#134e4b' : '#52525b',
+                  color: preset === option.value ? 'var(--zone-accent)' : '#52525b',
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: 'pointer',

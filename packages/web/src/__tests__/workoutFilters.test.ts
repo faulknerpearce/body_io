@@ -9,7 +9,7 @@ function workout(
     description: '',
     icon: 'fa-dumbbell',
     iconBg: '#ecfdf5',
-    iconColor: '#134e4b',
+    iconColor: '#0d9488',
     defaultDurationMinutes: 30,
     defaultCalories: 200,
     createdAt: '2026-06-01T00:00:00Z',

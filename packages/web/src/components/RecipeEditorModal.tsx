@@ -288,7 +288,7 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
             style={{
               border: 'none',
               background: 'transparent',
-              color: '#134e4b',
+              color: 'var(--zone-accent)',
               fontSize: 13,
               fontWeight: 500,
               cursor: 'pointer',
@@ -372,7 +372,7 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
           disabled={saving}
           style={{
             ...modalPrimaryButton,
-            background: saving ? '#6b7280' : '#134e4b',
+            background: saving ? '#6b7280' : 'var(--zone-accent)',
           }}
         >
           {saving ? 'Saving...' : isEdit ? 'Save Recipe' : 'Create Recipe'}

@@ -25,7 +25,8 @@ export function buildMetricConfigs(
       color: '#ea580c',
       iconBg: '#fed7aa',
       iconClass: 'fa-fire',
-      gradient: 'linear-gradient(to right, #134e4b, #14b8a6)',
+      // Data-series gradient (not brand primary) — orange → teal energy spectrum
+      gradient: 'linear-gradient(to right, #0f766e, #14b8a6)',
       rightLabel: 'of daily goal',
       remainingSuffix: 'kcal',
       remaining: (v, g) => `${Math.max(g - v, 0).toLocaleString()} kcal`,

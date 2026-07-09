@@ -36,7 +36,7 @@ export function buildActivityMetricConfigs(
       label: 'Active Time',
       value: formatDuration(totals.movingTimeSeconds),
       detail: 'total moving time',
-      color: '#134e4b',
+      color: '#0f766e',
       iconBg: '#ccfbf1',
       iconClass: 'fa-clock',
     },

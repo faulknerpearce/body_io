@@ -267,8 +267,8 @@ export default function BarcodeScannerModal({
             style={{
               padding: '10px 16px',
               borderRadius: 12,
-              border: '1px solid #134e4b',
-              background: '#134e4b',
+              border: '1px solid var(--zone-accent)',
+              background: 'var(--zone-accent)',
               color: 'white',
               fontSize: 13,
               fontWeight: 500,

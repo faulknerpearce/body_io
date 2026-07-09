@@ -90,7 +90,7 @@ export default function SharedActivityViewModal({
           disabled={alreadyLogged || saving}
           style={{
             ...primaryButton,
-            background: alreadyLogged || saving ? '#6b7280' : '#134e4b',
+            background: alreadyLogged || saving ? '#6b7280' : 'var(--zone-accent)',
           }}
         >
           {alreadyLogged ? 'Already added' : saving ? 'Adding...' : 'Add to my log'}

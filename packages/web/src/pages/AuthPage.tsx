@@ -1,5 +1,8 @@
-import { useState, type CSSProperties, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
+import { Alert, Button, Card } from '../components/ui'
 import { useAuth } from '../context/useAuth'
+import { BRAND_BLUE, neutrals, radius, type } from '../lib/design-tokens'
+import { inputBase, labelBase } from '../lib/styles'
 
 type Mode = 'signin' | 'signup'
 
@@ -36,152 +39,113 @@ export default function AuthPage() {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 400,
-        margin: '48px auto',
-        padding: 32,
-        background: 'white',
-        borderRadius: 16,
-        border: '1px solid #e4e4e7',
-      }}
-    >
-      <h1
-        style={{
-          fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-          fontSize: 28,
-          fontWeight: 600,
-          margin: '0 0 8px 0',
-          letterSpacing: '-0.02em',
-        }}
-      >
-        {mode === 'signin' ? 'Sign in' : 'Create account'}
-      </h1>
-      <p style={{ fontSize: 14, color: '#71717a', margin: '0 0 24px 0' }}>
-        Track your daily nutrition with a private food log.
-      </p>
-
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={() => {
-            setMode('signin')
-            setError(null)
-            setMessage(null)
-          }}
+    <div style={{ minHeight: '100vh', background: neutrals.pageBg, padding: '48px 16px' }}>
+      <Card tone="neutral" style={{ maxWidth: 400, margin: '0 auto', padding: 32, boxShadow: 'var(--shadow-soft)' }}>
+        <div
           style={{
-            flex: 1,
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: '1px solid #e4e4e7',
-            background: mode === 'signin' ? '#134e4b' : 'white',
-            color: mode === 'signin' ? 'white' : '#3f3f46',
+            width: 44,
+            height: 44,
+            borderRadius: radius.md,
+            background: BRAND_BLUE,
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 16,
+            fontSize: 18,
+          }}
+          aria-hidden="true"
+        >
+          <i className="fa-solid fa-fire" />
+        </div>
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: type.titleLg,
             fontWeight: 600,
-            fontSize: 13,
-            cursor: 'pointer',
+            margin: '0 0 8px 0',
+            letterSpacing: '-0.02em',
+            color: neutrals.textPrimary,
           }}
         >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMode('signup')
-            setError(null)
-            setMessage(null)
-          }}
-          style={{
-            flex: 1,
-            padding: '8px 12px',
-            borderRadius: 8,
-            border: '1px solid #e4e4e7',
-            background: mode === 'signup' ? '#134e4b' : 'white',
-            color: mode === 'signup' ? 'white' : '#3f3f46',
-            fontWeight: 600,
-            fontSize: 13,
-            cursor: 'pointer',
-          }}
-        >
-          Sign up
-        </button>
-      </div>
+          {mode === 'signin' ? 'Sign in' : 'Create account'}
+        </h1>
+        <p style={{ fontSize: type.body, color: neutrals.textSubtle, margin: '0 0 24px 0' }}>
+          Track your daily nutrition with a private food log.
+        </p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {mode === 'signup' && (
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
-            Display name
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+          <Button
+            variant={mode === 'signin' ? 'primary' : 'secondary'}
+            style={{ flex: 1 }}
+            onClick={() => {
+              setMode('signin')
+              setError(null)
+              setMessage(null)
+            }}
+          >
+            Sign in
+          </Button>
+          <Button
+            variant={mode === 'signup' ? 'primary' : 'secondary'}
+            style={{ flex: 1 }}
+            onClick={() => {
+              setMode('signup')
+              setError(null)
+              setMessage(null)
+            }}
+          >
+            Sign up
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {mode === 'signup' && (
+            <label style={labelBase}>
+              Display name
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="name"
+                style={{ ...inputBase, marginTop: 6 }}
+              />
+            </label>
+          )}
+
+          <label style={labelBase}>
+            Email
             <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              autoComplete="name"
-              style={inputStyle}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              style={{ ...inputBase, marginTop: 6 }}
             />
           </label>
-        )}
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            style={inputStyle}
-          />
-        </label>
+          <label style={labelBase}>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+              style={{ ...inputBase, marginTop: 6 }}
+            />
+          </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13 }}>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            style={inputStyle}
-          />
-        </label>
+          {error && <Alert variant="error">{error}</Alert>}
+          {message && <Alert variant="success">{message}</Alert>}
 
-        {error && (
-          <p role="alert" style={{ margin: 0, fontSize: 13, color: '#dc2626' }}>
-            {error}
-          </p>
-        )}
-        {message && (
-          <p role="status" style={{ margin: 0, fontSize: 13, color: '#059669' }}>
-            {message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            marginTop: 8,
-            padding: '12px 16px',
-            borderRadius: 8,
-            border: 'none',
-            background: '#134e4b',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: submitting ? 'wait' : 'pointer',
-            opacity: submitting ? 0.7 : 1,
-          }}
-        >
-          {submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
-        </button>
-      </form>
+          <Button type="submit" size="md" disabled={submitting} style={{ marginTop: 8, width: '100%' }}>
+            {submitting ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+          </Button>
+        </form>
+      </Card>
     </div>
   )
-}
-
-const inputStyle: CSSProperties = {
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #e4e4e7',
-  fontSize: 14,
 }

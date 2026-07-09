@@ -4,6 +4,7 @@ import CatalogListTabs from '../components/CatalogListTabs'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
+import { EmptyState } from '../components/ui'
 import LogWorkoutModal from '../components/LogWorkoutModal'
 import ShareModal from '../components/ShareModal'
 import WorkoutEditorModal from '../components/WorkoutEditorModal'
@@ -273,8 +274,18 @@ export default function WorkoutsPage({ onOpenCreateReady }: WorkoutsPageProps) {
       )}
 
       {listTab === 'mine' && workouts.length === 0 ? (
-        <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>
-          <p style={{ margin: 0 }}>No workouts yet. Create one to speed up logging.</p>
+        <div className="day-accordion">
+          <EmptyState
+            icon="fa-solid fa-dumbbell"
+            title="No workouts yet"
+            description="Create one to speed up logging your training sessions."
+            action={
+              <ZoneButton variant="primary" onClick={() => setEditingWorkout(null)}>
+                <i className="fa-solid fa-plus" aria-hidden="true" />
+                New Workout
+              </ZoneButton>
+            }
+          />
         </div>
       ) : listTab === 'mine' && visibleWorkouts.length === 0 ? (
         <div className="day-accordion" style={{ padding: 32, textAlign: 'center', color: '#71717a' }}>

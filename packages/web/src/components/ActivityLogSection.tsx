@@ -1,8 +1,10 @@
 import { formatDistance, formatDuration } from '@nutrition-tracker/shared'
 import { useState } from 'react'
 import type { Activity, ActivityWrite } from '../lib/activities'
+import { neutrals, radius } from '../lib/design-tokens'
 import AddActivityModal from './AddActivityModal'
 import ShareModal from './ShareModal'
+import { Button, Card, EmptyState } from './ui'
 
 interface ActivityLogSectionProps {
   activities: Activity[]
@@ -78,15 +80,15 @@ export default function ActivityLogSection({
   const activityList = (
     <>
       {count === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#a1a1aa' }}>
-          <i className="fa-solid fa-heart-pulse" style={{ fontSize: 32, marginBottom: 12, display: 'block' }} />
-          <p style={{ fontWeight: 500, margin: '0 0 4px 0', color: '#52525b' }}>No activities yet</p>
-          <p style={{ fontSize: 13, margin: 0 }}>
-            {showActions
+        <EmptyState
+          icon="fa-solid fa-heart-pulse"
+          title="No activities yet"
+          description={
+            showActions
               ? 'Click "Log Activity" to record your first workout.'
-              : 'Use the button above to record your first workout.'}
-          </p>
-        </div>
+              : 'Use the button above to record your first workout.'
+          }
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: collapsible ? 20 : 0 }}>
           {activities.map((item) => {
@@ -96,9 +98,9 @@ export default function ActivityLogSection({
                 key={item.id}
                 className="log-entry-card"
                 style={{
-                  background: '#fafafa',
-                  border: '1px solid #e4e4e7',
-                  borderRadius: 20,
+                  background: neutrals.surfaceMuted,
+                  border: `1px solid ${neutrals.border}`,
+                  borderRadius: radius.lg,
                   padding: '20px 24px',
                   display: 'flex',
                   alignItems: 'center',
@@ -110,15 +112,18 @@ export default function ActivityLogSection({
                   style={{
                     width: 44,
                     height: 44,
-                    borderRadius: 16,
-                    background: '#ecfdf5',
+                    borderRadius: radius.lg,
+                    background: 'var(--zone-accent-muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
                   }}
                 >
-                  <i className={`fa-solid ${icon}`} style={{ color: '#134e4b', fontSize: 20 }} />
+                  <i
+                    className={`fa-solid ${icon}`}
+                    style={{ color: 'var(--zone-accent)', fontSize: 20 }}
+                  />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 600 }}>{item.name}</div>
@@ -133,10 +138,10 @@ export default function ActivityLogSection({
                     }}
                   >
                     <span>
-                      <span style={{ fontWeight: 500, color: '#134e4b' }}>
+                      <span style={{ fontWeight: 500, color: 'var(--zone-accent)' }}>
                         {formatDuration(item.movingTimeSeconds)}
                       </span>{' '}
-                      <span style={{ color: '#a1a1aa' }}>duration</span>
+                      <span style={{ color: neutrals.textFaint }}>duration</span>
                     </span>
                     <span>
                       <span style={{ fontWeight: 500, color: '#0d9488' }}>{formatDistance(item.distanceMeters)}</span>{' '}
@@ -243,15 +248,7 @@ export default function ActivityLogSection({
   }
 
   return (
-    <div
-      style={{
-        background: 'white',
-        border: '1px solid #e4e4e7',
-        borderRadius: 24,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        overflow: 'hidden',
-      }}
-    >
+    <Card tone="neutral">
       <div
         className="log-section-header"
         style={{
@@ -280,8 +277,17 @@ export default function ActivityLogSection({
           }}
         >
           <div>
-            <div style={{ fontSize: 13, color: '#71717a', fontWeight: 500, marginBottom: 4 }}>{title}</div>
-            <div style={{ fontSize: 12, color: '#a1a1aa' }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: neutrals.textSubtle,
+                fontWeight: 500,
+                marginBottom: 4,
+              }}
+            >
+              {title}
+            </div>
+            <div style={{ fontSize: 12, color: neutrals.textFaint }}>
               {subtitle ?? 'Chronological order (earliest → latest)'} • {count}{' '}
               {count === 1 ? 'activity' : 'activities'}
             </div>
@@ -289,7 +295,7 @@ export default function ActivityLogSection({
           <i
             className="fa-solid fa-chevron-down"
             style={{
-              color: '#71717a',
+              color: neutrals.textSubtle,
               fontSize: 14,
               transition: 'transform 0.2s ease',
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -299,40 +305,32 @@ export default function ActivityLogSection({
           />
         </button>
         {onAdd && showActions && (
-          <button
-            type="button"
+          <Button
+            variant="primary"
             onClick={() => {
               setShowAddForm(true)
               setInternalExpanded(true)
             }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 16px',
-              background: '#134e4b',
-              color: 'white',
-              border: 'none',
-              borderRadius: 9999,
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
           >
-            <i className="fa-solid fa-plus" style={{ fontSize: 11 }} />
+            <i className="fa-solid fa-plus" style={{ fontSize: 11 }} aria-hidden="true" />
             Log Activity
-          </button>
+          </Button>
         )}
       </div>
 
       {expanded && (
-        <div className="log-section-content" style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}>
+        <div
+          className="log-section-content"
+          style={{
+            padding: '0 24px 24px',
+            borderTop: `1px solid ${neutrals.surfaceHover}`,
+          }}
+        >
           {activityList}
         </div>
       )}
 
       {modals}
-    </div>
+    </Card>
   )
 }

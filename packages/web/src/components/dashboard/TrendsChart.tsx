@@ -15,7 +15,7 @@ interface ChartSeries {
 const SERIES: ChartSeries[] = [
   { key: 'intake', label: 'Intake', color: '#ea580c', pick: (row) => row.intakeCalories },
   { key: 'output', label: 'Total output', color: '#0d9488', pick: (row) => row.totalOutput },
-  { key: 'net', label: 'Net', color: '#134e4b', pick: (row) => row.net },
+  { key: 'net', label: 'Net', color: '#2b68e8', pick: (row) => row.net },
 ]
 
 const CHART_WIDTH = 720

@@ -256,7 +256,7 @@ export default function WorkoutEditorModal({ workout, onSave, onClose }: Workout
             style={{
               border: 'none',
               background: 'transparent',
-              color: '#134e4b',
+              color: 'var(--zone-accent)',
               fontSize: 13,
               fontWeight: 500,
               cursor: 'pointer',
@@ -327,7 +327,7 @@ export default function WorkoutEditorModal({ workout, onSave, onClose }: Workout
           disabled={saving}
           style={{
             ...modalPrimaryButton,
-            background: saving ? '#6b7280' : '#134e4b',
+            background: saving ? '#6b7280' : 'var(--zone-accent)',
           }}
         >
           {saving ? 'Saving...' : isEdit ? 'Save Workout' : 'Create Workout'}

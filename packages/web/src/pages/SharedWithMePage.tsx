@@ -390,7 +390,7 @@ export default function SharedWithMePage() {
                   isNew={isNew(item.share.createdAt)}
                   icon={icon}
                   iconBg="#ecfdf5"
-                  iconColor="#134e4b"
+                  iconColor="var(--zone-accent)"
                   title={item.activity.name}
                   subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.activity.activityType}`}
                   onView={() => setViewingActivity(item)}

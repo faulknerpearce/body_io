@@ -2,10 +2,12 @@ import { formatPortionLabel } from '@nutrition-tracker/shared'
 import { useState } from 'react'
 import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import type { FoodEntry, FoodEntryWrite } from '../lib/entries'
+import { neutrals, radius } from '../lib/design-tokens'
 import AddEntryModal from './AddEntryModal'
 import BarcodeScannerModal from './BarcodeScannerModal'
 import FoodLogEntryStats from './FoodLogEntryStats'
 import ShareModal from './ShareModal'
+import { Button, Card, EmptyState } from './ui'
 
 interface FoodLogSectionProps {
   entries: FoodEntry[]
@@ -98,13 +100,15 @@ export default function FoodLogSection({
   const entryList = (
     <>
       {entryCount === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#a1a1aa' }}>
-          <i className="fa-solid fa-utensils" style={{ fontSize: 32, marginBottom: 12, display: 'block' }} />
-          <p style={{ fontWeight: 500, margin: '0 0 4px 0', color: '#52525b' }}>No entries yet</p>
-          <p style={{ fontSize: 13, margin: 0 }}>
-            {showActions ? 'Click "Add Entry" to log your first food item.' : 'Use the buttons above to log your first food item.'}
-          </p>
-        </div>
+        <EmptyState
+          icon="fa-solid fa-utensils"
+          title="No entries yet"
+          description={
+            showActions
+              ? 'Click "Add Entry" to log your first food item.'
+              : 'Use the buttons above to log your first food item.'
+          }
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: collapsible ? 20 : 0 }}>
           {entries.map((item) => (
@@ -112,9 +116,9 @@ export default function FoodLogSection({
               key={item.id}
               className="log-entry-card"
               style={{
-                background: '#fafafa',
-                border: '1px solid #e4e4e7',
-                borderRadius: 20,
+                background: neutrals.surfaceMuted,
+                border: `1px solid ${neutrals.border}`,
+                borderRadius: radius.lg,
                 padding: '20px 24px',
                 display: 'flex',
                 alignItems: 'center',
@@ -298,15 +302,7 @@ export default function FoodLogSection({
   }
 
   return (
-    <div
-      style={{
-        background: 'white',
-        border: '1px solid #e4e4e7',
-        borderRadius: 24,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        overflow: 'hidden',
-      }}
-    >
+    <Card tone="neutral">
       <div
         className="log-section-header"
         style={{
@@ -335,8 +331,17 @@ export default function FoodLogSection({
           }}
         >
           <div>
-            <div style={{ fontSize: 13, color: '#71717a', fontWeight: 500, marginBottom: 4 }}>{title}</div>
-            <div style={{ fontSize: 12, color: '#a1a1aa' }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: neutrals.textSubtle,
+                fontWeight: 500,
+                marginBottom: 4,
+              }}
+            >
+              {title}
+            </div>
+            <div style={{ fontSize: 12, color: neutrals.textFaint }}>
               {subtitle ?? 'Chronological order (earliest → latest)'} • {entryCount}{' '}
               {entryCount === 1 ? 'entry' : 'entries'}
             </div>
@@ -344,7 +349,7 @@ export default function FoodLogSection({
           <i
             className="fa-solid fa-chevron-down"
             style={{
-              color: '#71717a',
+              color: neutrals.textSubtle,
               fontSize: 14,
               transition: 'transform 0.2s ease',
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -355,64 +360,44 @@ export default function FoodLogSection({
         </button>
         {!readOnly && onAdd && showActions && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <button
-              type="button"
+            <Button
+              variant="primary"
               onClick={() => {
                 setPrefillEntry(null)
                 setShowAddForm(true)
                 setInternalExpanded(true)
               }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 16px',
-                background: '#134e4b',
-                color: 'white',
-                border: 'none',
-                borderRadius: 9999,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              <i className="fa-solid fa-plus" style={{ fontSize: 11 }} />
+              <i className="fa-solid fa-plus" style={{ fontSize: 11 }} aria-hidden="true" />
               Add Entry
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => {
                 setShowScanner(true)
                 setInternalExpanded(true)
               }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 16px',
-                background: 'white',
-                color: '#134e4b',
-                border: '1px solid #134e4b',
-                borderRadius: 9999,
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: 'pointer',
-              }}
             >
-              <i className="fa-solid fa-barcode" style={{ fontSize: 11 }} />
+              <i className="fa-solid fa-barcode" style={{ fontSize: 11 }} aria-hidden="true" />
               Scan Barcode
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
       {expanded && (
-        <div className="log-section-content" style={{ padding: '0 24px 24px', borderTop: '1px solid #f4f4f5' }}>
+        <div
+          className="log-section-content"
+          style={{
+            padding: '0 24px 24px',
+            borderTop: `1px solid ${neutrals.surfaceHover}`,
+          }}
+        >
           {entryList}
         </div>
       )}
 
       {modals}
-    </div>
+    </Card>
   )
 }

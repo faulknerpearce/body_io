@@ -22,7 +22,7 @@ export default function ActivityOverviewPanel({ activities }: ActivityOverviewPa
           No activities logged today
         </p>
         <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0 }}>
-          <a href={routeHref('outputs')} style={{ color: '#134e4b', fontWeight: 500 }}>
+          <a href={routeHref('outputs')} style={{ color: 'var(--zone-accent)', fontWeight: 500 }}>
             Log an activity
           </a>{' '}
           to track workouts and calories burned.
