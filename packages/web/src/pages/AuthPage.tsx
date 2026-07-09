@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Alert, Button, Card } from '../components/ui'
 import { useAuth } from '../context/useAuth'
-import { BRAND_BLUE, neutrals, radius, type } from '../lib/design-tokens'
+import { BRAND_SUNSET, neutrals, radius, type, zoneGradients } from '../lib/design-tokens'
 import { inputBase, labelBase } from '../lib/styles'
 
 type Mode = 'signin' | 'signup'
@@ -39,14 +39,44 @@ export default function AuthPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: neutrals.pageBg, padding: '48px 16px' }}>
-      <Card tone="neutral" style={{ maxWidth: 400, margin: '0 auto', padding: 32, boxShadow: 'var(--shadow-soft)' }}>
+    <div
+      className="auth-atmosphere"
+      style={{
+        minHeight: '100vh',
+        background: zoneGradients.dashboard,
+        backgroundAttachment: 'fixed',
+        padding: '48px 16px',
+        position: 'relative',
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          opacity: 0.07,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: '180px 180px',
+        }}
+      />
+      <Card
+        tone="neutral"
+        style={{
+          maxWidth: 400,
+          margin: '0 auto',
+          padding: 32,
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         <div
           style={{
             width: 44,
             height: 44,
             borderRadius: radius.md,
-            background: BRAND_BLUE,
+            background: BRAND_SUNSET,
             color: 'white',
             display: 'flex',
             alignItems: 'center',
@@ -70,8 +100,8 @@ export default function AuthPage() {
         >
           {mode === 'signin' ? 'Sign in' : 'Create account'}
         </h1>
-        <p style={{ fontSize: type.body, color: neutrals.textSubtle, margin: '0 0 24px 0' }}>
-          Track your daily nutrition with a private food log.
+        <p style={{ fontSize: type.body, color: neutrals.textMuted, margin: '0 0 24px 0' }}>
+          Track daily fuel, movement, and balance.
         </p>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>

@@ -1,277 +1,356 @@
 import type { NetBalance } from '@nutrition-tracker/shared'
-import { netRingProgress } from '../../lib/dashboardCharts'
-import { cardSurface, iconTileSm, subtleSurface } from '../../lib/styles'
-import HorizontalBarChart from '../charts/HorizontalBarChart'
-import ProgressRing from '../charts/ProgressRing'
-import OutputCompositionBar from './OutputCompositionBar'
+import { atmosphere, neutrals, radius, type } from '../../lib/design-tokens'
+import Card from '../ui/Card'
+import GradientMeter from '../ui/GradientMeter'
 
 interface EnergyOverviewPanelProps {
   balance: NetBalance
   hasActivities: boolean
 }
 
-const statusColor: Record<NetBalance['status'], string> = {
-  under: '#2563eb',
-  in_range: '#059669',
-  over: '#dc2626',
+const statusLabel: Record<NetBalance['status'], string> = {
+  under: 'Building',
+  in_range: 'Balanced',
+  over: 'Above range',
 }
 
-const statusBadgeBg: Record<NetBalance['status'], string> = {
-  under: '#dbeafe',
-  in_range: '#d1fae5',
-  over: '#fee2e2',
+const statusGradient: Record<NetBalance['status'], string> = {
+  under: atmosphere.gradients.cool,
+  in_range: atmosphere.gradients.warmCool,
+  over: atmosphere.gradients.dangerCool,
 }
 
-function GoalZoneTrack({ balance }: { balance: NetBalance }) {
-  const max = Math.max(balance.goalHigh, balance.net, 1)
-  const lowPct = max > 0 ? (balance.goalLow / max) * 100 : 0
-  const highPct = max > 0 ? (balance.goalHigh / max) * 100 : 0
-  const netPct = max > 0 ? Math.min((balance.net / max) * 100, 100) : 0
-  const color = statusColor[balance.status]
-  const trackTop = 14
-  const trackHeight = 14
-  const dotSize = 18
-  const trackCenterY = trackTop + trackHeight / 2
-
+function AccentDots() {
   return (
-    <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #e4e4e7' }}>
-      <div
+    <span
+      style={{ display: 'inline-flex', flexDirection: 'column', gap: 4, marginLeft: 8 }}
+      aria-hidden="true"
+    >
+      {atmosphere.accentDots.map((color) => (
+        <span
+          key={color}
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: radius.pill,
+            background: color,
+          }}
+        />
+      ))}
+    </span>
+  )
+}
+
+function MetricCol({
+  label,
+  value,
+  unit,
+}: {
+  label: string
+  value: string
+  unit?: string
+}) {
+  return (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <p
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 10,
-          gap: 12,
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          color: neutrals.textMuted,
+          margin: '0 0 6px 0',
         }}
       >
-        <span
+        {label}
+      </p>
+      <p
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 26,
+          fontWeight: 600,
+          letterSpacing: '-0.02em',
+          margin: 0,
+          color: neutrals.textPrimary,
+          lineHeight: 1.1,
+        }}
+      >
+        {value}
+        {unit && (
+          <span style={{ fontSize: 14, fontWeight: 500, color: neutrals.textMuted, marginLeft: 4 }}>
+            {unit}
+          </span>
+        )}
+      </p>
+    </div>
+  )
+}
+
+function MeterRow({
+  label,
+  valueText,
+  pct,
+  gradient,
+}: {
+  label: string
+  valueText: string
+  pct: number
+  gradient: string
+}) {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        columnGap: 16,
+        rowGap: 8,
+        alignItems: 'end',
+      }}
+    >
+      <div>
+        <p
           style={{
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: 600,
             letterSpacing: '0.08em',
-            color: '#3f3f46',
             textTransform: 'uppercase',
+            color: neutrals.textMuted,
+            margin: '0 0 4px 0',
           }}
         >
-          Net vs goal
-        </span>
-        <span
+          {label}
+        </p>
+        <p
           style={{
-            fontSize: 12,
+            fontFamily: 'var(--font-display)',
+            fontSize: 22,
             fontWeight: 600,
-            color: '#059669',
-            fontVariantNumeric: 'tabular-nums',
+            margin: 0,
+            color: neutrals.textPrimary,
+            letterSpacing: '-0.02em',
           }}
         >
-          {balance.goalLow.toLocaleString()}–{balance.goalHigh.toLocaleString()} kcal
-        </span>
+          {valueText}
+        </p>
       </div>
-
-      <div style={{ position: 'relative', height: 44, marginBottom: 6 }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: trackTop,
-            left: 0,
-            right: 0,
-            height: trackHeight,
-            borderRadius: 9999,
-            background: '#e4e4e7',
-            border: '1px solid #d4d4d8',
-            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: trackTop,
-            left: 0,
-            height: trackHeight,
-            width: `${netPct}%`,
-            borderRadius: 9999,
-            background: `linear-gradient(90deg, ${color}55, ${color}99)`,
-            transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: trackTop,
-            left: `${lowPct}%`,
-            height: trackHeight,
-            width: `${highPct - lowPct}%`,
-            borderRadius: 9999,
-            background: 'rgba(16, 185, 129, 0.35)',
-            border: '2px solid #059669',
-            boxSizing: 'border-box',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: trackCenterY,
-            left: `calc(${netPct}% - ${dotSize / 2}px)`,
-            width: dotSize,
-            height: dotSize,
-            borderRadius: 9999,
-            background: color,
-            border: '3px solid white',
-            boxShadow: `0 2px 8px ${color}66, 0 0 0 1px ${color}`,
-            transform: 'translateY(-50%)',
-            transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 12,
-          fontSize: 12,
-          fontWeight: 600,
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              color: '#a1a1aa',
-            }}
-          >
-            Current
-          </span>
-          <span style={{ color }}>{balance.net.toLocaleString()}</span>
-        </span>
-        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: '0.06em',
-              textTransform: 'uppercase',
-              color: '#059669',
-            }}
-          >
-            Goal
-          </span>
-          <span style={{ color: '#059669' }}>{balance.goalHigh.toLocaleString()}</span>
-        </span>
+      <div style={{ width: 96, paddingBottom: 4 }}>
+        <GradientMeter value={pct} gradient={gradient} height={7} aria-label={`${label} ${pct}%`} />
       </div>
     </div>
   )
 }
 
 export default function EnergyOverviewPanel({ balance, hasActivities }: EnergyOverviewPanelProps) {
-  const color = statusColor[balance.status]
-  const intakeMax = Math.max(balance.goalHigh, balance.consumed, 1)
-  const ring = netRingProgress(balance)
-
-  const intakeRow = {
-    label: 'Intake',
-    value: balance.consumed,
-    displayValue: `${balance.consumed.toLocaleString()} kcal`,
-    max: intakeMax,
-    color: '#ea580c',
-    gradient: 'linear-gradient(90deg, #ea580c, #fb923c)',
-  }
+  const goalSpan = Math.max(balance.goalHigh, 1)
+  const intakePct = Math.min((balance.consumed / goalSpan) * 100, 100)
+  const outputPct = Math.min((balance.burned / goalSpan) * 100, 100)
+  const activityPct =
+    balance.burned > 0
+      ? Math.min((balance.activityCalories / Math.max(balance.burned, 1)) * 100, 100)
+      : 0
+  const netVsHighPct = Math.min((balance.net / goalSpan) * 100, 100)
+  const goalBandPct = Math.min(
+    ((balance.goalHigh - balance.goalLow) / goalSpan) * 100,
+    100,
+  )
 
   return (
-    <div style={{ ...cardSurface, padding: 28 }}>
-      <div className="dashboard-bento-hero-inner">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <Card tone="neutral" style={{ padding: 28 }}>
+      {/* Header row */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+          marginBottom: 28,
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <p
+              style={{
+                fontSize: type.eyebrow,
+                fontWeight: 600,
+                letterSpacing: '1.2px',
+                textTransform: 'uppercase',
+                color: neutrals.textPrimary,
+                margin: 0,
+              }}
+            >
+              Today&apos;s energy
+            </p>
+            <AccentDots />
+          </div>
           <p
             style={{
               fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '1.5px',
-              color: 'var(--zone-accent)',
+              color: neutrals.textMuted,
+              margin: '6px 0 0 0',
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
+            }}
+          >
+            Fuel, movement &amp; balance
+          </p>
+        </div>
+        <i
+          className="fa-regular fa-sun"
+          style={{ fontSize: 22, color: neutrals.textFaint, marginTop: 2 }}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* Hero metric */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: type.hero,
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+              color: neutrals.textPrimary,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {balance.net.toLocaleString()}
+          </span>
+          <span style={{ fontSize: 18, fontWeight: 500, color: neutrals.textMuted }}>kcal net</span>
+        </div>
+        <p style={{ fontSize: 13, color: neutrals.textMuted, margin: '10px 0 0 0', lineHeight: 1.45 }}>
+          {balance.contextMessage}
+        </p>
+      </div>
+
+      {/* Two-column summary */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 20,
+          marginBottom: 28,
+          paddingBottom: 24,
+          borderBottom: `1px solid ${neutrals.border}`,
+        }}
+      >
+        <MetricCol label="Calories in" value={balance.consumed.toLocaleString()} unit="kcal" />
+        <MetricCol label="Calories out" value={balance.burned.toLocaleString()} unit="kcal" />
+      </div>
+
+      {/* Meter rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, marginBottom: 24 }}>
+        <MeterRow
+          label="Balance"
+          valueText={statusLabel[balance.status]}
+          pct={Math.min(netVsHighPct, 100)}
+          gradient={statusGradient[balance.status]}
+        />
+        <MeterRow
+          label="Intake vs goal"
+          valueText={`${Math.round(intakePct)}%`}
+          pct={intakePct}
+          gradient={atmosphere.gradients.peach}
+        />
+        <MeterRow
+          label="Output load"
+          valueText={`${Math.round(outputPct)}%`}
+          pct={outputPct}
+          gradient={atmosphere.gradients.cool}
+        />
+        <MeterRow
+          label="Activity share"
+          valueText={
+            hasActivities || balance.activityCalories > 0
+              ? `${Math.round(activityPct)}%`
+              : 'BMR only'
+          }
+          pct={hasActivities || balance.activityCalories > 0 ? activityPct : 8}
+          gradient={atmosphere.gradients.warmCool}
+        />
+      </div>
+
+      {/* Full-width goal visibility bar */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            marginBottom: 8,
+            gap: 12,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: neutrals.textMuted,
               margin: 0,
             }}
           >
-            Net Energy
+            Goal range
           </p>
-
-          <div className="energy-overview-ring-row">
-            <div className="energy-overview-ring">
-              <ProgressRing
-                value={balance.net}
-                goal={balance.goalHigh}
-                color={color}
-                size={148}
-                strokeWidth={12}
-                centerLabel={`${ring.pct}%`}
-                ariaLabel={`Net energy ${balance.net} kilocalories, ${ring.pct} percent of goal`}
-              />
-            </div>
-
-            <div className="energy-overview-stats">
-              <div className="energy-overview-stats-header">
-                <div style={{ ...iconTileSm, background: statusBadgeBg[balance.status] }}>
-                  <i className="fa-solid fa-bolt" style={{ color, fontSize: 16 }} />
-                </div>
-                <div>
-                  <span
-                    className="net-balance-value-mobile"
-                    style={{
-                      fontFamily: "'Space Grotesk','Inter',system-ui,sans-serif",
-                      fontSize: 40,
-                      fontWeight: 600,
-                      lineHeight: 1,
-                      color,
-                      letterSpacing: '-0.03em',
-                    }}
-                  >
-                    {balance.net.toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#71717a', marginLeft: 6 }}>
-                    kcal net
-                  </span>
-                </div>
-              </div>
-              <p style={{ fontSize: 13, color: '#71717a', margin: 0, lineHeight: 1.5 }}>
-                {balance.consumed.toLocaleString()} intake · {balance.burned.toLocaleString()} total
-                output
-              </p>
-              <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>
-                BMR is included automatically in total output. {balance.contextMessage}
-              </p>
-              {!hasActivities && (
-                <p style={{ fontSize: 12, color: '#a1a1aa', margin: '8px 0 0 0' }}>
-                  Log activities on Outputs to add exercise burn on top of BMR.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ ...subtleSurface, padding: '20px 22px' }}>
           <p
             style={{
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: 600,
-              letterSpacing: '0.08em',
-              color: '#71717a',
-              textTransform: 'uppercase',
-              margin: '0 0 16px 0',
+              color: neutrals.textPrimary,
+              margin: 0,
+              fontVariantNumeric: 'tabular-nums',
             }}
           >
-            Today&apos;s balance
+            {balance.goalLow.toLocaleString()}–{balance.goalHigh.toLocaleString()} kcal
           </p>
-          <HorizontalBarChart rows={[intakeRow]} />
-          <p style={{ fontSize: 11, color: '#a1a1aa', margin: '-4px 0 14px 0' }}>
-            Intake vs high calorie goal ({balance.goalHigh.toLocaleString()} kcal).
-          </p>
-          <OutputCompositionBar balance={balance} />
-          <GoalZoneTrack balance={balance} />
         </div>
+        <div
+          style={{
+            position: 'relative',
+            height: 12,
+            borderRadius: radius.pill,
+            background: 'linear-gradient(90deg, #FFE8C8 0%, #FFDB85 35%, #B8D4E8 70%, #9BB8D4 100%)',
+            overflow: 'hidden',
+          }}
+          role="img"
+          aria-label={`Net ${balance.net} within goal ${balance.goalLow} to ${balance.goalHigh}`}
+        >
+          {/* Goal band highlight */}
+          <div
+            style={{
+              position: 'absolute',
+              left: `${(balance.goalLow / goalSpan) * 100}%`,
+              width: `${goalBandPct}%`,
+              top: 0,
+              bottom: 0,
+              background: 'rgba(255,255,255,0.35)',
+              borderLeft: '1px solid rgba(255,255,255,0.7)',
+              borderRight: '1px solid rgba(255,255,255,0.7)',
+            }}
+          />
+          {/* Net marker */}
+          <div
+            style={{
+              position: 'absolute',
+              left: `calc(${Math.min(netVsHighPct, 100)}% - 6px)`,
+              top: '50%',
+              width: 12,
+              height: 12,
+              borderRadius: radius.pill,
+              background: neutrals.textPrimary,
+              border: '2px solid white',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+              transform: 'translateY(-50%)',
+            }}
+          />
+        </div>
+        {!hasActivities && balance.activityCalories === 0 && (
+          <p style={{ fontSize: 12, color: neutrals.textFaint, margin: '12px 0 0 0' }}>
+            Log activities on Outputs to add exercise burn on top of BMR.
+          </p>
+        )}
       </div>
-    </div>
+    </Card>
   )
 }

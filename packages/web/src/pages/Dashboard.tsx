@@ -166,9 +166,9 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader
-        eyebrow="Dashboard"
+        eyebrow="Today"
         title="Overview"
-        description={`Date ${todayISO()}`}
+        description={`Fuel, movement, and balance · ${todayISO()}`}
       />
 
       <div style={{ marginBottom: 24 }}>

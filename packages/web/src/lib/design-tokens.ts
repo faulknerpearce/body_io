@@ -1,73 +1,75 @@
 export type ZoneId = 'dashboard' | 'inputs' | 'outputs' | 'profile'
 
-/** Brand blue — dashboard zone and center nav button. */
-export const BRAND_BLUE = '#2b68e8'
+/** Sunset warm accent — primary brand for dashboard / center nav. */
+export const BRAND_SUNSET = '#FF6B35'
 
-/** Neutral zinc scale (shared chrome). */
+/** @deprecated Use BRAND_SUNSET — kept as alias for any remaining imports. */
+export const BRAND_BLUE = BRAND_SUNSET
+
+/** Golden-hour neutrals (iOS-like secondary labels). */
 export const neutrals = {
-  textPrimary: '#18181b',
-  textSecondary: '#3f3f46',
-  textMuted: '#52525b',
-  textSubtle: '#71717a',
-  textFaint: '#a1a1aa',
-  border: '#e4e4e7',
-  borderStrong: '#d4d4d8',
-  surface: '#ffffff',
-  surfaceMuted: '#fafafa',
-  surfaceHover: '#f4f4f5',
-  pageBg: '#fafafa',
+  textPrimary: '#1C1C1E',
+  textSecondary: '#3A3A3C',
+  textMuted: '#6C6C70',
+  textSubtle: '#6C6C70',
+  textFaint: '#8E8E93',
+  border: 'rgba(28, 28, 30, 0.08)',
+  borderStrong: 'rgba(28, 28, 30, 0.12)',
+  surface: '#FFFFFF',
+  surfaceMuted: '#FAFBFC',
+  surfaceHover: '#F4F4F5',
+  pageBg: '#FAFBFC',
 } as const
 
-/** Semantic status colors (alerts, validation). */
+/** Semantic status (alerts) — slightly softened for wellness feel. */
 export const status = {
   danger: {
-    text: '#dc2626',
-    textStrong: '#b91c1c',
-    bg: '#fef2f2',
-    border: '#fecaca',
+    text: '#FF453A',
+    textStrong: '#D70015',
+    bg: '#FFF1F0',
+    border: '#FFC9C5',
   },
   success: {
-    text: '#059669',
-    textStrong: '#065f46',
-    bg: '#ecfdf5',
-    border: '#a7f3d0',
+    text: '#34C759',
+    textStrong: '#248A3D',
+    bg: '#EAF9EE',
+    border: '#B6EBC5',
   },
   warning: {
-    text: '#d97706',
-    textStrong: '#b45309',
-    bg: '#fffbeb',
-    border: '#fde68a',
+    text: '#FF9F0A',
+    textStrong: '#C93400',
+    bg: '#FFF6E5',
+    border: '#FFE0A3',
   },
   info: {
-    text: '#1d4ed8',
-    textStrong: '#1e40af',
-    bg: '#eff6ff',
-    border: '#bfdbfe',
+    text: '#5AC8FA',
+    textStrong: '#007AFF',
+    bg: '#EAF6FF',
+    border: '#B8E0FA',
   },
 } as const
 
 /**
  * Radius scale (px).
- * Default card radius is `lg` (16).
+ * Elevated cards use `xxl` (28) — reference style.
  */
 export const radius = {
   sm: 8,
   md: 12,
   lg: 16,
   xl: 20,
+  xxl: 28,
   pill: 9999,
 } as const
 
 /** Shadow scale. */
 export const shadow = {
   none: 'none',
-  soft: '0 1px 3px rgba(0,0,0,0.05)',
-  modal: '0 25px 50px -12px rgba(0,0,0,0.25)',
+  soft: '0 4px 16px rgba(28, 28, 30, 0.06)',
+  elevated: '0 14px 36px rgba(28, 28, 30, 0.10)',
+  modal: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
 } as const
 
-/**
- * Type scale (px) — keep titles on Space Grotesk via `var(--font-display)`.
- */
 export const type = {
   eyebrow: 11,
   caption: 12,
@@ -78,13 +80,68 @@ export const type = {
   titleLg: 28,
   titleXl: 32,
   display: 36,
+  hero: 52,
 } as const
+
+/** Atmosphere: grain + gradient status bars. */
+export const atmosphere = {
+  grainOpacity: 0.07,
+  accentDots: ['#FF6B35', '#FF8C5A', '#B07B9E'] as const,
+  gradients: {
+    warmCool: 'linear-gradient(90deg, #FF6B35, #5AC8FA)',
+    dangerCool: 'linear-gradient(90deg, #FF453A, #64D2FF)',
+    goldenSky: 'linear-gradient(90deg, #FFD700, #64D2FF)',
+    peach: 'linear-gradient(90deg, #FF9F5C, #FFDB85)',
+    cool: 'linear-gradient(90deg, #5AC8FA, #007AFF)',
+  },
+} as const
+
+/** Per-zone sky gradients (top → bottom). */
+export const zoneGradients: Record<ZoneId, string> = {
+  dashboard: `linear-gradient(
+    165deg,
+    #3D4F7A 0%,
+    #6B8DB5 18%,
+    #B8D4E8 40%,
+    #E8B48A 58%,
+    #FF9F5C 78%,
+    #FFDB85 100%
+  )`,
+  inputs: `linear-gradient(
+    165deg,
+    #7A6B5A 0%,
+    #C4A484 22%,
+    #E8C4A0 45%,
+    #F5D5B8 65%,
+    #FFE8D0 85%,
+    #FFF6EB 100%
+  )`,
+  outputs: `linear-gradient(
+    165deg,
+    #1E3A4C 0%,
+    #2F6F7E 20%,
+    #5BA3B0 42%,
+    #A8D5D0 65%,
+    #D4EDE8 85%,
+    #F0F7F5 100%
+  )`,
+  profile: `linear-gradient(
+    165deg,
+    #3C3C48 0%,
+    #5C5C6E 22%,
+    #8A8A9C 48%,
+    #C5C5D0 72%,
+    #E8E8EE 90%,
+    #F5F5F7 100%
+  )`,
+}
 
 export interface ZoneTokens {
   id: ZoneId
   accent: string
   accentMuted: string
   accentText: string
+  /** Full CSS background (gradient) for page atmosphere. */
   bg: string
   cardBg: string
   cardBorder: string
@@ -94,43 +151,43 @@ export interface ZoneTokens {
 export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   dashboard: {
     id: 'dashboard',
-    accent: BRAND_BLUE,
-    accentMuted: '#dbeafe',
+    accent: BRAND_SUNSET,
+    accentMuted: 'rgba(255, 107, 53, 0.16)',
     accentText: '#ffffff',
-    bg: '#f0f4ff',
-    cardBg: '#ffffff',
-    cardBorder: '#bfdbfe',
-    eyebrow: '#1e40af',
+    bg: zoneGradients.dashboard,
+    cardBg: neutrals.surface,
+    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    eyebrow: '#5C4A3A',
   },
   inputs: {
     id: 'inputs',
-    accent: '#d97706',
-    accentMuted: '#ffedd5',
+    accent: '#E8893A',
+    accentMuted: 'rgba(232, 137, 58, 0.16)',
     accentText: '#ffffff',
-    bg: '#fffbf5',
-    cardBg: '#ffffff',
-    cardBorder: '#fed7aa',
-    eyebrow: '#b45309',
+    bg: zoneGradients.inputs,
+    cardBg: neutrals.surface,
+    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    eyebrow: '#8B5A2B',
   },
   outputs: {
     id: 'outputs',
-    accent: '#0d9488',
-    accentMuted: '#ccfbf1',
+    accent: '#2F8A9B',
+    accentMuted: 'rgba(47, 138, 155, 0.16)',
     accentText: '#ffffff',
-    bg: '#f0fdfa',
-    cardBg: '#ffffff',
-    cardBorder: '#99f6e4',
-    eyebrow: '#0f766e',
+    bg: zoneGradients.outputs,
+    cardBg: neutrals.surface,
+    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    eyebrow: '#1E5A66',
   },
   profile: {
     id: 'profile',
-    accent: '#27272a',
-    accentMuted: '#f4f4f5',
+    accent: '#4A4A58',
+    accentMuted: 'rgba(74, 74, 88, 0.12)',
     accentText: '#ffffff',
-    bg: '#fafafa',
-    cardBg: '#ffffff',
-    cardBorder: '#e4e4e7',
-    eyebrow: '#52525b',
+    bg: zoneGradients.profile,
+    cardBg: neutrals.surface,
+    cardBorder: 'rgba(28, 28, 30, 0.06)',
+    eyebrow: '#5C5C6E',
   },
 }
 
@@ -146,7 +203,6 @@ export function zoneCssVars(zone: ZoneTokens): Record<string, string> {
   }
 }
 
-/** Global CSS custom properties for neutrals, status, radius, shadow. */
 export function globalCssVars(): Record<string, string> {
   return {
     '--color-text-primary': neutrals.textPrimary,
@@ -180,8 +236,12 @@ export function globalCssVars(): Record<string, string> {
     '--radius-md': `${radius.md}px`,
     '--radius-lg': `${radius.lg}px`,
     '--radius-xl': `${radius.xl}px`,
+    '--radius-xxl': `${radius.xxl}px`,
     '--radius-pill': `${radius.pill}px`,
     '--shadow-soft': shadow.soft,
+    '--shadow-elevated': shadow.elevated,
     '--shadow-modal': shadow.modal,
+    '--brand-sunset': BRAND_SUNSET,
+    '--nav-center-blue': BRAND_SUNSET,
   }
 }

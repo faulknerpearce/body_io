@@ -20,8 +20,8 @@ export default function Card({
   const toneStyle: CSSProperties =
     tone === 'zone'
       ? {
-          background: 'var(--zone-card-bg)',
-          border: '1px solid var(--zone-card-border)',
+          background: 'var(--zone-card-bg, #ffffff)',
+          border: '1px solid var(--zone-card-border, rgba(28,28,30,0.06))',
         }
       : {
           background: neutrals.surface,
@@ -32,10 +32,10 @@ export default function Card({
     <div
       className={['ui-card', className].filter(Boolean).join(' ')}
       style={{
-        borderRadius: radius.lg,
-        boxShadow: shadow.soft,
+        borderRadius: radius.xxl,
+        boxShadow: shadow.elevated,
         overflow: 'hidden',
-        padding: padded ? 20 : undefined,
+        padding: padded ? 24 : undefined,
         ...toneStyle,
         ...style,
       }}

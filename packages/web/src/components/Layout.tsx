@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/useAuth'
 import { useProfileOptional } from '../context/useProfile'
-import { zoneTokens } from '../lib/design-tokens'
+import { zoneCssVars, zoneTokens, type ZoneId } from '../lib/design-tokens'
 import {
   primaryNavRoute,
   routeHref,
@@ -30,7 +30,14 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
   const menuRef = useRef<HTMLDivElement | null>(null)
   const activeNav = primaryNavRoute(activeRoute)
   const zone = routeZone(activeRoute)
-  const layoutBg = zone === 'profile' ? zoneTokens.profile.bg : zoneTokens[activeNav === 'dashboard' || activeNav === null ? 'dashboard' : activeNav].bg
+  const atmosphereZone: ZoneId =
+    zone === 'profile'
+      ? 'profile'
+      : activeNav === 'dashboard' || activeNav === null
+        ? 'dashboard'
+        : activeNav
+  const atmosphere = zoneTokens[atmosphereZone]
+  const layoutBg = atmosphere.bg
 
   const displayLabel =
     profileContext && !profileContext.loading
@@ -78,7 +85,16 @@ export default function Layout({ children, activeRoute }: LayoutProps) {
   }, [menuOpen])
 
   return (
-    <div className="app-layout" style={{ background: layoutBg }}>
+    <div
+      className="app-layout"
+      data-zone={atmosphereZone}
+      style={{
+        background: layoutBg,
+        ...zoneCssVars(atmosphere),
+        ['--layout-bg' as string]: layoutBg,
+        ['--nav-center-blue' as string]: zoneTokens.dashboard.accent,
+      }}
+    >
       <nav className="app-nav">
         <div className="app-nav-inner">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>

@@ -2,23 +2,20 @@ import type { CSSProperties } from 'react'
 import { neutrals, radius, shadow, status, type } from './design-tokens'
 
 /**
- * Shared inline-style tokens built on design-tokens.
- * Prefer `components/ui/*` primitives for new UI; these remain for gradual migration.
- *
- * Primary actions use zone CSS vars (`var(--zone-accent)`) so they inherit the
- * active zone from ZoneThemeProvider (defaults to dashboard brand blue).
+ * Shared inline-style tokens built on design-tokens (Golden Hour).
+ * Prefer `components/ui/*` for new UI.
  */
 export const cardSurface: CSSProperties = {
   background: neutrals.surface,
   border: `1px solid ${neutrals.border}`,
-  borderRadius: radius.lg,
-  boxShadow: shadow.soft,
+  borderRadius: radius.xxl,
+  boxShadow: shadow.elevated,
 }
 
 export const subtleSurface: CSSProperties = {
   background: neutrals.surfaceMuted,
   border: `1px solid ${neutrals.border}`,
-  borderRadius: radius.lg,
+  borderRadius: radius.xl,
 }
 
 export const iconTileSm: CSSProperties = {
@@ -85,11 +82,12 @@ export const primaryButton: CSSProperties = {
 export const inputBase: CSSProperties = {
   width: '100%',
   padding: '10px 14px',
-  border: `1px solid ${neutrals.border}`,
+  border: `1px solid ${neutrals.borderStrong}`,
   borderRadius: radius.md,
   fontSize: type.body,
   outline: 'none',
   boxSizing: 'border-box',
+  background: neutrals.surface,
 }
 
 export const labelBase: CSSProperties = {
@@ -117,14 +115,14 @@ export const modalSubtitle: CSSProperties = {
 
 export const catalogItemCard: CSSProperties = {
   padding: '14px 16px',
-  borderRadius: radius.lg,
+  borderRadius: radius.xl,
   border: `1px solid ${neutrals.border}`,
   background: neutrals.surfaceMuted,
 }
 
 export const summaryPanel: CSSProperties = {
   padding: 16,
-  borderRadius: radius.lg,
+  borderRadius: radius.xl,
   background: status.success.bg,
   color: status.success.textStrong,
   fontSize: type.bodySm,
@@ -133,7 +131,7 @@ export const summaryPanel: CSSProperties = {
 export const modalFooterButton: CSSProperties = {
   padding: '10px 20px',
   borderRadius: radius.md,
-  border: `1px solid ${neutrals.border}`,
+  border: `1px solid ${neutrals.borderStrong}`,
   background: neutrals.surface,
   fontSize: type.bodySm,
   fontWeight: 500,
