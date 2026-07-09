@@ -4,11 +4,11 @@
   --app-nav-height: 72px;
   --mobile-tab-height: 76px;
   --mobile-day-nav-dock-height: 44px;
-  --nav-center-active: #2b5fe8;
-  --nav-center-blue: #2b5fe8; /* legacy alias — dashboard sky top */
+  --nav-center-active: #568feb;
+  --nav-center-blue: #568feb; /* legacy alias — dashboard sky top */
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --brand-sunset: #ff6b35;
-  --dashboard-sky-top: #2b5fe8;
+  --dashboard-sky-top: #568feb;
 
   /* Neutrals (Golden Hour / iOS-like) */
   --color-text-primary: #1c1c1e;
@@ -53,18 +53,18 @@
   --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
   /* Default zone = soft dashboard wash */
-  --zone-accent: #2b5fe8;
+  --zone-accent: #568feb;
   --zone-accent-muted: rgba(43, 95, 232, 0.12);
   --zone-accent-text: #ffffff;
   --zone-bg: linear-gradient(
     180deg,
-    color-mix(in srgb, #2b5fe8 10%, #ffffff) 0%,
+    color-mix(in srgb, #568feb 10%, #ffffff) 0%,
     #f5f7fb 42%,
     #fafbfc 100%
   );
   --zone-card-bg: #ffffff;
   --zone-card-border: rgba(43, 95, 232, 0.1);
-  --zone-eyebrow: #2b5fe8;
+  --zone-eyebrow: #568feb;
   /* Page chrome on light washes — dark readable text */
   --zone-on-sky: #1c1c1e;
   --zone-on-sky-muted: #6c6c70;
@@ -664,7 +664,7 @@ html {
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 16px;
-  --trends-accent: #2b5fe8;
+  --trends-accent: #568feb;
   --trends-sage: #5ba88a;
 }
 
@@ -737,7 +737,7 @@ html {
 }
 
 .trends-table tfoot {
-  border-top: 2px solid var(--trends-accent, #2b5fe8);
+  border-top: 2px solid var(--trends-accent, #568feb);
 }
 
 .trends-table-summary th,
@@ -757,7 +757,7 @@ html {
 
 .trends-table-summary-total th,
 .trends-table-summary-total td {
-  background: var(--trends-accent, #2b5fe8);
+  background: var(--trends-accent, #568feb);
   color: #ffffff;
   font-weight: 700;
 }
@@ -812,14 +812,14 @@ html {
 }
 
 .trends-chip-active {
-  background: var(--trends-accent, #2b5fe8);
-  border-color: var(--trends-accent, #2b5fe8);
+  background: var(--trends-accent, #568feb);
+  border-color: var(--trends-accent, #568feb);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(61, 79, 122, 0.28);
 }
 
 .trends-chip-active:hover {
-  background: var(--trends-accent, #2b5fe8);
+  background: var(--trends-accent, #568feb);
   color: #ffffff;
 }
 
@@ -855,7 +855,7 @@ html {
 }
 
 .trends-view-toggle-button-active {
-  background: var(--trends-accent, #2b5fe8);
+  background: var(--trends-accent, #568feb);
   color: #ffffff;
   box-shadow: 0 1px 4px rgba(61, 79, 122, 0.25);
 }
@@ -916,7 +916,7 @@ html {
 }
 
 .trends-summary-card-total .trends-summary-card-value {
-  color: var(--trends-accent, #2b5fe8);
+  color: var(--trends-accent, #568feb);
   font-size: 15px;
   font-weight: 600;
 }
@@ -1347,14 +1347,14 @@ html {
 /* Only when Dashboard is the active route */
 .mobile-tab-bar-center-active {
   color: #ffffff;
-  background: var(--nav-center-active, var(--dashboard-sky-top, #2b5fe8));
+  background: var(--nav-center-active, var(--dashboard-sky-top, #568feb));
   box-shadow: 0 8px 22px rgba(61, 79, 122, 0.45);
   transform: translate(-50%, -52%);
 }
 
 .mobile-tab-bar-side:focus-visible,
 .mobile-tab-bar-center:focus-visible {
-  outline: 3px solid var(--nav-center-active, #2b5fe8);
+  outline: 3px solid var(--nav-center-active, #568feb);
   outline-offset: 2px;
 }
 
@@ -1916,7 +1916,7 @@ html {
   padding: 0;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  background: var(--zone-accent, #0f7a4a);
+  background: var(--zone-accent, #13a561);
   box-shadow: 0 1px 4px rgba(24, 24, 27, 0.18);
   transform: translate(-50%, 50%);
   cursor: pointer;
@@ -1929,12 +1929,12 @@ html {
 .hourly-chart-dot:focus {
   outline: none;
   transform: translate(-50%, 50%) scale(1.2);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #0f7a4a) 25%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #13a561) 25%, transparent);
 }
 
 .hourly-chart-dot-selected {
   transform: translate(-50%, 50%) scale(1.25);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #0f7a4a) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #13a561) 35%, transparent);
 }
 
 .hourly-chart-dot-selected:hover,
@@ -1943,7 +1943,7 @@ html {
 }
 
 .hourly-chart-dot:focus-visible {
-  outline: 2px solid var(--zone-accent, #0f7a4a);
+  outline: 2px solid var(--zone-accent, #13a561);
   outline-offset: 2px;
 }
 

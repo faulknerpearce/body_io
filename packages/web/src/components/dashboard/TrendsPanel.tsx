@@ -37,7 +37,7 @@ const VIEW_OPTIONS: { value: TrendsView; label: string }[] = [
 ]
 
 /** Theme: surplus (more fuel left) green, deficit/burn-heavy coral. */
-const DELTA_SURPLUS = '#0F7A4A'
+const DELTA_SURPLUS = '#13A561'
 const DELTA_DEFICIT = '#E86A3C'
 
 function formatDelta(value: number | null): string {

@@ -28,7 +28,7 @@ const SERIES: ChartSeries[] = [
   {
     key: 'intake',
     label: 'Intake',
-    color: '#0F7A4A',
+    color: '#13A561',
     marker: 'hollow',
     pick: (row) => row.intakeCalories,
   },
@@ -43,7 +43,7 @@ const SERIES: ChartSeries[] = [
   {
     key: 'net',
     label: 'Net',
-    color: '#2B5FE8',
+    color: '#568FEB',
     marker: 'filled',
     pick: (row) => row.net,
   },

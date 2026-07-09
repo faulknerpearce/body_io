@@ -1,10 +1,24 @@
 export type ZoneId = 'dashboard' | 'inputs' | 'outputs' | 'profile'
 
-/** Sunset warm accent — primary brand CTAs. */
+/**
+ * Zone accents — matched to Outputs coral (#E86A3C) for equal vividness.
+ * Tuned for similar perceived luminance (~0.28) and high saturation so
+ * green/blue feel as punchy as coral without looking washed or neon.
+ */
+export const ZONE_CORAL = '#E86A3C'
+export const ZONE_GREEN = '#13A561'
+export const ZONE_BLUE = '#568FEB'
+
+/** Darker companions for eyebrows / strong labels (same hue family). */
+export const ZONE_CORAL_DEEP = '#C45A2A'
+export const ZONE_GREEN_DEEP = '#0E7A48'
+export const ZONE_BLUE_DEEP = '#2B5FCF'
+
+/** Sunset warm accent — residual brand (charts, accents). */
 export const BRAND_SUNSET = '#FF6B35'
 
-/** Brighter royal blue at the top of the dashboard sky (active, not muted slate). */
-export const DASHBOARD_SKY_TOP = '#2B5FE8'
+/** Dashboard blue — same chroma family as ZONE_BLUE. */
+export const DASHBOARD_SKY_TOP = ZONE_BLUE
 
 /** @deprecated Use BRAND_SUNSET — kept as alias for any remaining imports. */
 export const BRAND_BLUE = BRAND_SUNSET
@@ -106,21 +120,21 @@ export const atmosphere = {
 export const zoneGradients: Record<ZoneId, string> = {
   dashboard: `linear-gradient(
     180deg,
-    color-mix(in srgb, #2B5FE8 10%, #ffffff) 0%,
+    color-mix(in srgb, ${ZONE_BLUE} 11%, #ffffff) 0%,
     #F5F7FB 42%,
     #FAFBFC 100%
   )`,
-  /** Fueling — soft mint wash */
+  /** Fueling — soft green wash (chroma matched to coral) */
   inputs: `linear-gradient(
     180deg,
-    color-mix(in srgb, #0F7A4A 9%, #ffffff) 0%,
+    color-mix(in srgb, ${ZONE_GREEN} 11%, #ffffff) 0%,
     #F4FAF6 42%,
     #FAFBFC 100%
   )`,
   /** Burning — soft coral wash */
   outputs: `linear-gradient(
     180deg,
-    color-mix(in srgb, #E86A3C 9%, #ffffff) 0%,
+    color-mix(in srgb, ${ZONE_CORAL} 11%, #ffffff) 0%,
     #FFF8F5 42%,
     #FAFBFC 100%
   )`,
@@ -175,39 +189,39 @@ export interface ZoneTokens {
 export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   dashboard: {
     id: 'dashboard',
-    accent: DASHBOARD_SKY_TOP,
-    accentMuted: 'rgba(43, 95, 232, 0.12)',
+    accent: ZONE_BLUE,
+    accentMuted: 'rgba(86, 143, 235, 0.14)',
     accentText: '#ffffff',
     bg: zoneGradients.dashboard,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(43, 95, 232, 0.1)',
-    eyebrow: '#2B5FE8',
+    cardBorder: 'rgba(86, 143, 235, 0.14)',
+    eyebrow: ZONE_BLUE_DEEP,
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
   inputs: {
     id: 'inputs',
-    // Fuel / nourish — green accents on soft mint page wash
-    accent: '#0F7A4A',
-    accentMuted: 'rgba(15, 122, 74, 0.12)',
+    // Fuel / nourish — green matched to coral S/L
+    accent: ZONE_GREEN,
+    accentMuted: 'rgba(19, 165, 97, 0.14)',
     accentText: '#ffffff',
     bg: zoneGradients.inputs,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(15, 122, 74, 0.12)',
-    eyebrow: '#0F7A4A',
+    cardBorder: 'rgba(19, 165, 97, 0.16)',
+    eyebrow: ZONE_GREEN_DEEP,
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
   outputs: {
     id: 'outputs',
-    // Burn / effort — coral accents on soft warm page wash
-    accent: '#E86A3C',
-    accentMuted: 'rgba(232, 106, 60, 0.12)',
+    // Burn / effort — reference coral
+    accent: ZONE_CORAL,
+    accentMuted: 'rgba(232, 106, 60, 0.14)',
     accentText: '#ffffff',
     bg: zoneGradients.outputs,
     cardBg: neutrals.surface,
-    cardBorder: 'rgba(232, 106, 60, 0.12)',
-    eyebrow: '#C45A2A',
+    cardBorder: 'rgba(232, 106, 60, 0.14)',
+    eyebrow: ZONE_CORAL_DEEP,
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
