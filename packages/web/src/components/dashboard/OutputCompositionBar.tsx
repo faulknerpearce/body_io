@@ -9,9 +9,9 @@ interface OutputCompositionBarProps {
 const BMR_COLOR = '#9B8EC4'
 const BMR_GRADIENT = 'linear-gradient(90deg, #8B7EB8, #B5A8D9)'
 
-/** Soft teal (outputs accent) — activity share of burn. */
-const ACTIVITY_COLOR = '#0F6B7C'
-const ACTIVITY_GRADIENT = 'linear-gradient(90deg, #0F6B7C, #3D8F9E)'
+/** Burn coral (outputs accent) — activity share of burn. */
+const ACTIVITY_COLOR = '#E86A3C'
+const ACTIVITY_GRADIENT = 'linear-gradient(90deg, #E86A3C, #FF9F5C)'
 
 export default function OutputCompositionBar({ balance }: OutputCompositionBarProps) {
   const { bmr, activityCalories, burned } = balance

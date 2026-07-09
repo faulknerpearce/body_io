@@ -114,8 +114,18 @@ export const zoneGradients: Record<ZoneId, string> = {
     #FF9F5C 80%,
     #FFDB85 100%
   )`,
-  /** Clear peach sunrise — no muddy brown tops */
+  /** Fueling — fresh green canopy into soft mint cream */
   inputs: `linear-gradient(
+    165deg,
+    #0B6B45 0%,
+    #1B8A5A 16%,
+    #3DAA75 36%,
+    #7ECFA0 56%,
+    #C5EED4 78%,
+    #F2FBF5 100%
+  )`,
+  /** Burning — warm coral / ember (former inputs palette) */
+  outputs: `linear-gradient(
     165deg,
     #E86A3C 0%,
     #FF8F5A 18%,
@@ -123,16 +133,6 @@ export const zoneGradients: Record<ZoneId, string> = {
     #FFD0A8 58%,
     #FFE8D4 80%,
     #FFF8F2 100%
-  )`,
-  /** Slightly brighter mid-tones; deeper accent handles CTA contrast separately */
-  outputs: `linear-gradient(
-    165deg,
-    #163A48 0%,
-    #1F5F6E 18%,
-    #3D8F9E 40%,
-    #7EC4CE 62%,
-    #C5E8EC 82%,
-    #F2FAFB 100%
   )`,
   profile: `linear-gradient(
     165deg,
@@ -200,26 +200,27 @@ export const zoneTokens: Record<ZoneId, ZoneTokens> = {
   },
   inputs: {
     id: 'inputs',
-    accent: '#E86A3C',
-    accentMuted: 'rgba(232, 106, 60, 0.16)',
+    // Fuel / nourish — deep green for accessible white-on-accent CTAs
+    accent: '#0F7A4A',
+    accentMuted: 'rgba(15, 122, 74, 0.16)',
     accentText: '#ffffff',
     bg: zoneGradients.inputs,
     cardBg: neutrals.surface,
     cardBorder: 'rgba(28, 28, 30, 0.06)',
-    eyebrow: '#C45A2A',
+    eyebrow: '#0B5C38',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },
   outputs: {
     id: 'outputs',
-    // Deeper teal for accessible white-on-accent CTAs (Log Activity, etc.)
-    accent: '#0F6B7C',
-    accentMuted: 'rgba(15, 107, 124, 0.16)',
+    // Burn / effort — coral ember for Log Activity CTAs
+    accent: '#E86A3C',
+    accentMuted: 'rgba(232, 106, 60, 0.16)',
     accentText: '#ffffff',
     bg: zoneGradients.outputs,
     cardBg: neutrals.surface,
     cardBorder: 'rgba(28, 28, 30, 0.06)',
-    eyebrow: '#0C5563',
+    eyebrow: '#C45A2A',
     onSky: onSky.text,
     onSkyMuted: onSky.textMuted,
   },

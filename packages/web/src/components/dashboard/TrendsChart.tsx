@@ -21,21 +21,21 @@ interface ChartSeries {
 }
 
 /**
- * Golden-hour series with non-color differentiators:
- * Intake solid + hollow points, Output dashed + filled points, Net solid thicker + filled points.
+ * Series colors follow zone language: fuel green, burn coral, net sky blue.
+ * Non-color cues: Intake solid + hollow · Output dashed + filled · Net bold + filled.
  */
 const SERIES: ChartSeries[] = [
   {
     key: 'intake',
     label: 'Intake',
-    color: '#E8893A',
+    color: '#0F7A4A',
     marker: 'hollow',
     pick: (row) => row.intakeCalories,
   },
   {
     key: 'output',
     label: 'Output',
-    color: '#0F6B7C',
+    color: '#E86A3C',
     dash: '7 5',
     marker: 'filled',
     pick: (row) => row.totalOutput,
@@ -332,8 +332,8 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
       {isMobile && rows.length > 0 && (
         <p className="trends-chart-mobile-hint">
           {showPoints
-            ? 'Intake: open orange circles · Output: dashed + teal dots · Net: solid filled. Tap a point for exact kcal.'
-            : 'Intake solid · Output dashed · Net bold solid. Y-axis k = thousands.'}
+            ? 'Intake: open green circles · Output: dashed + coral dots · Net: solid filled. Tap a point for exact kcal.'
+            : 'Intake solid green · Output dashed coral · Net bold solid. Y-axis k = thousands.'}
         </p>
       )}
     </div>

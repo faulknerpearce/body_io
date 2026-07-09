@@ -1918,7 +1918,7 @@ html {
   padding: 0;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  background: var(--zone-accent, #d97706);
+  background: var(--zone-accent, #0f7a4a);
   box-shadow: 0 1px 4px rgba(24, 24, 27, 0.18);
   transform: translate(-50%, 50%);
   cursor: pointer;
@@ -1931,12 +1931,12 @@ html {
 .hourly-chart-dot:focus {
   outline: none;
   transform: translate(-50%, 50%) scale(1.2);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #d97706) 25%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #0f7a4a) 25%, transparent);
 }
 
 .hourly-chart-dot-selected {
   transform: translate(-50%, 50%) scale(1.25);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #d97706) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zone-accent, #0f7a4a) 35%, transparent);
 }
 
 .hourly-chart-dot-selected:hover,
@@ -1945,7 +1945,7 @@ html {
 }
 
 .hourly-chart-dot:focus-visible {
-  outline: 2px solid var(--zone-accent, #d97706);
+  outline: 2px solid var(--zone-accent, #0f7a4a);
   outline-offset: 2px;
 }
 
