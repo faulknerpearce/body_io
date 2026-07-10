@@ -216,9 +216,9 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader
-        eyebrow="Today"
+        eyebrow="Dashboard"
         title="Overview"
-        description={`Fuel, movement, and balance · ${todayISO()}`}
+        description="Energy balance, multi-day trends, and today's food and activity."
       />
 
       <div style={{ marginBottom: 16 }}>

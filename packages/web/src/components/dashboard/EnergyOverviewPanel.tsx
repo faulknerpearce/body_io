@@ -4,7 +4,7 @@ import { neutrals, radius, type as typeScale } from '../../lib/design-tokens'
 import ProgressRing from '../charts/ProgressRing'
 import DayNavigator from '../layout/DayNavigator'
 import Card from '../ui/Card'
-import OutputCompositionBar from './OutputCompositionBar'
+import OutputComposition from './OutputComposition'
 
 interface EnergyOverviewPanelProps {
   balance: NetBalance
@@ -45,13 +45,15 @@ const statusBadgeBg: Record<NetBalance['status'], string> = {
 
 /** Net position on a track with the goal low–high band and a Target mark. */
 function GoalZoneTrack({ balance }: { balance: NetBalance }) {
-  const max = Math.max(balance.goalHigh, balance.net, 1)
+  // Floor display at 0 so BMR-driven negative net does not show below the track origin
+  const displayNet = Math.max(balance.net, 0)
+  const max = Math.max(balance.goalHigh, displayNet, 1)
   const lowPct = max > 0 ? (balance.goalLow / max) * 100 : 0
   const highPct = max > 0 ? (balance.goalHigh / max) * 100 : 0
   // Target sits in the green zone — midpoint of low–high band
   const targetValue = (balance.goalLow + balance.goalHigh) / 2
   const targetPct = max > 0 ? Math.min((targetValue / max) * 100, 100) : 0
-  const netPct = max > 0 ? Math.min(Math.max(balance.net, 0) / max * 100, 100) : 0
+  const netPct = max > 0 ? Math.min((displayNet / max) * 100, 100) : 0
   const color = statusColor[balance.status]
   const trackTop = 10
   const trackHeight = 12
@@ -107,7 +109,7 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
             boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.06)',
           }}
         />
-        {balance.net > 0 && (
+        {displayNet > 0 && (
           <div
             style={{
               position: 'absolute',
@@ -153,24 +155,28 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
             zIndex: 2,
           }}
         />
-        {balance.net > 0 && (
-          <div
-            style={{
-              position: 'absolute',
-              top: trackCenterY,
-              left: `calc(${netPct}% - ${dotSize / 2}px)`,
-              width: dotSize,
-              height: dotSize,
-              borderRadius: 9999,
-              background: color,
-              border: '3px solid white',
-              boxShadow: `0 2px 8px ${color}66, 0 0 0 1px ${color}`,
-              transform: 'translateY(-50%)',
-              transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-              zIndex: 3,
-            }}
-          />
-        )}
+        {/* Always show marker; floors to left edge when net ≤ 0 */}
+        <div
+          title={
+            balance.net < 0
+              ? `Current net ${balance.net.toLocaleString()} kcal (shown at 0)`
+              : `Current net ${displayNet.toLocaleString()} kcal`
+          }
+          style={{
+            position: 'absolute',
+            top: trackCenterY,
+            left: `calc(${netPct}% - ${dotSize / 2}px)`,
+            width: dotSize,
+            height: dotSize,
+            borderRadius: 9999,
+            background: color,
+            border: '3px solid white',
+            boxShadow: `0 2px 8px ${color}66, 0 0 0 1px ${color}`,
+            transform: 'translateY(-50%)',
+            transition: 'left 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            zIndex: 3,
+          }}
+        />
       </div>
 
       <div
@@ -184,7 +190,14 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
           fontVariantNumeric: 'tabular-nums',
         }}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+        <span
+          style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}
+          title={
+            balance.net < 0
+              ? 'Net is below zero (e.g. BMR exceeds intake); shown at 0 on this track'
+              : undefined
+          }
+        >
           <span
             style={{
               fontSize: 10,
@@ -196,7 +209,7 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
           >
             Current
           </span>
-          <span style={{ color }}>{balance.net.toLocaleString()}</span>
+          <span style={{ color }}>{displayNet.toLocaleString()}</span>
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
           <span
@@ -303,44 +316,50 @@ export default function EnergyOverviewPanel({
           pointerEvents: dayLoading ? 'none' : undefined,
         }}
       >
-        <div className="energy-overview-ring">
-          <ProgressRing
-            value={ringFillValue}
-            goal={balance.goalHigh}
-            color={color}
-            size={112}
-            strokeWidth={10}
-            centerLabel={ringCenterLabel}
-            ariaLabel={
-              balance.net < 0
-                ? `Net energy ${balance.net} kilocalories, ring empty while net is negative`
-                : `Net energy ${balance.net} kilocalories, ${ring.pct} percent of high goal`
-            }
-          />
+        {/* Net balance (in − out) — title sits above kcal so it mirrors Total output */}
+        <div className="energy-overview-net-section">
+          <div className="energy-overview-net-body">
+            <div className="energy-overview-ring">
+              <ProgressRing
+                value={ringFillValue}
+                goal={balance.goalHigh}
+                color={color}
+                size={112}
+                strokeWidth={10}
+                centerLabel={ringCenterLabel}
+                ariaLabel={
+                  balance.net < 0
+                    ? `Net energy ${balance.net} kilocalories, ring empty while net is negative`
+                    : `Net energy ${balance.net} kilocalories, ${ring.pct} percent of high goal`
+                }
+              />
+            </div>
+
+            <div className="energy-overview-stats">
+              <p className="energy-overview-section-title">Net energy</p>
+              <div className="energy-overview-net">
+                <span className="energy-overview-net-value">{balance.net.toLocaleString()}</span>
+                <span className="energy-overview-net-unit">kcal net</span>
+              </div>
+              <div className="energy-overview-io energy-overview-io-stacked">
+                <span>
+                  <strong>{balance.consumed.toLocaleString()}</strong> in
+                </span>
+                <span>
+                  <strong>{balance.burned.toLocaleString()}</strong> out
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="energy-overview-stats">
-          <div className="energy-overview-net">
-            <span className="energy-overview-net-value">{balance.net.toLocaleString()}</span>
-            <span className="energy-overview-net-unit">kcal net</span>
-          </div>
-          <div className="energy-overview-io">
-            <span>
-              <strong>{balance.consumed.toLocaleString()}</strong> in
-            </span>
-            <span className="energy-overview-io-sep" aria-hidden="true">
-              ·
-            </span>
-            <span>
-              <strong>{balance.burned.toLocaleString()}</strong> out
-            </span>
-          </div>
-        </div>
+        <div className="energy-overview-section-divider" aria-hidden="true" />
+
+        {/* Right of net stats — fills trailing blank space on the row */}
+        <OutputComposition balance={balance} />
       </div>
 
-      {/* Output breakdown: BMR vs activity (what makes up burn) */}
       <div style={{ opacity: dayLoading ? 0.55 : 1, transition: 'opacity 0.15s ease' }}>
-        <OutputCompositionBar balance={balance} />
         <GoalZoneTrack balance={balance} />
       </div>
     </Card>
