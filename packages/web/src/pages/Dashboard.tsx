@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNutritionGoals, useProfile } from '../context/useProfile'
 import { sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityOverviewPanel from '../components/dashboard/ActivityOverviewPanel'
+import DailyIoCard from '../components/dashboard/DailyIoCard'
 import EnergyOverviewPanel from '../components/dashboard/EnergyOverviewPanel'
 import NutritionRingsPanel from '../components/dashboard/NutritionRingsPanel'
 import TrendsPanel from '../components/dashboard/TrendsPanel'
@@ -246,6 +247,20 @@ export default function Dashboard() {
         title="Overview"
         description="Energy balance, multi-day trends, and today's food and activity."
       />
+
+      <div style={{ marginBottom: 16 }}>
+        <DailyIoCard
+          balance={energyBalance}
+          date={energyDate}
+          isToday={energyIsToday}
+          canGoBack
+          canGoForward={!energyIsToday}
+          dayLoading={energyLoading}
+          onPrevious={goEnergyPrev}
+          onNext={goEnergyNext}
+          onGoToToday={goEnergyToday}
+        />
+      </div>
 
       <div style={{ marginBottom: 16 }}>
         <EnergyOverviewPanel
