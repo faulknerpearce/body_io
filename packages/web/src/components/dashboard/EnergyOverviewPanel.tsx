@@ -374,6 +374,7 @@ export default function EnergyOverviewPanel({
       {usesWearable && onSaveDeviceTotal && onClearDeviceTotal && (
         <div style={{ marginTop: 12 }}>
           <DeviceTotalControl
+            key={`${date}-${balance.deviceTotal ?? 'none'}`}
             deviceTotal={balance.deviceTotal}
             bmr={balance.bmr}
             activityCalories={balance.activityCalories}
