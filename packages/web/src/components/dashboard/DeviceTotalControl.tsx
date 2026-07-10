@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { neutrals, radius } from '../../lib/design-tokens'
 
 interface DeviceTotalControlProps {
@@ -24,18 +24,12 @@ export default function DeviceTotalControl({
   onSave,
   onClear,
 }: DeviceTotalControlProps) {
+  // Parent remounts via key when date/deviceTotal changes so draft stays in sync without effects.
   const [draft, setDraft] = useState(deviceTotal === null ? '' : String(deviceTotal))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   /** Expanded when no saved value, or user taps to edit. */
   const [expanded, setExpanded] = useState(deviceTotal === null)
-
-  useEffect(() => {
-    setDraft(deviceTotal === null ? '' : String(deviceTotal))
-    setError(null)
-    // New day / load: collapse when a total exists, expand when empty
-    setExpanded(deviceTotal === null)
-  }, [deviceTotal])
 
   const baseBurn = deviceTotal !== null ? deviceTotal : bmr
   const totalOut = baseBurn + activityCalories
