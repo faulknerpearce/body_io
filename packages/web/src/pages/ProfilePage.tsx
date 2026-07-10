@@ -41,6 +41,7 @@ function profileFormKey(profile: UserProfile): string {
     profile.weightKg ?? '',
     profile.gender,
     profile.bmrOverride ?? '',
+    profile.usesWearable ? '1' : '0',
     JSON.stringify(profile.nutritionGoals),
   ].join('|')
 }
@@ -59,6 +60,7 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
   const [bmrOverride, setBmrOverride] = useState(
     profile.bmrOverride === null ? '' : String(profile.bmrOverride),
   )
+  const [usesWearable, setUsesWearable] = useState(profile.usesWearable)
   const [goalsForm, setGoalsForm] = useState(() => structuredClone(profile.nutritionGoals))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -71,8 +73,9 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
       weightKg: optionalWeight(weightKg),
       gender,
       bmrOverride: optionalWeight(bmrOverride),
+      usesWearable,
     }),
-    [age, heightCm, weightKg, gender, bmrOverride],
+    [age, heightCm, weightKg, gender, bmrOverride, usesWearable],
   )
 
   const calculatedBmr = useMemo(() => {
@@ -105,6 +108,7 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
       weightKg: draftProfile.weightKg,
       gender: draftProfile.gender,
       bmrOverride: draftProfile.bmrOverride,
+      usesWearable: draftProfile.usesWearable,
       nutritionGoals: normalizeGoals(goalsForm),
     })
 
@@ -259,8 +263,9 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
           Basal Metabolic Rate
         </h3>
         <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 20px 0' }}>
-          BMR is included automatically in daily output on the dashboard. Calculated with
-          Mifflin-St Jeor from age, height, weight, and gender.
+          BMR is the default day base for output on the dashboard. Calculated with Mifflin-St Jeor
+          from age, height, weight, and gender. If you use a fitness tracker, you can replace BMR
+          with that day&apos;s device total.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -306,11 +311,57 @@ function ProfileForm({ profile, updateProfile }: ProfileFormProps) {
             />
             <p style={{ fontSize: 12, color: '#a1a1aa', margin: '8px 0 0 0' }}>
               {activeBmr.source === 'override'
-                ? 'Using your manual override for daily output.'
+                ? 'Using your manual override when no device total is set.'
                 : activeBmr.source === 'fallback'
                   ? 'Add age, height, and weight to calculate BMR, or set a manual override.'
-                  : 'Using calculated BMR for daily output.'}
+                  : 'Using calculated BMR when no device total is set.'}
             </p>
+          </div>
+
+          <div
+            style={{
+              padding: '14px 16px',
+              borderRadius: 12,
+              border: '1px solid #e4e4e7',
+              background: usesWearable ? '#f0fdf4' : '#fafafa',
+            }}
+          >
+            <label
+              htmlFor="profile-uses-wearable"
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 12,
+                cursor: 'pointer',
+                margin: 0,
+              }}
+            >
+              <input
+                id="profile-uses-wearable"
+                type="checkbox"
+                checked={usesWearable}
+                onChange={(e) => setUsesWearable(e.target.checked)}
+                style={{ marginTop: 3, width: 16, height: 16, flexShrink: 0 }}
+              />
+              <span>
+                <span
+                  style={{
+                    display: 'block',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#18181b',
+                    marginBottom: 4,
+                  }}
+                >
+                  I use a fitness tracker for daily burn
+                </span>
+                <span style={{ fontSize: 12, color: '#71717a', lineHeight: 1.45 }}>
+                  When on, the Daily energy card lets you enter your watch&apos;s total calories for
+                  each day. That replaces resting BMR as the day&apos;s base. Workouts you log still
+                  add on top — leave their calories at 0 if the watch already counted them.
+                </span>
+              </span>
+            </label>
           </div>
         </div>
       </section>

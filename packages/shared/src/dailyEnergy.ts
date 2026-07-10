@@ -1,9 +1,14 @@
 import { listDatesInRange, shiftISODate, todayISO } from './dateUtils.js'
+import { resolveDayBaseBurn, type DayBaseSource } from './netBalance.js'
 
 export interface DailyEnergySnapshot {
   date: string
   intakeCalories: number
+  /** Profile BMR used as fallback when no device total. */
   bmr: number
+  /** Resolved day base (device total or BMR). */
+  baseBurn: number
+  baseSource: DayBaseSource
   activityCalories: number
   totalOutput: number
   net: number
@@ -16,6 +21,8 @@ export interface DailyEnergyPeriodSummary {
   intakeAverage: number
   bmrTotal: number
   bmrAverage: number
+  baseBurnTotal: number
+  baseBurnAverage: number
   activityTotal: number
   activityAverage: number
   totalOutputTotal: number
@@ -53,6 +60,7 @@ export function buildDailyEnergySnapshots(
   intakeByDate: Readonly<Record<string, number>>,
   activityByDate: Readonly<Record<string, number>>,
   bmr: number,
+  deviceTotalByDate: Readonly<Record<string, number>> = {},
 ): DailyEnergySnapshot[] {
   const dates = listDatesInRange(startDate, endDate)
   const snapshots: DailyEnergySnapshot[] = []
@@ -61,7 +69,11 @@ export function buildDailyEnergySnapshots(
   for (const date of dates) {
     const intakeCalories = intakeByDate[date] ?? 0
     const activityCalories = activityByDate[date] ?? 0
-    const totalOutput = bmr + activityCalories
+    const deviceRaw = deviceTotalByDate[date]
+    const deviceTotal =
+      deviceRaw !== undefined && Number.isFinite(deviceRaw) ? deviceRaw : null
+    const { baseBurn, baseSource } = resolveDayBaseBurn(bmr, deviceTotal)
+    const totalOutput = baseBurn + activityCalories
     const net = intakeCalories - totalOutput
     const netDelta = previousNet === null ? null : net - previousNet
 
@@ -69,6 +81,8 @@ export function buildDailyEnergySnapshots(
       date,
       intakeCalories,
       bmr,
+      baseBurn,
+      baseSource,
       activityCalories,
       totalOutput,
       net,
@@ -87,6 +101,7 @@ export function summarizeDailyEnergyPeriod(rows: DailyEnergySnapshot[]): DailyEn
 
   const intakeTotal = sum((row) => row.intakeCalories)
   const bmrTotal = sum((row) => row.bmr)
+  const baseBurnTotal = sum((row) => row.baseBurn)
   const activityTotal = sum((row) => row.activityCalories)
   const totalOutputTotal = sum((row) => row.totalOutput)
   const netTotal = sum((row) => row.net)
@@ -99,6 +114,8 @@ export function summarizeDailyEnergyPeriod(rows: DailyEnergySnapshot[]): DailyEn
     intakeAverage: average(intakeTotal),
     bmrTotal,
     bmrAverage: average(bmrTotal),
+    baseBurnTotal,
+    baseBurnAverage: average(baseBurnTotal),
     activityTotal,
     activityAverage: average(activityTotal),
     totalOutputTotal,

@@ -22,6 +22,11 @@ import PageHeader from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageState'
 import { fetchActivities, type Activity } from '../lib/activities'
 import { fetchDailyEnergySnapshots } from '../lib/dailyEnergy'
+import {
+  clearDeviceTotal,
+  fetchDeviceTotal,
+  saveDeviceTotal,
+} from '../lib/deviceTotals'
 import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { routeHref } from '../lib/routing'
 
@@ -82,6 +87,7 @@ export default function Dashboard() {
   const [energyDate, setEnergyDate] = useState(today)
   const [energyEntries, setEnergyEntries] = useState<FoodEntry[]>([])
   const [energyActivities, setEnergyActivities] = useState<Activity[]>([])
+  const [energyDeviceTotal, setEnergyDeviceTotal] = useState<number | null>(null)
   const [energyLoading, setEnergyLoading] = useState(true)
   const [trendsPreset, setTrendsPreset] = useState<TrendsRangePreset>('last_7')
   const [customStart, setCustomStart] = useState(() => resolveTrendsDateRange('last_7').start)
@@ -122,17 +128,23 @@ export default function Dashboard() {
     const kickoff = queueMicrotask(() => {
       if (cancelled) return
       setEnergyLoading(true)
-      Promise.all([fetchEntries(energyDate), fetchActivities(energyDate)])
-        .then(([food, acts]) => {
+      Promise.all([
+        fetchEntries(energyDate),
+        fetchActivities(energyDate),
+        profile.usesWearable ? fetchDeviceTotal(energyDate) : Promise.resolve(null),
+      ])
+        .then(([food, acts, deviceTotal]) => {
           if (cancelled) return
           setEnergyEntries(food)
           setEnergyActivities(acts)
+          setEnergyDeviceTotal(deviceTotal)
         })
         .catch((err) => {
           if (!cancelled) {
             console.error('Failed to load energy day', energyDate, err)
             setEnergyEntries([])
             setEnergyActivities([])
+            setEnergyDeviceTotal(null)
           }
         })
         .finally(() => {
@@ -143,7 +155,7 @@ export default function Dashboard() {
     return () => {
       cancelled = true
     }
-  }, [energyDate])
+  }, [energyDate, profile.usesWearable])
 
   useEffect(() => {
     let cancelled = false
@@ -188,6 +200,19 @@ export default function Dashboard() {
     setEnergyDate(todayISO())
   }, [])
 
+  const handleSaveDeviceTotal = useCallback(
+    async (kcal: number) => {
+      const saved = await saveDeviceTotal(energyDate, kcal)
+      setEnergyDeviceTotal(saved)
+    },
+    [energyDate],
+  )
+
+  const handleClearDeviceTotal = useCallback(async () => {
+    await clearDeviceTotal(energyDate)
+    setEnergyDeviceTotal(null)
+  }, [energyDate])
+
   if (loading) {
     return <PageLoading message="Loading dashboard..." />
   }
@@ -209,6 +234,7 @@ export default function Dashboard() {
     nutritionGoals.calories.low,
     nutritionGoals.calories.high,
     bmr,
+    profile.usesWearable ? energyDeviceTotal : null,
   )
   const recentEntries = entries.slice(0, 3)
   const recentActivities = activities.slice(0, 3)
@@ -232,6 +258,9 @@ export default function Dashboard() {
           onPrevious={goEnergyPrev}
           onNext={goEnergyNext}
           onGoToToday={goEnergyToday}
+          usesWearable={profile.usesWearable}
+          onSaveDeviceTotal={handleSaveDeviceTotal}
+          onClearDeviceTotal={handleClearDeviceTotal}
         />
       </div>
 

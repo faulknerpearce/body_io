@@ -11,12 +11,12 @@ export type { ProfileUpdate, UserProfile }
 
 const BASE_PROFILE_COLUMNS =
   'display_name, nutrition_goals, age, height_cm, weight_kg, time_zone'
-const EXTENDED_PROFILE_COLUMNS = `${BASE_PROFILE_COLUMNS}, gender, bmr_override`
+const EXTENDED_PROFILE_COLUMNS = `${BASE_PROFILE_COLUMNS}, gender, bmr_override, uses_wearable`
 
 function isMissingProfileColumnError(message: string): boolean {
   return (
-    /could not find the '?(gender|bmr_override)'? column/i.test(message) ||
-    /column profiles\.(gender|bmr_override) does not exist/i.test(message)
+    /could not find the '?(gender|bmr_override|uses_wearable)'? column/i.test(message) ||
+    /column profiles\.(gender|bmr_override|uses_wearable) does not exist/i.test(message)
   )
 }
 
@@ -94,7 +94,12 @@ export async function saveProfileUpdate(
   let saved = await saveProfileRow(userId, update, EXTENDED_PROFILE_COLUMNS)
 
   if (saved.error && isMissingProfileColumnError(saved.error.message)) {
-    const legacyUpdate: ProfileUpdate = { ...update, gender: undefined, bmrOverride: undefined }
+    const legacyUpdate: ProfileUpdate = {
+      ...update,
+      gender: undefined,
+      bmrOverride: undefined,
+      usesWearable: undefined,
+    }
     saved = await saveProfileRow(userId, legacyUpdate, BASE_PROFILE_COLUMNS)
     if (!saved.error && saved.data) {
       const current = await loadProfileRow(userId)
@@ -117,5 +122,7 @@ export async function saveProfileUpdate(
     ...profile,
     gender: update.gender ?? profile.gender,
     bmrOverride: update.bmrOverride !== undefined ? update.bmrOverride : profile.bmrOverride,
+    usesWearable:
+      update.usesWearable !== undefined ? update.usesWearable : profile.usesWearable,
   }
 }

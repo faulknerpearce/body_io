@@ -9,50 +9,60 @@ interface OutputCompositionProps {
 const DONUT_SIZE = 112
 const STROKE = 10
 
-/** Muted gray — resting metabolism share of total burn. */
-const BMR_RING = '#C7C7CC'
+/** Muted gray — base burn (BMR or device total). */
+const BASE_RING = '#C7C7CC'
 const ACTIVITY_COLOR = ZONE_CORAL
 
-function compositionPercents(bmr: number, burned: number) {
+function compositionPercents(baseBurn: number, burned: number) {
   if (burned <= 0) {
-    return { bmrPct: 100, activityPct: 0 }
+    return { basePct: 100, activityPct: 0 }
   }
-  const bmrPct = Math.round((bmr / burned) * 100)
-  return { bmrPct, activityPct: 100 - bmrPct }
+  const basePct = Math.round((baseBurn / burned) * 100)
+  return { basePct, activityPct: 100 - basePct }
 }
 
 /**
  * Dominant burn mode for the donut center.
- * Resting when BMR is the larger share (including 50/50); Active when activity wins.
+ * Resting/Device when base is the larger share; Active when activity wins.
  */
-function dominantMode(bmrPct: number, activityPct: number): {
+function dominantMode(
+  basePct: number,
+  activityPct: number,
+  baseSource: NetBalance['baseSource'],
+): {
   label: string
   pct: number
   color: string
 } {
-  if (activityPct > bmrPct) {
+  if (activityPct > basePct) {
     return { label: 'Active', pct: activityPct, color: ACTIVITY_COLOR }
   }
-  return { label: 'Resting', pct: bmrPct, color: BMR_RING }
+  return {
+    label: baseSource === 'device' ? 'Device' : 'Resting',
+    pct: basePct,
+    color: BASE_RING,
+  }
 }
 
 /** Two-segment composition donut with mode label in the center. */
 function CompositionDonut({
-  bmrPct,
+  basePct,
   activityPct,
+  baseSource,
   ariaLabel,
 }: {
-  bmrPct: number
+  basePct: number
   activityPct: number
+  baseSource: NetBalance['baseSource']
   ariaLabel: string
 }) {
   const radius = (DONUT_SIZE - STROKE) / 2
   const circumference = 2 * Math.PI * radius
   const center = DONUT_SIZE / 2
 
-  const bmrLen = (bmrPct / 100) * circumference
+  const baseLen = (basePct / 100) * circumference
   const activityLen = (activityPct / 100) * circumference
-  const mode = dominantMode(bmrPct, activityPct)
+  const mode = dominantMode(basePct, activityPct, baseSource)
 
   return (
     <div
@@ -79,16 +89,16 @@ function CompositionDonut({
           stroke="#f4f4f5"
           strokeWidth={STROKE}
         />
-        {bmrPct > 0 && (
+        {basePct > 0 && (
           <circle
             cx={center}
             cy={center}
             r={radius}
             fill="none"
-            stroke={BMR_RING}
+            stroke={BASE_RING}
             strokeWidth={STROKE}
             strokeLinecap="butt"
-            strokeDasharray={`${bmrLen} ${circumference - bmrLen}`}
+            strokeDasharray={`${baseLen} ${circumference - baseLen}`}
             strokeDashoffset={0}
             style={{ transition: 'stroke-dasharray 0.5s cubic-bezier(0.4, 0, 0.2, 1)' }}
           />
@@ -103,7 +113,7 @@ function CompositionDonut({
             strokeWidth={STROKE}
             strokeLinecap="butt"
             strokeDasharray={`${activityLen} ${circumference - activityLen}`}
-            strokeDashoffset={-bmrLen}
+            strokeDashoffset={-baseLen}
             style={{
               transition:
                 'stroke-dasharray 0.5s cubic-bezier(0.4, 0, 0.2, 1), stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -152,14 +162,15 @@ function CompositionDonut({
 }
 
 /**
- * Share of total daily burn: BMR (resting) vs activity.
+ * Share of total daily burn: base (BMR or device) vs activity.
  * Layout mirrors net energy: title + big kcal, then ring.
  */
 export default function OutputComposition({ balance }: OutputCompositionProps) {
-  const { bmr, activityCalories, burned } = balance
-  const { bmrPct, activityPct } = compositionPercents(bmr, burned)
+  const { baseBurn, baseSource, activityCalories, burned } = balance
+  const { basePct, activityPct } = compositionPercents(baseBurn, burned)
+  const baseLabel = baseSource === 'device' ? 'Device' : 'BMR'
 
-  const ariaLabel = `Total output ${burned} kilocalories: ${bmrPct}% BMR (${bmr}), ${activityPct}% activity (${activityCalories})`
+  const ariaLabel = `Total output ${burned} kilocalories: ${basePct}% ${baseLabel} (${baseBurn}), ${activityPct}% activity (${activityCalories})`
 
   return (
     <div className="energy-overview-output">
@@ -174,12 +185,12 @@ export default function OutputComposition({ balance }: OutputCompositionProps) {
             <div className="energy-overview-output-row">
               <span
                 className="energy-overview-output-swatch"
-                style={{ background: BMR_RING }}
+                style={{ background: BASE_RING }}
                 aria-hidden="true"
               />
-              <span className="energy-overview-output-pct">{bmrPct}%</span>
-              <span className="energy-overview-output-label">BMR</span>
-              <span className="energy-overview-output-kcal">{bmr.toLocaleString()}</span>
+              <span className="energy-overview-output-pct">{basePct}%</span>
+              <span className="energy-overview-output-label">{baseLabel}</span>
+              <span className="energy-overview-output-kcal">{baseBurn.toLocaleString()}</span>
             </div>
             <div className="energy-overview-output-row">
               <span
@@ -195,7 +206,12 @@ export default function OutputComposition({ balance }: OutputCompositionProps) {
             </div>
           </div>
         </div>
-        <CompositionDonut bmrPct={bmrPct} activityPct={activityPct} ariaLabel={ariaLabel} />
+        <CompositionDonut
+          basePct={basePct}
+          activityPct={activityPct}
+          baseSource={baseSource}
+          ariaLabel={ariaLabel}
+        />
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { buildDailyEnergySnapshots, type DailyEnergySnapshot } from '@nutrition-tracker/shared'
+import { fetchDeviceTotalsByDate } from './deviceTotals'
 import { supabase } from './supabase'
 
 async function requireUserId(): Promise<string> {
@@ -18,7 +19,7 @@ export async function fetchDailyEnergySnapshots(
 ): Promise<DailyEnergySnapshot[]> {
   const userId = await requireUserId()
 
-  const [foodResult, activityResult] = await Promise.all([
+  const [foodResult, activityResult, deviceByDate] = await Promise.all([
     supabase
       .from('food_entries')
       .select('entry_date, calories')
@@ -30,6 +31,7 @@ export async function fetchDailyEnergySnapshots(
       .select('activity_date, calories')
       .gte('activity_date', startDate)
       .lte('activity_date', endDate),
+    fetchDeviceTotalsByDate(startDate, endDate),
   ])
 
   if (foodResult.error) throw new Error(foodResult.error.message)
@@ -46,5 +48,12 @@ export async function fetchDailyEnergySnapshots(
       (activityByDate[row.activity_date] ?? 0) + (row.calories ?? 0)
   }
 
-  return buildDailyEnergySnapshots(startDate, endDate, intakeByDate, activityByDate, bmr)
+  return buildDailyEnergySnapshots(
+    startDate,
+    endDate,
+    intakeByDate,
+    activityByDate,
+    bmr,
+    deviceByDate,
+  )
 }
