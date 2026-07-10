@@ -25,10 +25,28 @@ describe('buildDailyEnergySnapshots', () => {
 
     expect(rows).toHaveLength(3)
     expect(rows[0].totalOutput).toBe(1700)
+    expect(rows[0].baseBurn).toBe(1400)
+    expect(rows[0].baseSource).toBe('bmr')
     expect(rows[0].net).toBe(500)
     expect(rows[0].netDelta).toBeNull()
     expect(rows[1].netDelta).toBe(rows[1].net - rows[0].net)
     expect(rows.every((row) => row.totalOutput > 0)).toBe(true)
+  })
+
+  it('uses per-day device total as base when provided', () => {
+    const rows = buildDailyEnergySnapshots(
+      '2026-06-01',
+      '2026-06-02',
+      { '2026-06-01': 2000, '2026-06-02': 2000 },
+      { '2026-06-01': 100, '2026-06-02': 0 },
+      1400,
+      { '2026-06-01': 2500 },
+    )
+    expect(rows[0].baseSource).toBe('device')
+    expect(rows[0].baseBurn).toBe(2500)
+    expect(rows[0].totalOutput).toBe(2600)
+    expect(rows[1].baseSource).toBe('bmr')
+    expect(rows[1].baseBurn).toBe(1400)
   })
 })
 

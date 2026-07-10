@@ -231,8 +231,12 @@ export default function TrendsPanel({
                     </p>
                   </div>
                   <div className="trends-mobile-card-field">
-                    <p className="trends-mobile-card-field-label">BMR</p>
-                    <p className="trends-mobile-card-field-value">{row.bmr.toLocaleString()} kcal</p>
+                    <p className="trends-mobile-card-field-label">
+                      {row.baseSource === 'device' ? 'Device' : 'BMR'}
+                    </p>
+                    <p className="trends-mobile-card-field-value">
+                      {row.baseBurn.toLocaleString()} kcal
+                    </p>
                   </div>
                   <div className="trends-mobile-card-field">
                     <p className="trends-mobile-card-field-label">Activity</p>
@@ -275,7 +279,7 @@ export default function TrendsPanel({
                 <tr>
                   <th scope="col">Date</th>
                   <th scope="col">Intake</th>
-                  <th scope="col">BMR</th>
+                  <th scope="col">Base</th>
                   <th scope="col">Activity</th>
                   <th scope="col">Total Output</th>
                   <th scope="col">Net</th>
@@ -287,7 +291,10 @@ export default function TrendsPanel({
                   <tr key={row.date}>
                     <th scope="row">{formatDayLabel(row.date)}</th>
                     <td>{row.intakeCalories.toLocaleString()}</td>
-                    <td>{row.bmr.toLocaleString()}</td>
+                    <td title={row.baseSource === 'device' ? 'Device total' : 'BMR'}>
+                      {row.baseBurn.toLocaleString()}
+                      {row.baseSource === 'device' ? ' · D' : ''}
+                    </td>
                     <td>{row.activityCalories.toLocaleString()}</td>
                     <td>{row.totalOutput.toLocaleString()}</td>
                     <td style={{ color: netColor(row.net), fontWeight: 600 }}>
@@ -304,7 +311,7 @@ export default function TrendsPanel({
                   <tr className="trends-table-summary trends-table-summary-total">
                     <th scope="row">Period total</th>
                     <td>{summary.intakeTotal.toLocaleString()}</td>
-                    <td>{summary.bmrTotal.toLocaleString()}</td>
+                    <td>{summary.baseBurnTotal.toLocaleString()}</td>
                     <td>{summary.activityTotal.toLocaleString()}</td>
                     <td>{summary.totalOutputTotal.toLocaleString()}</td>
                     <td>{summary.netTotal.toLocaleString()}</td>
@@ -313,7 +320,7 @@ export default function TrendsPanel({
                   <tr className="trends-table-summary trends-table-summary-average">
                     <th scope="row">Daily average</th>
                     <td>{summary.intakeAverage.toLocaleString()}</td>
-                    <td>{summary.bmrAverage.toLocaleString()}</td>
+                    <td>{summary.baseBurnAverage.toLocaleString()}</td>
                     <td>{summary.activityAverage.toLocaleString()}</td>
                     <td>{summary.totalOutputAverage.toLocaleString()}</td>
                     <td>{summary.netAverage.toLocaleString()}</td>

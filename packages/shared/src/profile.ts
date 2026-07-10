@@ -16,6 +16,11 @@ export interface UserProfile extends UserBodyStats {
   nutritionGoals: NutritionGoals
   gender: ProfileGender
   bmrOverride: number | null
+  /**
+   * When true, the user can enter a wearable day total that replaces BMR
+   * as the day's base burn. Workouts still add on top.
+   */
+  usesWearable: boolean
   /** IANA timezone used for calendar-day food and activity logs. */
   timeZone: string
 }
@@ -27,6 +32,7 @@ export interface ProfileUpdate {
   weightKg?: number | null
   gender?: ProfileGender
   bmrOverride?: number | null
+  usesWearable?: boolean
   nutritionGoals?: NutritionGoals
   timeZone?: string
 }
@@ -59,6 +65,10 @@ function parseOptionalBmrOverride(raw: unknown): number | null {
   return Math.round(value)
 }
 
+function parseUsesWearable(raw: unknown): boolean {
+  return raw === true
+}
+
 export function mapProfileRow(row: {
   display_name: string
   nutrition_goals: unknown
@@ -67,6 +77,7 @@ export function mapProfileRow(row: {
   weight_kg?: number | string | null
   gender?: string | null
   bmr_override?: number | string | null
+  uses_wearable?: boolean | null
   time_zone?: string | null
 }): UserProfile {
   const weightRaw = row.weight_kg
@@ -85,6 +96,7 @@ export function mapProfileRow(row: {
     weightKg: Number.isFinite(weightKg) ? weightKg : null,
     gender: parseProfileGender(row.gender),
     bmrOverride: parseOptionalBmrOverride(row.bmr_override),
+    usesWearable: parseUsesWearable(row.uses_wearable),
     timeZone: parseTimeZone(row.time_zone),
   }
 }
@@ -150,6 +162,10 @@ export function validateProfileUpdate(input: ProfileUpdate): ValidationResult<Pr
     }
   }
 
+  if (input.usesWearable !== undefined && typeof input.usesWearable !== 'boolean') {
+    return { ok: false, error: 'usesWearable must be true or false' }
+  }
+
   if (input.timeZone !== undefined && !isValidTimeZone(input.timeZone)) {
     return { ok: false, error: 'timeZone must be a valid IANA timezone' }
   }
@@ -172,6 +188,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
   weight_kg?: number | null
   gender?: ProfileGender
   bmr_override?: number | null
+  uses_wearable?: boolean
   nutrition_goals?: NutritionGoals
   time_zone?: string
 } {
@@ -182,6 +199,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
     weight_kg?: number | null
     gender?: ProfileGender
     bmr_override?: number | null
+    uses_wearable?: boolean
     nutrition_goals?: NutritionGoals
     time_zone?: string
   } = {}
@@ -194,6 +212,7 @@ export function buildProfileUpdatePayload(input: ProfileUpdate): {
   if (input.weightKg !== undefined) payload.weight_kg = input.weightKg
   if (input.gender !== undefined) payload.gender = input.gender
   if (input.bmrOverride !== undefined) payload.bmr_override = input.bmrOverride
+  if (input.usesWearable !== undefined) payload.uses_wearable = input.usesWearable
   if (input.nutritionGoals !== undefined) payload.nutrition_goals = input.nutritionGoals
   if (input.timeZone !== undefined) payload.time_zone = input.timeZone
 
@@ -215,6 +234,8 @@ export function mergeProfileRow(
     gender: row.gender === undefined ? current.gender : parseProfileGender(row.gender),
     bmr_override:
       row.bmr_override === undefined ? current.bmrOverride : parseOptionalBmrOverride(row.bmr_override),
+    uses_wearable:
+      row.uses_wearable === undefined ? current.usesWearable : parseUsesWearable(row.uses_wearable),
     time_zone:
       row.time_zone === undefined || row.time_zone === null
         ? current.timeZone

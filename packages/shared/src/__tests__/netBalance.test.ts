@@ -35,9 +35,27 @@ describe('computeNetBalance', () => {
     expect(balance.contextMessage).toMatch(/400/)
   })
 
-  it('always includes BMR in burned output', () => {
+  it('always includes BMR in burned output when no device total', () => {
     const balance = computeNetBalance(1500, 0, low, high, bmr)
     expect(balance.burned).toBe(1400)
     expect(balance.net).toBe(100)
+    expect(balance.baseSource).toBe('bmr')
+    expect(balance.baseBurn).toBe(1400)
+  })
+
+  it('replaces BMR base with device total when set', () => {
+    const balance = computeNetBalance(2400, 300, low, high, bmr, 2450)
+    expect(balance.baseSource).toBe('device')
+    expect(balance.baseBurn).toBe(2450)
+    expect(balance.deviceTotal).toBe(2450)
+    expect(balance.burned).toBe(2750)
+    expect(balance.net).toBe(2400 - 2750)
+  })
+
+  it('allows device total below BMR', () => {
+    const balance = computeNetBalance(2000, 0, low, high, bmr, 1100)
+    expect(balance.baseBurn).toBe(1100)
+    expect(balance.burned).toBe(1100)
+    expect(balance.net).toBe(900)
   })
 })

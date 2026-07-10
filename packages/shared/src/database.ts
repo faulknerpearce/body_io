@@ -561,6 +561,7 @@ export type Database = {
           weight_kg: number | null
           gender: string
           bmr_override: number | null
+          uses_wearable: boolean
           time_zone: string
           created_at: string
         }
@@ -573,6 +574,7 @@ export type Database = {
           weight_kg?: number | null
           gender?: string
           bmr_override?: number | null
+          uses_wearable?: boolean
           time_zone?: string
           created_at?: string
         }
@@ -585,6 +587,7 @@ export type Database = {
           weight_kg?: number | null
           gender?: string
           bmr_override?: number | null
+          uses_wearable?: boolean
           time_zone?: string
           created_at?: string
         }
@@ -597,6 +600,30 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+      }
+      daily_device_totals: {
+        Row: {
+          user_id: string
+          energy_date: string
+          device_total_kcal: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          energy_date: string
+          device_total_kcal: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          energy_date?: string
+          device_total_kcal?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: Record<string, never>

@@ -17,6 +17,7 @@ export const mockProfile: UserProfile = {
   weightKg: 68,
   gender: DEFAULT_PROFILE_GENDER,
   bmrOverride: null,
+  usesWearable: false,
   nutritionGoals: DEFAULT_NUTRITION_GOALS,
   timeZone: DEFAULT_TIMEZONE,
 }

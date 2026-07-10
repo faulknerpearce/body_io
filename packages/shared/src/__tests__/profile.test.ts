@@ -25,8 +25,19 @@ describe('mapProfileRow', () => {
       weightKg: 78.5,
       gender: 'female',
       bmrOverride: null,
+      usesWearable: false,
       timeZone: DEFAULT_TIMEZONE,
     })
+  })
+
+  it('maps uses_wearable when present', () => {
+    expect(
+      mapProfileRow({
+        display_name: 'Alex',
+        nutrition_goals: DEFAULT_NUTRITION_GOALS,
+        uses_wearable: true,
+      }).usesWearable,
+    ).toBe(true)
   })
 })
 

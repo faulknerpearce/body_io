@@ -4,6 +4,7 @@ import { neutrals, radius, type as typeScale } from '../../lib/design-tokens'
 import ProgressRing from '../charts/ProgressRing'
 import DayNavigator from '../layout/DayNavigator'
 import Card from '../ui/Card'
+import DeviceTotalControl from './DeviceTotalControl'
 import OutputComposition from './OutputComposition'
 
 interface EnergyOverviewPanelProps {
@@ -17,6 +18,10 @@ interface EnergyOverviewPanelProps {
   onPrevious: () => void
   onNext: () => void
   onGoToToday: () => void
+  /** When true, show device total input (profile.usesWearable). */
+  usesWearable?: boolean
+  onSaveDeviceTotal?: (kcal: number) => Promise<void>
+  onClearDeviceTotal?: () => Promise<void>
 }
 
 /** Status of net kcal vs the daily goal band (low–high). */
@@ -194,7 +199,7 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
           style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}
           title={
             balance.net < 0
-              ? 'Net is below zero (e.g. BMR exceeds intake); shown at 0 on this track'
+              ? 'True net is negative; marker stays at 0 on the track'
               : undefined
           }
         >
@@ -209,7 +214,7 @@ function GoalZoneTrack({ balance }: { balance: NetBalance }) {
           >
             Current
           </span>
-          <span style={{ color }}>{displayNet.toLocaleString()}</span>
+          <span style={{ color }}>{balance.net.toLocaleString()}</span>
         </span>
         <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
           <span
@@ -240,6 +245,9 @@ export default function EnergyOverviewPanel({
   onPrevious,
   onNext,
   onGoToToday,
+  usesWearable = false,
+  onSaveDeviceTotal,
+  onClearDeviceTotal,
 }: EnergyOverviewPanelProps) {
   const color = statusColor[balance.status]
   const ring = netRingProgress(balance)
@@ -362,6 +370,19 @@ export default function EnergyOverviewPanel({
       <div style={{ opacity: dayLoading ? 0.55 : 1, transition: 'opacity 0.15s ease' }}>
         <GoalZoneTrack balance={balance} />
       </div>
+
+      {usesWearable && onSaveDeviceTotal && onClearDeviceTotal && (
+        <div style={{ marginTop: 12 }}>
+          <DeviceTotalControl
+            deviceTotal={balance.deviceTotal}
+            bmr={balance.bmr}
+            activityCalories={balance.activityCalories}
+            dayLoading={dayLoading}
+            onSave={onSaveDeviceTotal}
+            onClear={onClearDeviceTotal}
+          />
+        </div>
+      )}
     </Card>
   )
 }
