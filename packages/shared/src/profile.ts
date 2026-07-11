@@ -66,7 +66,7 @@ function parseOptionalBmrOverride(raw: unknown): number | null {
 }
 
 function parseUsesWearable(raw: unknown): boolean {
-  return raw === true
+  return raw === true || raw === 'true' || raw === 1 || raw === '1' || raw === 't'
 }
 
 export function mapProfileRow(row: {

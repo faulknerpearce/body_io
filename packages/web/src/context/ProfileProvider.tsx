@@ -42,7 +42,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       .then((nextProfile) => {
         if (!cancelled) setProfile(nextProfile)
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('[ProfileProvider] failed to load profile', err)
         if (!cancelled) {
           setProfile({
             ...FALLBACK_PROFILE,
