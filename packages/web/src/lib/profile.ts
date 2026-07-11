@@ -16,20 +16,33 @@ const GENDER_BMR_COLUMNS = `${BASE_PROFILE_COLUMNS}, gender, bmr_override`
 /** Full profile including fitness-tracker flag. */
 const FULL_PROFILE_COLUMNS = `${GENDER_BMR_COLUMNS}, uses_wearable`
 
+/** True only when the error is about a missing profiles column (not other tables). */
 function isMissingProfileColumnError(message: string): boolean {
+  const m = message.toLowerCase()
+  if (/daily_device_totals|activities|food_entries/i.test(message)) return false
   return (
     /could not find the '?(gender|bmr_override|uses_wearable)'? column/i.test(message) ||
-    /column profiles\.(gender|bmr_override|uses_wearable) does not exist/i.test(message) ||
-    /schema cache/i.test(message)
+    /column ['"]?profiles?\.(gender|bmr_override|uses_wearable)/i.test(message) ||
+    (/schema cache/i.test(m) &&
+      /(gender|bmr_override|uses_wearable)/i.test(message) &&
+      /column|profiles?/i.test(m))
   )
 }
 
 function isMissingUsesWearableError(message: string): boolean {
   return (
     /could not find the '?uses_wearable'? column/i.test(message) ||
-    /column profiles\.uses_wearable does not exist/i.test(message) ||
+    /column ['"]?profiles?\.uses_wearable/i.test(message) ||
     (/schema cache/i.test(message) && /uses_wearable/i.test(message))
   )
+}
+
+function readUsesWearableFlag(data: Record<string, unknown> | null | undefined): boolean | null {
+  if (!data || !('uses_wearable' in data)) return null
+  const raw = data.uses_wearable
+  if (raw === true || raw === 'true' || raw === 1 || raw === '1' || raw === 't') return true
+  if (raw === false || raw === 'false' || raw === 0 || raw === '0' || raw === 'f') return false
+  return null
 }
 
 async function fetchProfileRow(
@@ -46,28 +59,58 @@ async function fetchProfileRow(
   return { data: data as Record<string, unknown> | null, error: null }
 }
 
+/** Load uses_wearable in its own request so a partial schema never invents false. */
+async function fetchUsesWearableFlag(userId: string): Promise<boolean | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('uses_wearable')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error) {
+    if (isMissingUsesWearableError(error.message)) return null
+    // Non-schema errors still matter — surface as null and let caller use row default carefully
+    console.warn('[profile] uses_wearable select failed:', error.message)
+    return null
+  }
+  return readUsesWearableFlag(data as Record<string, unknown> | null)
+}
+
 async function loadProfileRow(userId: string): Promise<Record<string, unknown>> {
   const full = await fetchProfileRow(userId, FULL_PROFILE_COLUMNS)
-  if (!full.error && full.data) return full.data
+  if (!full.error && full.data) {
+    // Prefer explicit flag select if the combined row is missing the key for any reason
+    if (!('uses_wearable' in full.data)) {
+      const flag = await fetchUsesWearableFlag(userId)
+      if (flag !== null) return { ...full.data, uses_wearable: flag }
+    }
+    return full.data
+  }
 
   if (full.error && !isMissingProfileColumnError(full.error.message)) {
     throw new Error(full.error.message)
   }
 
-  // Schema cache may lag after migration — try without uses_wearable.
+  // Build row without uses_wearable, then attach the flag from a dedicated select.
+  let baseRow: Record<string, unknown>
   const mid = await fetchProfileRow(userId, GENDER_BMR_COLUMNS)
   if (!mid.error && mid.data) {
-    return { ...mid.data, uses_wearable: false }
+    baseRow = mid.data
+  } else {
+    if (mid.error && !isMissingProfileColumnError(mid.error.message)) {
+      throw new Error(mid.error.message)
+    }
+    const base = await fetchProfileRow(userId, BASE_PROFILE_COLUMNS)
+    if (base.error) throw new Error(base.error.message)
+    if (!base.data) throw new Error('Profile not found')
+    baseRow = base.data
   }
 
-  if (mid.error && !isMissingProfileColumnError(mid.error.message)) {
-    throw new Error(mid.error.message)
+  const flag = await fetchUsesWearableFlag(userId)
+  return {
+    ...baseRow,
+    uses_wearable: flag === true,
   }
-
-  const base = await fetchProfileRow(userId, BASE_PROFILE_COLUMNS)
-  if (base.error) throw new Error(base.error.message)
-  if (!base.data) throw new Error('Profile not found')
-  return { ...base.data, uses_wearable: false }
 }
 
 async function saveProfileRow(
@@ -76,6 +119,7 @@ async function saveProfileRow(
   columns: string,
 ): Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }> {
   const payload = buildProfileUpdatePayload(update)
+  // Never include uses_wearable here when we're on a fallback column set — caller handles flag.
   const { data, error } = await supabase
     .from('profiles')
     .update(payload)
@@ -87,27 +131,41 @@ async function saveProfileRow(
   return { data: data as unknown as Record<string, unknown>, error: null }
 }
 
-/** Persist uses_wearable alone (after core profile save if full update fails schema cache). */
+/** Persist uses_wearable alone and verify the value read back. */
 async function saveUsesWearableOnly(
   userId: string,
   usesWearable: boolean,
 ): Promise<{ ok: true; value: boolean } | { ok: false; error: string }> {
-  const { data, error } = await supabase
+  const { error: updateError } = await supabase
     .from('profiles')
     .update({ uses_wearable: usesWearable })
     .eq('id', userId)
-    .select('uses_wearable')
-    .single()
 
-  if (error) {
+  if (updateError) {
     return {
       ok: false,
-      error: isMissingUsesWearableError(error.message)
-        ? 'Fitness tracker setting could not be saved yet (database schema still updating). Wait a minute and try again.'
-        : error.message,
+      error: isMissingUsesWearableError(updateError.message)
+        ? 'Fitness tracker setting could not be saved (database schema). Try again in a minute.'
+        : updateError.message,
     }
   }
-  return { ok: true, value: data.uses_wearable === true }
+
+  // Verify with a fresh select (do not trust update returning empty under RLS edge cases)
+  const verified = await fetchUsesWearableFlag(userId)
+  if (verified === null) {
+    return {
+      ok: false,
+      error:
+        'Fitness tracker setting was written but could not be verified. Refresh and try again.',
+    }
+  }
+  if (verified !== usesWearable) {
+    return {
+      ok: false,
+      error: `Fitness tracker setting did not stick (expected ${usesWearable}, got ${verified}).`,
+    }
+  }
+  return { ok: true, value: verified }
 }
 
 export async function fetchUserProfile(userId: string): Promise<UserProfile> {
@@ -115,28 +173,19 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile> {
   const profile = mapProfileRow(row as Parameters<typeof mapProfileRow>[0])
   const browserTimeZone = detectBrowserTimeZone()
   if (profile.timeZone !== browserTimeZone) {
-    const { data: updated, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({ time_zone: browserTimeZone })
       .eq('id', userId)
-      .select(FULL_PROFILE_COLUMNS)
-      .single()
 
-    if (updateError) {
-      // Timezone-only update may fail select on missing columns; still apply local TZ.
-      if (isMissingProfileColumnError(updateError.message)) {
-        await supabase.from('profiles').update({ time_zone: browserTimeZone }).eq('id', userId)
-        return mapProfileRow({
-          ...row,
-          time_zone: browserTimeZone,
-        } as Parameters<typeof mapProfileRow>[0])
-      }
+    if (updateError && !isMissingProfileColumnError(updateError.message)) {
       throw new Error(updateError.message)
     }
 
+    // Re-load full row so uses_wearable is never dropped after timezone patch
+    const refreshed = await loadProfileRow(userId)
     return mapProfileRow({
-      ...row,
-      ...(updated as Record<string, unknown>),
+      ...refreshed,
       time_zone: browserTimeZone,
     } as Parameters<typeof mapProfileRow>[0])
   }
@@ -148,39 +197,36 @@ export async function saveProfileUpdate(
   userId: string,
   update: ProfileUpdate,
 ): Promise<UserProfile> {
-  let saved = await saveProfileRow(userId, update, FULL_PROFILE_COLUMNS)
+  // Split the flag so core profile save cannot silently swallow it.
+  const usesWearable = update.usesWearable
+  const coreUpdate: ProfileUpdate = { ...update, usesWearable: undefined }
+
+  let saved = await saveProfileRow(userId, { ...coreUpdate, usesWearable }, FULL_PROFILE_COLUMNS)
 
   if (saved.error && isMissingProfileColumnError(saved.error.message)) {
-    // Save core fields without uses_wearable if schema cache is stale.
-    const withoutWearable: ProfileUpdate = { ...update, usesWearable: undefined }
     const columns = isMissingUsesWearableError(saved.error.message)
       ? GENDER_BMR_COLUMNS
       : BASE_PROFILE_COLUMNS
     const legacyUpdate: ProfileUpdate =
       columns === BASE_PROFILE_COLUMNS
-        ? { ...withoutWearable, gender: undefined, bmrOverride: undefined }
-        : withoutWearable
+        ? { ...coreUpdate, gender: undefined, bmrOverride: undefined }
+        : coreUpdate
 
     saved = await saveProfileRow(userId, legacyUpdate, columns)
     if (saved.error) throw new Error(saved.error.message)
     if (!saved.data) throw new Error('Profile not found')
-
-    // Always try to persist the tracker flag separately when requested.
-    if (update.usesWearable !== undefined) {
-      const wear = await saveUsesWearableOnly(userId, update.usesWearable)
-      if (!wear.ok) throw new Error(wear.error)
-      saved.data = { ...saved.data, uses_wearable: wear.value }
-    } else {
-      // Re-read flag if present
-      const flag = await fetchProfileRow(userId, 'uses_wearable')
-      if (!flag.error && flag.data && 'uses_wearable' in flag.data) {
-        saved.data = { ...saved.data, uses_wearable: flag.data.uses_wearable }
-      }
-    }
+  } else if (saved.error) {
+    throw new Error(saved.error.message)
   }
 
-  if (saved.error) throw new Error(saved.error.message)
   if (!saved.data) throw new Error('Profile not found')
+
+  // Always write + verify the tracker flag when the form sent it (true or false).
+  if (usesWearable !== undefined) {
+    const wear = await saveUsesWearableOnly(userId, usesWearable)
+    if (!wear.ok) throw new Error(wear.error)
+    saved.data = { ...saved.data, uses_wearable: wear.value }
+  }
 
   if (update.displayName !== undefined) {
     const { error: authError } = await supabase.auth.updateUser({
@@ -189,6 +235,7 @@ export async function saveProfileUpdate(
     if (authError) throw new Error(authError.message)
   }
 
-  // Trust the row returned from the database — do not invent usesWearable from the form.
-  return mapProfileRow(saved.data as Parameters<typeof mapProfileRow>[0])
+  // Final authoritative reload so refresh and in-app state match the database.
+  const reloaded = await loadProfileRow(userId)
+  return mapProfileRow(reloaded as Parameters<typeof mapProfileRow>[0])
 }
