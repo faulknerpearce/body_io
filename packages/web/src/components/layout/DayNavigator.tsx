@@ -1,4 +1,4 @@
-import { formatDayLabel, formatMonthDayLabel, formatWeekdayHeadline } from '@nutrition-tracker/shared'
+import { formatDayLabel, formatMonthDayLabel, formatWeekdayHeadline } from '@body-io/shared'
 import type { ReactNode } from 'react'
 import GoToTodayButton from './GoToTodayButton'
 

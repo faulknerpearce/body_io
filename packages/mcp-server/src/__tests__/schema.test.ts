@@ -6,12 +6,12 @@ describe('publicToolManifest', () => {
   it('exposes server metadata and valid tools for connector probes', () => {
     const manifest = publicToolManifest()
 
-    expect(manifest.serverInfo.name).toBe('nutrition_tracker')
+    expect(manifest.serverInfo.name).toBe('body_io')
     expect(manifest.tools).toHaveLength(21)
 
     for (const tool of manifest.tools) {
       expect(ToolSchema.safeParse(tool).success).toBe(true)
-      expect(tool.description?.toLowerCase()).toContain('nutrition tracker')
+      expect(tool.description?.toLowerCase()).toContain('body io')
     }
   })
 })

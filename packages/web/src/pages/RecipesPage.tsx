@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { RecipeSummary, RecipeWithIngredients } from '@nutrition-tracker/shared'
+import type { RecipeSummary, RecipeWithIngredients } from '@body-io/shared'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
@@ -65,7 +65,7 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
   }, [onOpenCreateReady, openCreate])
 
   const handleLogRecipe = async (options: {
-    portionUnit: import('@nutrition-tracker/shared').PortionUnit
+    portionUnit: import('@body-io/shared').PortionUnit
     portionQuantity: number
   }) => {
     if (!loggingRecipe) return

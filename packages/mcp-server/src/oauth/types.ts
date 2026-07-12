@@ -2,7 +2,7 @@ export interface OAuthEnv {
   SUPABASE_URL: string
   SUPABASE_ANON_KEY: string
   OAUTH_SIGNING_SECRET: string
-  /** Public origin, e.g. https://nutrition-tracker.pages.dev */
+  /** Public origin, e.g. https://body-io.pages.dev */
   MCP_PUBLIC_URL: string
 }
 

@@ -1,4 +1,4 @@
-import type { NetBalance } from '@nutrition-tracker/shared'
+import type { NetBalance } from '@body-io/shared'
 import { netRingProgress } from '../../lib/dashboardCharts'
 import { neutrals, radius, type as typeScale } from '../../lib/design-tokens'
 import ProgressRing from '../charts/ProgressRing'

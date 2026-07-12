@@ -5,7 +5,7 @@ import {
   fetchWorkoutsSharedWithMe,
 } from './sharing'
 
-const SEEN_KEY = 'nutrition-tracker-shared-seen-at'
+const SEEN_KEY = 'body-io-shared-seen-at'
 
 export function getSharedSeenAt(): string | null {
   try {

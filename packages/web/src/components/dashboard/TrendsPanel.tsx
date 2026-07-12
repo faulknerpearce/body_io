@@ -3,7 +3,7 @@ import {
   summarizeDailyEnergyPeriod,
   type DailyEnergySnapshot,
   type TrendsRangePreset,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { useState } from 'react'
 import { neutrals, radius, status } from '../../lib/design-tokens'
 import { inputBase, labelBase } from '../../lib/styles'

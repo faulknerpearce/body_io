@@ -3,7 +3,7 @@ import {
   resolveLogWorkoutMetrics,
   type WorkoutSummary,
   type WorkoutWithExercises,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { fetchWorkout } from '../lib/workouts'
 import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase } from '../lib/styles'

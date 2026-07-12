@@ -4,7 +4,7 @@ import {
   mapProfileRow,
   type ProfileUpdate,
   type UserProfile,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { supabase } from './supabase'
 
 export type { ProfileUpdate, UserProfile }

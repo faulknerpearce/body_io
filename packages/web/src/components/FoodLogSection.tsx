@@ -1,4 +1,4 @@
-import { formatPortionLabel } from '@nutrition-tracker/shared'
+import { formatPortionLabel } from '@body-io/shared'
 import { useState } from 'react'
 import type { MappedBarcodeProduct } from '../lib/openFoodFacts'
 import type { FoodEntry, FoodEntryWrite } from '../lib/entries'
@@ -25,7 +25,7 @@ interface FoodLogSectionProps {
   onLogRecipe?: (
     recipeId: string,
     options: {
-      portionUnit: import('@nutrition-tracker/shared').PortionUnit
+      portionUnit: import('@body-io/shared').PortionUnit
       portionQuantity: number
       servingWeightGrams?: number
       loggedAt?: string

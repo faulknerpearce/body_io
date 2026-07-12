@@ -1,4 +1,4 @@
-# Nutrition Tracker
+# Body IO
 
 A single-page daily-nutrition dashboard with per-user accounts, backed by Supabase Auth + RLS, and a companion MCP server for AI agents.
 
@@ -16,7 +16,7 @@ This is an **npm workspaces** monorepo. There is one lockfile at the root and on
 ## Repository layout
 
 ```
-nutrition_tracker/
+body_io/
 ├── package.json              # npm workspaces root
 ├── tsconfig.base.json        # shared compiler options (strict)
 ├── .env.example              # Supabase URL + anon key
@@ -88,7 +88,7 @@ nutrition_tracker/
 | `npm run lint`                    | ESLint on the web package                                       |
 | `npm run test`                    | Run the vitest suite in `packages/shared`                       |
 | `npm run format` / `format:check` | Apply / verify Prettier formatting                              |
-| `npm run build:shared`            | Compile `@nutrition-tracker/shared` to `dist/`                  |
+| `npm run build:shared`            | Compile `@body-io/shared` to `dist/`                  |
 
 ## Architecture
 
@@ -118,11 +118,11 @@ Grok and other OAuth-capable MCP clients use the built-in OAuth 2.1 + PKCE flow 
 
 ```sh
 npx wrangler login
-npx wrangler pages project create nutrition-tracker --production-branch main
+npx wrangler pages project create body-io --production-branch main
 
-npx wrangler pages secret put SUPABASE_URL          --project-name nutrition-tracker
-npx wrangler pages secret put SUPABASE_ANON_KEY     --project-name nutrition-tracker
-npx wrangler pages secret put OAUTH_SIGNING_SECRET  --project-name nutrition-tracker
+npx wrangler pages secret put SUPABASE_URL          --project-name body-io
+npx wrangler pages secret put SUPABASE_ANON_KEY     --project-name body-io
+npx wrangler pages secret put OAUTH_SIGNING_SECRET  --project-name body-io
 ```
 
 Set build-time vars before `npm run build` (embedded in the client bundle):
@@ -136,7 +136,7 @@ export VITE_SUPABASE_ANON_KEY=<anon-key>
 
 ```sh
 npm run build
-npx wrangler pages deploy packages/web/dist --project-name nutrition-tracker --branch main
+npx wrangler pages deploy packages/web/dist --project-name body-io --branch main
 ```
 
 ### Routes exposed

@@ -16,7 +16,7 @@ import {
   type RecipeInput,
   type RecipeSummary,
   type RecipeWithIngredients,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import type { FoodEntry } from './entries'
 import { markRecipeShareSaved } from './sharing'
 import { supabase } from './supabase'

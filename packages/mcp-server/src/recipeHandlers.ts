@@ -14,8 +14,8 @@ import {
   type RecipeInput,
   type RecipeSummary,
   type RecipeWithIngredients,
-} from '@nutrition-tracker/shared'
-import type { NutritionSupabase } from './supabase.js'
+} from '@body-io/shared'
+import type { BodyIOSupabase } from './supabase.js'
 import { fetchUserTimeZone } from './toolHandlers.js'
 import { requireUserId } from './toolHandlers.js'
 
@@ -34,7 +34,7 @@ function toSummary(
   }
 }
 
-export async function listRecipes(supabase: NutritionSupabase): Promise<RecipeSummary[]> {
+export async function listRecipes(supabase: BodyIOSupabase): Promise<RecipeSummary[]> {
   const { data: recipes, error } = await supabase
     .from('recipes')
     .select('*')
@@ -64,7 +64,7 @@ export async function listRecipes(supabase: NutritionSupabase): Promise<RecipeSu
 }
 
 export async function getRecipe(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   recipeId: string,
 ): Promise<RecipeWithIngredients> {
   const { data: recipeRow, error } = await supabase
@@ -94,7 +94,7 @@ export async function getRecipe(
 }
 
 async function replaceRecipeIngredients(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   recipeId: string,
   userId: string,
   ingredients: RecipeInput['ingredients'],
@@ -139,7 +139,7 @@ function parseRecipeInput(args: RecipeToolArgs): RecipeInput {
 }
 
 export async function saveRecipe(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   args: RecipeToolArgs,
 ): Promise<RecipeWithIngredients> {
   const input = parseRecipeInput(args)
@@ -174,13 +174,13 @@ export async function saveRecipe(
   return getRecipe(supabase, recipeId)
 }
 
-export async function deleteRecipe(supabase: NutritionSupabase, recipeId: string) {
+export async function deleteRecipe(supabase: BodyIOSupabase, recipeId: string) {
   const { error } = await supabase.from('recipes').delete().eq('id', recipeId)
   if (error) throw error
   return { ok: true as const }
 }
 
-export async function logRecipeEntry(supabase: NutritionSupabase, args: RecipeToolArgs) {
+export async function logRecipeEntry(supabase: BodyIOSupabase, args: RecipeToolArgs) {
   if (typeof args.recipeId !== 'string' && typeof args.recipe_id !== 'string') {
     throw new Error('recipeId is required')
   }

@@ -1,4 +1,4 @@
-import type { NetBalance } from '@nutrition-tracker/shared'
+import type { NetBalance } from '@body-io/shared'
 import { cardSurface, iconTileSm, subtleSurface } from '../lib/styles'
 
 interface NetBalanceCardProps {

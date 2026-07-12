@@ -47,7 +47,7 @@ export async function lookupOpenFoodFactsProduct(
   try {
     const response = await fetchFn(buildOpenFoodFactsUrl(barcode), {
       headers: {
-        'User-Agent': 'NutritionTracker/1.0 (https://github.com/faulknerpearce/nutrition_tracker)',
+        'User-Agent': 'BodyIO/1.0 (https://github.com/faulknerpearce/body_io)',
         Accept: 'application/json',
       },
     })

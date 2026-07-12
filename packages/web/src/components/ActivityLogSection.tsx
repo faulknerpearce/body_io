@@ -1,4 +1,4 @@
-import { formatDistance, formatDuration } from '@nutrition-tracker/shared'
+import { formatDistance, formatDuration } from '@body-io/shared'
 import { useState } from 'react'
 import type { Activity, ActivityWrite } from '../lib/activities'
 import { neutrals, radius } from '../lib/design-tokens'

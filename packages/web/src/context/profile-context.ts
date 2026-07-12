@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { NutritionGoals } from '@nutrition-tracker/shared'
+import type { NutritionGoals } from '@body-io/shared'
 import type { ProfileUpdate, UserProfile } from '../lib/profile'
 
 export interface ProfileContextValue {

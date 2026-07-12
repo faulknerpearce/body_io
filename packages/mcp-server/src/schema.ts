@@ -8,7 +8,7 @@ export function publicToolManifest() {
     serverInfo: { name: SERVER_NAME, version: SERVER_VERSION },
     capabilities: { tools: { listChanged: false } },
     instructions:
-      'Nutrition Tracker food log connector. Tools read and write per-user food entries, daily macro totals, and calorie goals.',
+      'body io food log connector. Tools read and write per-user food entries, daily macro totals, and calorie goals.',
     tools,
   }
 }

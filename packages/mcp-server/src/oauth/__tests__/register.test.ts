@@ -6,7 +6,7 @@ const ENV: OAuthEnv = {
   SUPABASE_URL: 'https://test.supabase.co',
   SUPABASE_ANON_KEY: 'anon',
   OAUTH_SIGNING_SECRET: 'secret',
-  MCP_PUBLIC_URL: 'https://nutrition-tracker.pages.dev',
+  MCP_PUBLIC_URL: 'https://body-io.pages.dev',
 }
 
 function post(body: unknown): Request {

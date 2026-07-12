@@ -3,7 +3,7 @@ import {
   formatDuration,
   sumActivityTotals,
   type Activity,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 
 export interface ActivityMetricConfig {
   label: string

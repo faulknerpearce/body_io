@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ShareUserResult } from '@nutrition-tracker/shared'
+import type { ShareUserResult } from '@body-io/shared'
 import {
   fetchActivitySharesForResource,
   fetchEntrySharesForResource,

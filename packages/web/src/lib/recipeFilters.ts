@@ -1,4 +1,4 @@
-import type { RecipeSummary } from '@nutrition-tracker/shared'
+import type { RecipeSummary } from '@body-io/shared'
 
 export type RecipeSortOption =
   | 'name-asc'

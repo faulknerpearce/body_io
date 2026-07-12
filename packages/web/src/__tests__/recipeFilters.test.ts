@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { RecipeSummary } from '@nutrition-tracker/shared'
+import type { RecipeSummary } from '@body-io/shared'
 import {
   filterAndSortRecipes,
   filterRecipesForPicker,

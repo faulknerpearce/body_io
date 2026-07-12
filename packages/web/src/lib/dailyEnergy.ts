@@ -1,4 +1,4 @@
-import { buildDailyEnergySnapshots, type DailyEnergySnapshot } from '@nutrition-tracker/shared'
+import { buildDailyEnergySnapshots, type DailyEnergySnapshot } from '@body-io/shared'
 import { fetchDeviceTotalsByDate } from './deviceTotals'
 import { supabase } from './supabase'
 

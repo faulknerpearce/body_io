@@ -18,12 +18,12 @@ import {
   sumTotals,
   type ActivityUpdate,
   type FoodUpdate,
-} from '@nutrition-tracker/shared'
-import type { NutritionSupabase } from './supabase.js'
+} from '@body-io/shared'
+import type { BodyIOSupabase } from './supabase.js'
 
 export type ToolArgs = Record<string, unknown>
 
-export async function requireUserId(supabase: NutritionSupabase): Promise<string> {
+export async function requireUserId(supabase: BodyIOSupabase): Promise<string> {
   const {
     data: { user },
     error,
@@ -33,7 +33,7 @@ export async function requireUserId(supabase: NutritionSupabase): Promise<string
   return user.id
 }
 
-async function fetchUserGoals(supabase: NutritionSupabase) {
+async function fetchUserGoals(supabase: BodyIOSupabase) {
   const userId = await requireUserId(supabase)
   const { data, error } = await supabase
     .from('profiles')
@@ -44,7 +44,7 @@ async function fetchUserGoals(supabase: NutritionSupabase) {
   return parseNutritionGoals(data?.nutrition_goals ?? DEFAULT_NUTRITION_GOALS)
 }
 
-export async function fetchUserTimeZone(supabase: NutritionSupabase): Promise<string> {
+export async function fetchUserTimeZone(supabase: BodyIOSupabase): Promise<string> {
   const userId = await requireUserId(supabase)
   const { data, error } = await supabase
     .from('profiles')
@@ -59,7 +59,7 @@ export async function fetchUserTimeZone(supabase: NutritionSupabase): Promise<st
 export const FOOD_ENTRY_DELETE_FORBIDDEN =
   'Entry not found or you do not have permission to delete it'
 
-export async function listFoodEntriesForDate(supabase: NutritionSupabase, date: string) {
+export async function listFoodEntriesForDate(supabase: BodyIOSupabase, date: string) {
   const userId = await requireUserId(supabase)
   const { data, error } = await supabase
     .from('food_entries')
@@ -72,7 +72,7 @@ export async function listFoodEntriesForDate(supabase: NutritionSupabase, date: 
 }
 
 export async function addFoodEntryForDate(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   date: string,
   args: ToolArgs,
 ) {
@@ -95,7 +95,7 @@ export async function addFoodEntryForDate(
   return mapRow(data)
 }
 
-export async function updateFoodEntry(supabase: NutritionSupabase, args: ToolArgs) {
+export async function updateFoodEntry(supabase: BodyIOSupabase, args: ToolArgs) {
   if (typeof args.id !== 'string' || args.id === '') throw new Error('id is required')
 
   const partial: Record<string, unknown> = {
@@ -136,7 +136,7 @@ export async function updateFoodEntry(supabase: NutritionSupabase, args: ToolArg
   return mapRow(data)
 }
 
-export async function deleteFoodEntry(supabase: NutritionSupabase, args: ToolArgs) {
+export async function deleteFoodEntry(supabase: BodyIOSupabase, args: ToolArgs) {
   if (typeof args.id !== 'string' || args.id === '') throw new Error('id is required')
   const { data, error } = await supabase
     .from('food_entries')
@@ -148,7 +148,7 @@ export async function deleteFoodEntry(supabase: NutritionSupabase, args: ToolArg
   return { ok: true as const }
 }
 
-export async function getDailyTotalsForDate(supabase: NutritionSupabase, date: string) {
+export async function getDailyTotalsForDate(supabase: BodyIOSupabase, date: string) {
   const entries = await listFoodEntriesForDate(supabase, date)
   const totals = sumTotals(entries)
   const goals = await fetchUserGoals(supabase)
@@ -156,7 +156,7 @@ export async function getDailyTotalsForDate(supabase: NutritionSupabase, date: s
 }
 
 async function attachActivityExercises(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   activities: ReturnType<typeof mapActivityRow>[],
 ) {
   if (activities.length === 0) return activities
@@ -187,7 +187,7 @@ async function attachActivityExercises(
   }))
 }
 
-export async function listActivitiesForDate(supabase: NutritionSupabase, date: string) {
+export async function listActivitiesForDate(supabase: BodyIOSupabase, date: string) {
   const { data, error } = await supabase
     .from('activities')
     .select('*')
@@ -198,7 +198,7 @@ export async function listActivitiesForDate(supabase: NutritionSupabase, date: s
 }
 
 export async function addActivityForDate(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   date: string,
   args: ToolArgs,
 ) {
@@ -218,7 +218,7 @@ export async function addActivityForDate(
   return mapActivityRow(data)
 }
 
-export async function updateActivity(supabase: NutritionSupabase, args: ToolArgs) {
+export async function updateActivity(supabase: BodyIOSupabase, args: ToolArgs) {
   if (typeof args.id !== 'string' || args.id === '') throw new Error('id is required')
 
   const partial: Record<string, unknown> = {}
@@ -269,14 +269,14 @@ export async function updateActivity(supabase: NutritionSupabase, args: ToolArgs
   return mapActivityRow(data)
 }
 
-export async function deleteActivity(supabase: NutritionSupabase, args: ToolArgs) {
+export async function deleteActivity(supabase: BodyIOSupabase, args: ToolArgs) {
   if (typeof args.id !== 'string' || args.id === '') throw new Error('id is required')
   const { error } = await supabase.from('activities').delete().eq('id', args.id)
   if (error) throw error
   return { ok: true as const }
 }
 
-export async function getActivityTotalsForDate(supabase: NutritionSupabase, date: string) {
+export async function getActivityTotalsForDate(supabase: BodyIOSupabase, date: string) {
   const entries = await listActivitiesForDate(supabase, date)
   return { totals: sumActivityTotals(entries), date }
 }
@@ -305,7 +305,7 @@ export function isManageDayLogAction(value: unknown): value is ManageDayLogActio
 }
 
 export async function manageDayLog(
-  supabase: NutritionSupabase,
+  supabase: BodyIOSupabase,
   date: string,
   action: ManageDayLogAction,
   args: ToolArgs,

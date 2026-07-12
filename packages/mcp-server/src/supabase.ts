@@ -1,13 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@nutrition-tracker/shared'
+import type { Database } from '@body-io/shared'
 
-export type NutritionSupabase = SupabaseClient<Database>
+export type BodyIOSupabase = SupabaseClient<Database>
 
 export function createAuthenticatedSupabase(
   url: string,
   anonKey: string,
   accessToken: string,
-): NutritionSupabase {
+): BodyIOSupabase {
   return createClient<Database>(url, anonKey, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   })

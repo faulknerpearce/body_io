@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Activity } from '@nutrition-tracker/shared'
+import type { Activity } from '@body-io/shared'
 import { buildActivityMetricConfigs } from '../lib/activityMetrics'
 
 function activity(partial: Partial<Activity> & Pick<Activity, 'id' | 'name'>): Activity {

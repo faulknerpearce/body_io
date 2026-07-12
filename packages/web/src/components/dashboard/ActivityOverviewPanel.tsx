@@ -1,4 +1,4 @@
-import type { Activity } from '@nutrition-tracker/shared'
+import type { Activity } from '@body-io/shared'
 import { buildActivityMetricConfigs } from '../../lib/activityMetrics'
 import { cardSurface } from '../../lib/styles'
 import { routeHref } from '../../lib/routing'

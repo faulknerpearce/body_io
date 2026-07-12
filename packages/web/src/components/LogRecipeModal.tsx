@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { scaleRecipeToServings, type PortionUnit, type RecipeSummary } from '@nutrition-tracker/shared'
+import { scaleRecipeToServings, type PortionUnit, type RecipeSummary } from '@body-io/shared'
 import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'

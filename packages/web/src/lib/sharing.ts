@@ -22,7 +22,7 @@ import {
   type ShareUserResult,
   type WorkoutShareRecord,
   type WorkoutSummary,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { supabase } from './supabase'
 
 export interface SharedRecipeItem {

@@ -9,7 +9,7 @@ import {
   type Activity,
   type ActivityWrite,
   type WorkoutSummary,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { fetchWorkoutSummaries } from '../lib/workouts'
 import { focusIfDesktop } from '../lib/device'
 import { inputBase, labelBase } from '../lib/styles'

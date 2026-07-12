@@ -1,4 +1,4 @@
-import type { RecipeShareRecord } from '@nutrition-tracker/shared'
+import type { RecipeShareRecord } from '@body-io/shared'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'

@@ -100,7 +100,7 @@ describe('handleMcp HTTP integration', () => {
           tools: expect.any(Object),
         }),
         serverInfo: {
-          name: 'nutrition_tracker',
+          name: 'body_io',
           version: '1.3.0',
         },
       },

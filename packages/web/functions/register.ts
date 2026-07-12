@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { handleRegister } from '@nutrition-tracker/mcp-server/oauth'
+import { handleRegister } from '@body-io/mcp-server/oauth'
 import { resolveOAuthEnv, type PagesOAuthEnv } from './_oauth-env'
 
 export const onRequest = async (context: EventContext<PagesOAuthEnv, string, unknown>) => {

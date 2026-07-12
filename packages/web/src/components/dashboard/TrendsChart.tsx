@@ -1,4 +1,4 @@
-import { parseISODate, type DailyEnergySnapshot } from '@nutrition-tracker/shared'
+import { parseISODate, type DailyEnergySnapshot } from '@body-io/shared'
 import { useMemo } from 'react'
 import { neutrals } from '../../lib/design-tokens'
 import { useMediaQuery } from '../../lib/useMediaQuery'

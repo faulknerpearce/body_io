@@ -2,7 +2,7 @@ import {
   mapOpenFoodFactsToEntry,
   type MappedBarcodeProduct,
   type OpenFoodFactsProduct,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 
 export type { MappedBarcodeProduct }
 

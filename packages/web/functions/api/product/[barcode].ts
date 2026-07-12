@@ -1,6 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import { lookupOpenFoodFactsProduct, normalizeBarcodeParam } from '@nutrition-tracker/shared'
+import { lookupOpenFoodFactsProduct, normalizeBarcodeParam } from '@body-io/shared'
 
 export const onRequest: PagesFunction = async (context) => {
   const barcode = normalizeBarcodeParam(context.params.barcode)

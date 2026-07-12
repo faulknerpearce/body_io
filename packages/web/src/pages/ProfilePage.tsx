@@ -7,7 +7,7 @@ import {
   type ProfileGender,
   type ProfileUpdate,
   type UserProfile,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import GoalsFormFields from '../components/GoalsFormFields'
 import Modal from '../components/Modal'
 import PageHeader from '../components/layout/PageHeader'

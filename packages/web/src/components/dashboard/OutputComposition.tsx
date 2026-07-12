@@ -1,4 +1,4 @@
-import type { NetBalance } from '@nutrition-tracker/shared'
+import type { NetBalance } from '@body-io/shared'
 import { neutrals, ZONE_CORAL } from '../../lib/design-tokens'
 
 interface OutputCompositionProps {

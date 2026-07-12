@@ -1,4 +1,4 @@
-import type { OAuthEnv } from '@nutrition-tracker/mcp-server/oauth'
+import type { OAuthEnv } from '@body-io/mcp-server/oauth'
 
 export interface PagesOAuthEnv {
   SUPABASE_URL: string

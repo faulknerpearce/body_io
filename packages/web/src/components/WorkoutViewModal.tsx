@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { WorkoutWithExercises } from '@nutrition-tracker/shared'
+import type { WorkoutWithExercises } from '@body-io/shared'
 import { fetchWorkout } from '../lib/workouts'
 import { catalogItemCard, modalFooterButton, modalPrimaryButton } from '../lib/styles'
 import CatalogListSection from './catalog/CatalogListSection'

@@ -1,4 +1,4 @@
-import { formatLogTime } from '@nutrition-tracker/shared'
+import { formatLogTime } from '@body-io/shared'
 import type { SharedEntryItem } from '../lib/sharing'
 import { primaryButton } from '../lib/styles'
 import Modal from './Modal'

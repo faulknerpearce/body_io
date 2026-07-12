@@ -7,7 +7,7 @@ import {
   type NewRecipeIngredient,
   type RecipeInput,
   type RecipeWithIngredients,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import CatalogListSection from './catalog/CatalogListSection'
 import CatalogModalHeader from './catalog/CatalogModalHeader'
 import IconPicker from './catalog/IconPicker'

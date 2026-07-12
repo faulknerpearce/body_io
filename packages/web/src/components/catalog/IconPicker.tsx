@@ -1,4 +1,4 @@
-import type { IconOption } from '@nutrition-tracker/shared'
+import type { IconOption } from '@body-io/shared'
 import { labelBase } from '../../lib/styles'
 
 interface IconPickerProps {

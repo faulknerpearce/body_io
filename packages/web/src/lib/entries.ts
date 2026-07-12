@@ -12,7 +12,7 @@ import {
   type FoodEntry,
   type FoodEntryWrite,
   type Totals,
-} from '@nutrition-tracker/shared'
+} from '@body-io/shared'
 import { markEntryShareSaved } from './sharing'
 import { supabase } from './supabase'
 

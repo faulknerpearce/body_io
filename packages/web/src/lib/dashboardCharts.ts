@@ -1,4 +1,4 @@
-import { type NetBalance, type Totals } from '@nutrition-tracker/shared'
+import { type NetBalance, type Totals } from '@body-io/shared'
 
 export interface RingProgress {
   pct: number
