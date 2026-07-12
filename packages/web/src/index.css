@@ -1936,16 +1936,9 @@ html {
 
 .food-macro-grid {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 4px 16px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   align-items: baseline;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.food-macro-grid::-webkit-scrollbar {
-  display: none;
 }
 
 .food-macro-grid span {
