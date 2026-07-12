@@ -1935,10 +1935,17 @@ html {
 }
 
 .food-macro-grid {
-  display: grid;
-  grid-template-columns: repeat(4, auto);
+  display: flex;
+  flex-wrap: nowrap;
   gap: 4px 16px;
   align-items: baseline;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.food-macro-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .food-macro-grid span {
