@@ -156,18 +156,12 @@ function FoodLogEntryRow({
             )}
           </div>
         </div>
-        <div
-          className="log-entry-icon-actions"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 2,
-            flexShrink: 0,
-            alignSelf: 'center',
-          }}
-        >
-          {(canEdit || !readOnly) && (
-            <>
+      </div>
+
+      {(canEdit || !readOnly) && (
+        <>
+          <div style={{ borderTop: `1px solid ${neutrals.border}`, marginTop: 16, paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 2 }}>
               {!readOnly && (
                 <button
                   type="button"
@@ -202,27 +196,27 @@ function FoodLogEntryRow({
                   <i className="fa-regular fa-trash-can" />
                 </button>
               )}
-            </>
-          )}
-          <button
-            type="button"
-            className="delicate-icon-action"
-            onClick={() => setDetailsOpen((v) => !v)}
-            aria-expanded={detailsOpen}
-            aria-label={detailsOpen ? 'Hide meal details' : 'Show meal details'}
-            title={detailsOpen ? 'Hide details' : 'Details'}
-          >
-            <i
-              className="fa-solid fa-chevron-down"
-              style={{
-                transition: 'transform 0.2s ease',
-                transform: detailsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                fontSize: 12,
-              }}
-            />
-          </button>
-        </div>
-      </div>
+            </div>
+            <button
+              type="button"
+              className="delicate-icon-action"
+              onClick={() => setDetailsOpen((v) => !v)}
+              aria-expanded={detailsOpen}
+              aria-label={detailsOpen ? 'Hide meal details' : 'Show meal details'}
+              title={detailsOpen ? 'Hide details' : 'Details'}
+            >
+              <i
+                className="fa-solid fa-chevron-down"
+                style={{
+                  transition: 'transform 0.2s ease',
+                  transform: detailsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  fontSize: 12,
+                }}
+              />
+            </button>
+          </div>
+        </>
+      )}
 
       {detailsOpen && (
         <div
