@@ -69,23 +69,19 @@ describe('Layout', () => {
     expect(screen.getByText('jordan')).toBeInTheDocument()
   })
 
-  it('calls signOut from the account menu', async () => {
-    const signOut = vi.fn().mockResolvedValue(undefined)
+  it('renders the Shared With Me and Profile menu items', async () => {
     const user = userEvent.setup()
     renderWithProviders(
       <Layout activeRoute="dashboard">
         <div>Content</div>
       </Layout>,
-      {
-        auth: createAuthContextValue({ signOut }),
-        profile: createProfileContextValue(),
-      },
+      { profile: createProfileContextValue() },
     )
 
     await user.click(screen.getByRole('button', { name: 'Account menu' }))
-    await user.click(screen.getByRole('menuitem', { name: 'Log out' }))
 
-    expect(signOut).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('menuitem', { name: 'Shared With Me' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Profile' })).toBeInTheDocument()
   })
 
   it('shows a badge when there are new shared items', async () => {

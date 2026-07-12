@@ -100,7 +100,8 @@ describe('ShareModal', () => {
 
     await user.type(screen.getByLabelText('Email or display name'), 'jo')
     await screen.findByText('Jordan')
-    await user.click(screen.getByRole('button', { name: /Share$/ }))
+    await user.click(screen.getByRole('button', { name: /Jordan.*Select/ }))
+    await user.click(screen.getByRole('button', { name: /Send$/ }))
 
     await waitFor(() => {
       expect(shareRecipe).toHaveBeenCalledWith('recipe-1', 'user-2', 'Jordan')

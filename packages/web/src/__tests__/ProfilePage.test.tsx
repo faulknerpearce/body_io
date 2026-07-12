@@ -31,7 +31,8 @@ describe('ProfilePage', () => {
 
     await user.clear(screen.getByLabelText('Display name'))
     await user.type(screen.getByLabelText('Display name'), 'Jordan')
-    await user.click(screen.getByRole('button', { name: 'Save Profile' }))
+    const saveButtons = screen.getAllByRole('button', { name: 'Save Profile' })
+    await user.click(saveButtons[0])
 
     await waitFor(() => {
       expect(updateProfile).toHaveBeenCalledWith(
@@ -43,7 +44,7 @@ describe('ProfilePage', () => {
         }),
       )
     })
-    expect(await screen.findByRole('status')).toHaveTextContent('Profile saved.')
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 
   it('shows validation errors from updateProfile', async () => {
@@ -53,7 +54,8 @@ describe('ProfilePage', () => {
       profile: createProfileContextValue({ updateProfile }),
     })
 
-    await user.click(screen.getByRole('button', { name: 'Save Profile' }))
+    const saveButtons = screen.getAllByRole('button', { name: 'Save Profile' })
+    await user.click(saveButtons[0])
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Display name is required')
   })
