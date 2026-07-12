@@ -91,7 +91,7 @@ export default function ActivityLogSection({
           }
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: collapsible ? 20 : 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20 }}>
           {activities.map((item) => {
             const icon = activityIcon[item.activityType] ?? activityIcon.Other
             return (
@@ -103,93 +103,94 @@ export default function ActivityLogSection({
                   border: `1px solid ${neutrals.border}`,
                   borderRadius: radius.lg,
                   padding: '20px 24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 20,
                   opacity: deleting === item.id ? 0.5 : 1,
                 }}
               >
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 9999,
-                    background: 'var(--zone-accent-muted)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <i
-                    className={`fa-solid ${icon}`}
-                    style={{ color: 'var(--zone-accent)', fontSize: 15 }}
-                  />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600 }}>{item.name}</div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
                   <div
                     style={{
-                      marginTop: 8,
-                      fontSize: 12,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 9999,
+                      background: 'var(--zone-accent-muted)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 12,
-                      flexWrap: 'wrap',
+                      justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <span>
-                      <span style={{ fontWeight: 500, color: 'var(--zone-accent)' }}>
-                        {formatDuration(item.movingTimeSeconds)}
-                      </span>{' '}
-                      <span style={{ color: neutrals.textFaint }}>duration</span>
-                    </span>
-                    <span>
-                      <span style={{ fontWeight: 500, color: '#0d9488' }}>{formatDistance(item.distanceMeters)}</span>{' '}
-                      <span style={{ color: '#a1a1aa' }}>distance</span>
-                    </span>
-                    {item.calories !== null && (
+                    <i
+                      className={`fa-solid ${icon}`}
+                      style={{ color: 'var(--zone-accent)', fontSize: 15 }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 15, color: neutrals.textPrimary }}>{item.name}</div>
+                    <div
+                      className="food-macro-grid"
+                      style={{
+                        marginTop: 8,
+                        fontSize: 12,
+                      }}
+                    >
                       <span>
-                        <span style={{ fontWeight: 500, color: '#ea580c' }}>{item.calories}</span>{' '}
-                        <span style={{ color: '#a1a1aa' }}>kcal burned</span>
+                        <span style={{ fontWeight: 500, color: 'var(--zone-accent)' }}>
+                          {formatDuration(item.movingTimeSeconds)}
+                        </span>{' '}
+                        <span style={{ color: neutrals.textFaint }}>duration</span>
                       </span>
-                    )}
+                      <span>
+                        <span style={{ fontWeight: 500, color: '#0d9488' }}>{formatDistance(item.distanceMeters)}</span>{' '}
+                        <span style={{ color: '#a1a1aa' }}>distance</span>
+                      </span>
+                      {item.calories !== null && (
+                        <span>
+                          <span style={{ fontWeight: 500, color: '#ea580c' }}>{item.calories}</span>{' '}
+                          <span style={{ color: '#a1a1aa' }}>kcal burned</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="catalog-row-actions">
-                  <button
-                    type="button"
-                    className="delicate-icon-action"
-                    onClick={() => setSharingActivity(item)}
-                    aria-label="Share activity"
-                    title="Share activity"
-                  >
-                    <i className="fa-regular fa-share-from-square" />
-                  </button>
-                  {onEdit && (
-                    <button
-                      type="button"
-                      className="delicate-icon-action"
-                      onClick={() => setEditingActivity(item)}
-                      aria-label="Edit activity"
-                      title="Edit activity"
-                    >
-                      <i className="fa-regular fa-pen-to-square" />
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      type="button"
-                      className="delicate-icon-action"
-                      onClick={() => removeActivity(item.id)}
-                      disabled={deleting === item.id}
-                      aria-label="Remove activity"
-                      title="Remove activity"
-                    >
-                      <i className="fa-regular fa-trash-can" />
-                    </button>
-                  )}
-                </div>
+
+                {(onEdit || onDelete) && (
+                  <div style={{ borderTop: `1px solid ${neutrals.border}`, marginTop: 16, paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      <button
+                        type="button"
+                        className="delicate-icon-action"
+                        onClick={() => setSharingActivity(item)}
+                        aria-label="Share activity"
+                        title="Share activity"
+                      >
+                        <i className="fa-regular fa-share-from-square" />
+                      </button>
+                      {onEdit && (
+                        <button
+                          type="button"
+                          className="delicate-icon-action"
+                          onClick={() => setEditingActivity(item)}
+                          aria-label="Edit activity"
+                          title="Edit activity"
+                        >
+                          <i className="fa-regular fa-pen-to-square" />
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          className="delicate-icon-action"
+                          onClick={() => removeActivity(item.id)}
+                          disabled={deleting === item.id}
+                          aria-label="Remove activity"
+                          title="Remove activity"
+                        >
+                          <i className="fa-regular fa-trash-can" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )
           })}
