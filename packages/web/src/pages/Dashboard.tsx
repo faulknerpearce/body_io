@@ -16,7 +16,7 @@ import { useNutritionGoals, useProfile } from '../context/useProfile'
 import { sectionHeader as sectionLabelStyle } from '../lib/styles'
 import ActivityOverviewPanel from '../components/dashboard/ActivityOverviewPanel'
 import DailyIoCard from '../components/dashboard/DailyIoCard'
-import EnergyOverviewPanel from '../components/dashboard/EnergyOverviewPanel'
+
 import NutritionRingsPanel from '../components/dashboard/NutritionRingsPanel'
 import TrendsPanel from '../components/dashboard/TrendsPanel'
 import DashboardPreviewList, { PreviewEmpty, PreviewRow } from '../components/DashboardPreviewList'
@@ -25,9 +25,7 @@ import { PageError, PageLoading } from '../components/layout/PageState'
 import { fetchActivities, type Activity } from '../lib/activities'
 import { fetchDailyEnergySnapshots } from '../lib/dailyEnergy'
 import {
-  clearDeviceTotal,
   fetchDeviceTotal,
-  saveDeviceTotal,
 } from '../lib/deviceTotals'
 import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { routeHref } from '../lib/routing'
@@ -230,19 +228,6 @@ export default function Dashboard() {
     setEnergyDate(todayISO())
   }, [])
 
-  const handleSaveDeviceTotal = useCallback(
-    async (kcal: number) => {
-      const saved = await saveDeviceTotal(energyDate, kcal)
-      setEnergyDeviceTotal(saved)
-    },
-    [energyDate],
-  )
-
-  const handleClearDeviceTotal = useCallback(async () => {
-    await clearDeviceTotal(energyDate)
-    setEnergyDeviceTotal(null)
-  }, [energyDate])
-
   if (loading) {
     return <PageLoading message="Loading dashboard..." />
   }
@@ -288,23 +273,6 @@ export default function Dashboard() {
           onPrevious={goEnergyPrev}
           onNext={goEnergyNext}
           onGoToToday={goEnergyToday}
-        />
-      </div>
-
-      <div style={{ marginBottom: 16 }}>
-        <EnergyOverviewPanel
-          balance={energyBalance}
-          date={energyDate}
-          isToday={energyIsToday}
-          canGoBack
-          canGoForward={!energyIsToday}
-          dayLoading={energyLoading}
-          onPrevious={goEnergyPrev}
-          onNext={goEnergyNext}
-          onGoToToday={goEnergyToday}
-          usesWearable={profile.usesWearable}
-          onSaveDeviceTotal={handleSaveDeviceTotal}
-          onClearDeviceTotal={handleClearDeviceTotal}
         />
       </div>
 
