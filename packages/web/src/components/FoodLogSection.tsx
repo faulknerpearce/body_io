@@ -120,13 +120,10 @@ function FoodLogEntryRow({
             <div style={{ fontSize: 13, color: neutrals.textMuted, marginTop: 2 }}>{weightLabel}</div>
           )}
           <div
+            className="food-macro-grid"
             style={{
               marginTop: 8,
               fontSize: 12,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              flexWrap: 'wrap',
             }}
           >
             <span>

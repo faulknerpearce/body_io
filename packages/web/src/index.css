@@ -1934,6 +1934,17 @@ html {
     opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.food-macro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 4px 16px;
+  align-items: baseline;
+}
+
+.food-macro-grid span {
+  white-space: nowrap;
+}
+
 @media (hover: hover) {
   .log-entry-card:hover {
     transform: translateX(4px);

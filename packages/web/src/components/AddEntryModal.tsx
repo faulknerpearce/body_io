@@ -690,7 +690,7 @@ export default function AddEntryModal({
               {previewTotals.carbs}g carbs.
             </div>
           )}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <div style={{ borderTop: '1px solid #e4e4e7', paddingTop: 16, marginTop: 8, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button
               type="button"
               onClick={close}
@@ -993,7 +993,7 @@ export default function AddEntryModal({
             </label>
           )}
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <div style={{ borderTop: '1px solid #e4e4e7', paddingTop: 16, marginTop: 8, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button
               type="button"
               onClick={close}
