@@ -302,7 +302,7 @@ export default function FoodLogSection({
           }
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: collapsible ? 20 : 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20 }}>
           {entries.map((item) => (
             <FoodLogEntryRow
               key={item.id}
