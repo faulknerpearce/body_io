@@ -25,7 +25,9 @@ import { PageError, PageLoading } from '../components/layout/PageState'
 import { fetchActivities, type Activity } from '../lib/activities'
 import { fetchDailyEnergySnapshots } from '../lib/dailyEnergy'
 import {
+  clearDeviceTotal,
   fetchDeviceTotal,
+  saveDeviceTotal,
 } from '../lib/deviceTotals'
 import { type FoodEntry, fetchEntries } from '../lib/entries'
 import { routeHref } from '../lib/routing'
@@ -228,6 +230,19 @@ export default function Dashboard() {
     setEnergyDate(todayISO())
   }, [])
 
+  const handleSaveDeviceTotal = useCallback(
+    async (kcal: number) => {
+      const saved = await saveDeviceTotal(energyDate, kcal)
+      setEnergyDeviceTotal(saved)
+    },
+    [energyDate],
+  )
+
+  const handleClearDeviceTotal = useCallback(async () => {
+    await clearDeviceTotal(energyDate)
+    setEnergyDeviceTotal(null)
+  }, [energyDate])
+
   if (loading) {
     return <PageLoading message="Loading dashboard..." />
   }
@@ -273,6 +288,9 @@ export default function Dashboard() {
           onPrevious={goEnergyPrev}
           onNext={goEnergyNext}
           onGoToToday={goEnergyToday}
+          usesWearable={profile.usesWearable}
+          onSaveDeviceTotal={handleSaveDeviceTotal}
+          onClearDeviceTotal={handleClearDeviceTotal}
         />
       </div>
 

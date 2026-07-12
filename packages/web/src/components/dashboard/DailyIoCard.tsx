@@ -11,6 +11,7 @@ import {
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import DayNavigator from '../layout/DayNavigator'
 import Card from '../ui/Card'
+import DeviceTotalControl from './DeviceTotalControl'
 
 interface DailyIoCardProps {
   balance: NetBalance
@@ -22,6 +23,9 @@ interface DailyIoCardProps {
   onPrevious: () => void
   onNext: () => void
   onGoToToday: () => void
+  usesWearable?: boolean
+  onSaveDeviceTotal?: (kcal: number) => Promise<void>
+  onClearDeviceTotal?: () => Promise<void>
 }
 
 const CHART_H = 200
@@ -83,6 +87,9 @@ export default function DailyIoCard({
   onPrevious,
   onNext,
   onGoToToday,
+  usesWearable = false,
+  onSaveDeviceTotal,
+  onClearDeviceTotal,
 }: DailyIoCardProps) {
   const isMobile = useMediaQuery('(max-width: 639px)')
   const { consumed, burned, goalLow, goalHigh, bmr } = balance
@@ -510,6 +517,20 @@ export default function DailyIoCard({
             <>Input and output match</>
           )}
         </p>
+
+        {usesWearable && onSaveDeviceTotal && onClearDeviceTotal && (
+          <div style={{ marginTop: 12 }}>
+            <DeviceTotalControl
+              key={`${date}-${balance.deviceTotal ?? 'none'}`}
+              deviceTotal={balance.deviceTotal}
+              bmr={balance.bmr}
+              activityCalories={balance.activityCalories}
+              dayLoading={dayLoading}
+              onSave={onSaveDeviceTotal}
+              onClear={onClearDeviceTotal}
+            />
+          </div>
+        )}
       </div>
     </Card>
   )
