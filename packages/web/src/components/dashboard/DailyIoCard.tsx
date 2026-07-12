@@ -111,6 +111,23 @@ export default function DailyIoCard({
     [goalHigh, goalLow, target],
   )
 
+  /** Spaced positions (px from top) for left-axis labels so they never overlap on mobile. */
+  const spacedLabelPositions = useMemo(() => {
+    const MIN_GAP = 26
+    const positions = goalLines.map((line) => ({
+      key: line.key,
+      rawPx: CHART_H - (pctOfMax(line.value, chartMax) / 100) * CHART_H,
+    }))
+    positions.sort((a, b) => a.rawPx - b.rawPx)
+    const adjusted: { key: string; px: number }[] = []
+    for (const p of positions) {
+      const last = adjusted[adjusted.length - 1]
+      const minPx = last ? last.px + MIN_GAP : 0
+      adjusted.push({ key: p.key, px: Math.max(p.rawPx, minPx) })
+    }
+    return adjusted
+  }, [goalLines, chartMax])
+
   const status = ioStatusBadge(balance)
   const inputH = pctOfMax(consumed, chartMax)
   const outputH = pctOfMax(burned, chartMax)
@@ -195,7 +212,8 @@ export default function DailyIoCard({
           {/* Left y-axis: High / Target / Low names (+ values on mobile) */}
           <div style={{ position: 'relative', height: CHART_H }}>
             {goalLines.map((line) => {
-              const bottom = pctOfMax(line.value, chartMax)
+              const spaced = spacedLabelPositions.find((p) => p.key === line.key)
+              const bottomPx = spaced ? CHART_H - spaced.px : 0
               return (
                 <div
                   key={line.key}
@@ -203,7 +221,7 @@ export default function DailyIoCard({
                     position: 'absolute',
                     left: 0,
                     right: 0,
-                    bottom: `${bottom}%`,
+                    bottom: bottomPx,
                     transform: 'translateY(50%)',
                     textAlign: 'right',
                     paddingRight: 2,
