@@ -6,7 +6,7 @@ import {
   loggedAtFromDayAndTime,
   scaleMacrosByPortion,
   scaleRecipeToServings,
-  todayISO,
+  todayISOInTimeZone,
   validateEntry,
   validatePortionInput,
   type FoodEntry,
@@ -136,6 +136,9 @@ interface PortionAmountFieldsProps {
   onPortionQuantityChange: (value: string) => void
   referenceWeightGrams: string
   quantityInputId: string
+  /** When false, only servings mode is available (no unit toggle). */
+  allowGrams?: boolean
+  helperText?: string
 }
 
 function PortionAmountFields({
@@ -145,49 +148,55 @@ function PortionAmountFields({
   onPortionQuantityChange,
   referenceWeightGrams,
   quantityInputId,
+  allowGrams = true,
+  helperText,
 }: PortionAmountFieldsProps) {
+  const effectiveUnit = allowGrams ? portionUnit : 'servings'
   return (
     <>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {(['servings', 'grams'] as const).map((value) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => onPortionUnitChange(value)}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 9999,
-              border: portionUnit === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
-              background: portionUnit === value ? 'var(--zone-accent)' : 'white',
-              color: portionUnit === value ? 'white' : '#52525b',
-              fontSize: 12,
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            {value === 'servings' ? 'Servings' : 'Weight (g)'}
-          </button>
-        ))}
-      </div>
+      {allowGrams ? (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          {(['servings', 'grams'] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => onPortionUnitChange(value)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 9999,
+                border: portionUnit === value ? '1px solid var(--zone-accent)' : '1px solid #e4e4e7',
+                background: portionUnit === value ? 'var(--zone-accent)' : 'white',
+                color: portionUnit === value ? 'white' : '#52525b',
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              {value === 'servings' ? 'Servings' : 'Weight (g)'}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div style={{ marginBottom: 16 }}>
         <label htmlFor={quantityInputId} style={labelBase}>
-          {portionUnit === 'grams'
+          {effectiveUnit === 'grams'
             ? 'How many grams did you have?'
             : 'How many servings did you have?'}
         </label>
         <input
           id={quantityInputId}
           type="number"
-          min={portionUnit === 'grams' ? '1' : '0.25'}
-          step={portionUnit === 'grams' ? '1' : '0.25'}
+          min={effectiveUnit === 'grams' ? '1' : '0.25'}
+          step={effectiveUnit === 'grams' ? '1' : '0.25'}
           value={portionQuantity}
           onChange={(e) => onPortionQuantityChange(e.target.value)}
           style={inputBase}
         />
         <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>
-          {portionUnit === 'grams'
-            ? `Each serving equals ${referenceWeightGrams || '…'}g of the reference amount above.`
-            : `One serving equals the ${referenceWeightGrams || '…'}g reference amount above.`}
+          {helperText ??
+            (effectiveUnit === 'grams'
+              ? `Each serving equals ${referenceWeightGrams || '…'}g of the reference amount above.`
+              : `One serving equals the ${referenceWeightGrams || '…'}g reference amount above.`)}
         </p>
       </div>
     </>
@@ -228,13 +237,16 @@ export default function AddEntryModal({
   const [showScanner, setShowScanner] = useState(false)
 
   const servingWeightForRecipe = (recipe: RecipeSummary | undefined) =>
-    recipe?.servingWeightGrams ? String(recipe.servingWeightGrams) : '100'
+    recipe?.servingWeightGrams ? String(recipe.servingWeightGrams) : ''
 
   const selectRecipe = (recipeId: string, recipeList: RecipeSummary[] = recipes) => {
+    const recipe = recipeList.find((item) => item.id === recipeId)
     setSelectedRecipeId(recipeId)
-    setRecipeServingWeightGrams(
-      servingWeightForRecipe(recipeList.find((recipe) => recipe.id === recipeId)),
-    )
+    setRecipeServingWeightGrams(servingWeightForRecipe(recipe))
+    // Match LogRecipeModal: only allow grams when the recipe has a serving weight.
+    if (!recipe?.servingWeightGrams) {
+      setRecipePortionUnit('servings')
+    }
   }
   const [referenceWeightGrams, setReferenceWeightGrams] = useState(() =>
     prefill?.referenceWeightGrams ? String(prefill.referenceWeightGrams) : '100',
@@ -250,15 +262,18 @@ export default function AddEntryModal({
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const showScannerRef = useRef(false)
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId)
+  const recipeAllowsGrams = Boolean(selectedRecipe?.servingWeightGrams)
   const recipeServingWeightNum = Number.parseFloat(recipeServingWeightGrams)
   const resolvedRecipeServingWeightGrams =
     Number.isFinite(recipeServingWeightNum) && recipeServingWeightNum > 0
       ? recipeServingWeightNum
       : null
   const recipePortionQuantityNum = Number.parseFloat(recipePortionQuantity)
+  const recipePortionUnitEffective: PortionUnit =
+    recipeAllowsGrams && recipePortionUnit === 'grams' ? 'grams' : 'servings'
   const recipeEffectiveServings =
     selectedRecipe && recipePortionQuantity !== '' && Number.isFinite(recipePortionQuantityNum)
-      ? recipePortionUnit === 'grams'
+      ? recipePortionUnitEffective === 'grams'
         ? resolvedRecipeServingWeightGrams
           ? recipePortionQuantityNum / resolvedRecipeServingWeightGrams
           : NaN
@@ -383,7 +398,7 @@ export default function AddEntryModal({
     setNutritionBasisNote('')
     setRecipePortionUnit('servings')
     setRecipePortionQuantity('1')
-    setRecipeServingWeightGrams('100')
+    setRecipeServingWeightGrams('')
     setSelectedRecipeId('')
     setRecipeLogTime(currentTimeInputValue(timeZone))
     setError(null)
@@ -477,15 +492,15 @@ export default function AddEntryModal({
       setError('Select a recipe')
       return
     }
-    if (recipePortionUnit === 'grams' && !resolvedRecipeServingWeightGrams) {
-      setError('Enter a serving weight greater than 0 to log by grams.')
+    if (recipePortionUnitEffective === 'grams' && !resolvedRecipeServingWeightGrams) {
+      setError('This recipe has no serving weight. Log by servings or add one in the recipe editor.')
       return
     }
 
     const portionQuantityValue = Number.parseFloat(recipePortionQuantity)
     if (!Number.isFinite(portionQuantityValue) || portionQuantityValue <= 0) {
       setError(
-        recipePortionUnit === 'grams'
+        recipePortionUnitEffective === 'grams'
           ? 'Weight must be greater than 0'
           : 'Servings must be greater than 0',
       )
@@ -502,10 +517,10 @@ export default function AddEntryModal({
     setError(null)
     try {
       await onLogRecipe(selectedRecipeId, {
-        portionUnit: recipePortionUnit,
+        portionUnit: recipePortionUnitEffective,
         portionQuantity: portionQuantityValue,
         servingWeightGrams:
-          recipePortionUnit === 'grams'
+          recipePortionUnitEffective === 'grams'
             ? (resolvedRecipeServingWeightGrams ?? undefined)
             : undefined,
         loggedAt: loggedAt.value,
@@ -632,7 +647,7 @@ export default function AddEntryModal({
               id="entry-recipe-log-date"
               type="date"
               value={entryDate}
-              max={todayISO()}
+              max={todayISOInTimeZone(timeZone)}
               onChange={(e) => setEntryDate(e.target.value || entryDate)}
               style={inputBase}
             />
@@ -649,31 +664,47 @@ export default function AddEntryModal({
               style={inputBase}
             />
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="entry-recipe-reference-weight" style={labelBase}>
-              Reference weight (g)
-            </label>
-            <input
-              id="entry-recipe-reference-weight"
-              type="number"
-              min="1"
-              step="1"
-              value={recipeServingWeightGrams}
-              onChange={(e) => setRecipeServingWeightGrams(e.target.value)}
-              style={inputBase}
-            />
-            <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>
-              One serving of this recipe equals this weight (
-              {selectedRecipe?.perServingTotals.calories ?? 0} kcal per serving).
+          {recipeAllowsGrams ? (
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="entry-recipe-reference-weight" style={labelBase}>
+                Serving weight (g)
+              </label>
+              <input
+                id="entry-recipe-reference-weight"
+                type="number"
+                min="1"
+                step="1"
+                value={recipeServingWeightGrams}
+                onChange={(e) => setRecipeServingWeightGrams(e.target.value)}
+                style={inputBase}
+              />
+              <p style={{ fontSize: 12, color: '#a1a1aa', margin: '6px 0 0 0' }}>
+                One serving of this recipe equals this weight (
+                {selectedRecipe?.perServingTotals.calories ?? 0} kcal per serving).
+              </p>
+            </div>
+          ) : selectedRecipe ? (
+            <p style={{ fontSize: 12, color: '#a1a1aa', margin: '0 0 16px 0' }}>
+              Recipe makes {selectedRecipe.defaultServings} servings per batch (
+              {selectedRecipe.perServingTotals.calories} kcal per serving). Add a serving weight in
+              the recipe editor to log by grams.
             </p>
-          </div>
+          ) : null}
           <PortionAmountFields
-            portionUnit={recipePortionUnit}
+            portionUnit={recipePortionUnitEffective}
             onPortionUnitChange={setRecipePortionUnit}
             portionQuantity={recipePortionQuantity}
             onPortionQuantityChange={setRecipePortionQuantity}
             referenceWeightGrams={recipeServingWeightGrams}
             quantityInputId="entry-recipe-portion"
+            allowGrams={recipeAllowsGrams}
+            helperText={
+              recipeAllowsGrams
+                ? undefined
+                : selectedRecipe
+                  ? `Recipe makes ${selectedRecipe.defaultServings} servings per batch (${selectedRecipe.perServingTotals.calories} kcal per serving).`
+                  : 'Select a recipe to log.'
+            }
           />
           {previewTotals && (
             <div
@@ -810,7 +841,7 @@ export default function AddEntryModal({
                 id="entry-log-date"
                 type="date"
                 value={entryDate}
-                max={todayISO()}
+                max={todayISOInTimeZone(timeZone)}
                 onChange={(e) => setEntryDate(e.target.value || entryDate)}
                 style={inputBase}
               />
