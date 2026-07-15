@@ -1,4 +1,10 @@
-import { formatDayLabel, shiftISODate, sumTotals, todayISO } from '@body-io/shared'
+import {
+  detectBrowserTimeZone,
+  formatDayLabel,
+  shiftISODate,
+  sumTotals,
+  todayISOInTimeZone,
+} from '@body-io/shared'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNutritionGoals, useProfile } from '../context/useProfile'
 import AddEntryModal from '../components/AddEntryModal'
@@ -45,17 +51,20 @@ export default function InputsPage({
   onOpenBarcodeScannerReady,
 }: InputsPageProps) {
   const nutritionGoals = useNutritionGoals()
-  const { profile } = useProfile()
+  const { profile, loading: profileLoading } = useProfile()
   const [days, setDays] = useState<DaySummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState(todayISO())
+  const [selectedDate, setSelectedDate] = useState(() =>
+    todayISOInTimeZone(detectBrowserTimeZone()),
+  )
   const [showAddForm, setShowAddForm] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const [prefillEntry, setPrefillEntry] = useState<FoodEntryWrite | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const today = todayISO()
+  const resolvedTimeZone = profileLoading ? detectBrowserTimeZone() : profile.timeZone
+  const today = todayISOInTimeZone(resolvedTimeZone)
   const isToday = selectedDate === today
 
   const activeDay = useMemo(

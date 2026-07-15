@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { RecipeSummary, RecipeWithIngredients } from '@body-io/shared'
+import { todayISOInTimeZone, type RecipeSummary, type RecipeWithIngredients } from '@body-io/shared'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
@@ -8,6 +8,7 @@ import LogRecipeModal from '../components/LogRecipeModal'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import RecipeViewModal from '../components/RecipeViewModal'
 import ShareModal from '../components/ShareModal'
+import { useProfile } from '../context/useProfile'
 import {
   filterAndSortRecipes,
   RECIPE_SORT_OPTIONS,
@@ -21,6 +22,7 @@ interface RecipesPageProps {
 }
 
 export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
+  const { profile } = useProfile()
   const [recipes, setRecipes] = useState<RecipeSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -73,6 +75,7 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
       recipeId: loggingRecipe.id,
       portionUnit: options.portionUnit,
       portionQuantity: options.portionQuantity,
+      entryDate: todayISOInTimeZone(profile.timeZone),
     })
     setLogSuccess(`Added ${loggingRecipe.name} to today's food log.`)
     setLoggingRecipe(null)
