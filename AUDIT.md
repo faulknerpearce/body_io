@@ -62,3 +62,24 @@ single, focused change set.
 
 - **Cloudflare Pages rootless-functions**: still uses the shim pattern. Removing the shim requires Cloudflare's `[build]` config and is out of scope for this pass.
 
+## Phase 7 — Recipe food-log math & config (2026-07)
+
+Deep pass focused on recipe → food-entry scaling and related drift.
+
+### Fixed
+
+| Issue | Fix |
+| ----- | --- |
+| **Double-rounding in `scaleRecipeToServings`** — intermediate `perServingTotals` round then re-round on multiply undercounted macros (~43% of batch/serving pairs). Full-batch log of 1000 kcal / 3 servings stored **999**. | Single-round from batch: `Math.round(batch * servingsLogged / defaultServings)` in `packages/shared/src/recipeTotals.ts`. Affects web `logRecipe`, MCP `logRecipeEntry`, and UI previews. |
+| **Recipe update omitted `serving_weight_grams`** — editor UI saved weight but DB never updated (web + MCP). | Update payloads now include `serving_weight_grams` from `buildRecipeInsertPayload`. |
+| **MCP `parseRecipeInput` ignored serving weight** | Accepts `servingWeightGrams` / `serving_weight_grams`. |
+| **Add Entry → Recipe allowed grams with default 100g** when recipe had no weight | Grams mode only when recipe has `servingWeightGrams` (matches `LogRecipeModal`). |
+| **“Today” for recipe logs used browser-local date inconsistently** | Inputs/Recipes pass profile TZ calendar day; `logRecipe` fallback uses `todayISOInTimeZone`. |
+
+### Residual / deferred (P2)
+
+- Web `lib/recipes.ts` and MCP `recipeHandlers.ts` remain near-duplicates (~250 lines each) — drift risk remains; full merge out of scope.
+- `supabase/migrations/` is empty; real SQL lives in `packages/shared/migrations/` (run manually / document for CLI users).
+- No backfill of historical food entries that were undercounted by double-rounding.
+- Dashboard / Outputs still use `todayISO()` in places; only Inputs + recipe log path were aligned to profile TZ in this pass.
+
