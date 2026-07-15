@@ -5,11 +5,12 @@ import {
   mapRecipeIngredientRow,
   mapRecipeRow,
   mapRow,
+  detectBrowserTimeZone,
   perServingTotals,
   scaleRecipeToServings,
   sumRecipeIngredients,
   validateRecipeInput,
-  todayISO,
+  todayISOInTimeZone,
   validateServingsLogged,
   type NewRecipeIngredient,
   type PortionUnit,
@@ -131,6 +132,7 @@ export async function saveRecipe(input: RecipeInput, id?: string): Promise<Recip
   const payload = buildRecipeInsertPayload(validated.value, userId, recipeId)
 
   if (id) {
+    // Keep in sync with buildRecipeInsertPayload fields (including serving_weight_grams).
     const { error } = await supabase
       .from('recipes')
       .update({
@@ -140,6 +142,7 @@ export async function saveRecipe(input: RecipeInput, id?: string): Promise<Recip
         icon_bg: payload.icon_bg,
         icon_color: payload.icon_color,
         default_servings: payload.default_servings,
+        serving_weight_grams: payload.serving_weight_grams,
         updated_at: new Date().toISOString(),
       })
       .eq('id', recipeId)
@@ -192,6 +195,8 @@ export async function logRecipe(options: {
   portionQuantity?: number
   servingWeightGrams?: number
   entryDate?: string
+  /** IANA timezone used only when entryDate is omitted (defaults to browser TZ). */
+  timeZone?: string
   loggedAt?: string
 }): Promise<FoodEntry> {
   const recipe = await fetchRecipe(options.recipeId)
@@ -218,6 +223,8 @@ export async function logRecipe(options: {
     effectiveServings,
   )
   const userId = await requireUserId()
+  const entryDate =
+    options.entryDate ?? todayISOInTimeZone(options.timeZone ?? detectBrowserTimeZone())
 
   const { data, error } = await supabase
     .from('food_entries')
@@ -235,7 +242,7 @@ export async function logRecipe(options: {
       fat: totals.fat,
       fiber: totals.fiber,
       caffeine: totals.caffeine,
-      entry_date: options.entryDate ?? todayISO(),
+      entry_date: entryDate,
       recipe_id: recipe.id,
       servings_logged: portionUnit === 'servings' ? portionQuantity : null,
       portion_unit: portionUnit,

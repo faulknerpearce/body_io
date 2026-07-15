@@ -122,6 +122,16 @@ async function replaceRecipeIngredients(
 
 function parseRecipeInput(args: RecipeToolArgs): RecipeInput {
   const ingredients = Array.isArray(args.ingredients) ? args.ingredients : []
+  const servingWeightRaw = args.servingWeightGrams ?? args.serving_weight_grams
+  const servingWeightGrams =
+    servingWeightRaw === null || servingWeightRaw === undefined
+      ? undefined
+      : typeof servingWeightRaw === 'number'
+        ? servingWeightRaw
+        : typeof servingWeightRaw === 'string' && servingWeightRaw.trim() !== ''
+          ? Number.parseFloat(servingWeightRaw)
+          : undefined
+
   return {
     name: typeof args.name === 'string' ? args.name : '',
     description: typeof args.description === 'string' ? args.description : '',
@@ -133,6 +143,12 @@ function parseRecipeInput(args: RecipeToolArgs): RecipeInput {
         ? args.defaultServings
         : typeof args.default_servings === 'number'
           ? args.default_servings
+          : undefined,
+    servingWeightGrams:
+      servingWeightGrams !== undefined && Number.isFinite(servingWeightGrams)
+        ? servingWeightGrams
+        : servingWeightRaw === null
+          ? null
           : undefined,
     ingredients: ingredients as RecipeInput['ingredients'],
   }
@@ -152,6 +168,7 @@ export async function saveRecipe(
   const payload = buildRecipeInsertPayload(validated.value, userId, recipeId)
 
   if (typeof args.id === 'string' && args.id !== '') {
+    // Keep in sync with buildRecipeInsertPayload fields (including serving_weight_grams).
     const { error } = await supabase
       .from('recipes')
       .update({
@@ -161,6 +178,7 @@ export async function saveRecipe(
         icon_bg: payload.icon_bg,
         icon_color: payload.icon_color,
         default_servings: payload.default_servings,
+        serving_weight_grams: payload.serving_weight_grams,
         updated_at: new Date().toISOString(),
       })
       .eq('id', recipeId)
@@ -234,8 +252,7 @@ export async function logRecipeEntry(supabase: BodyIOSupabase, args: RecipeToolA
       servings_logged: portionUnit === 'servings' ? portionQuantity : null,
       portion_unit: portionUnit,
       portion_quantity: portionQuantity,
-      reference_weight_grams:
-        portionUnit === 'grams' ? recipe.servingWeightGrams : recipe.servingWeightGrams,
+      reference_weight_grams: recipe.servingWeightGrams,
     })
     .select()
     .single()
