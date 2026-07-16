@@ -70,13 +70,6 @@ function ioStatusBadge(balance: NetBalance): {
   }
 }
 
-interface GoalLine {
-  key: string
-  label: string
-  value: number
-  emphasis?: boolean
-}
-
 export default function DailyIoCard({
   balance,
   date,
@@ -93,56 +86,32 @@ export default function DailyIoCard({
 }: DailyIoCardProps) {
   const isMobile = useMediaQuery('(max-width: 639px)')
   const { consumed, burned, goalLow, goalHigh, bmr } = balance
-  const target = (goalLow + goalHigh) / 2
+  const target = Math.round((goalLow + goalHigh) / 2)
   // Full-day BMR always — not time-prorated (that made "today" look like ~923 midday)
   const bmrLine = Math.round(bmr)
 
-  const leftAxisW = isMobile ? 40 : 44
-  const rightAxisW = isMobile ? 40 : 64
+  const leftAxisW = isMobile ? 48 : 56
+  const rightAxisW = isMobile ? 40 : 56
   const barW = isMobile ? 48 : 56
   const barGap = isMobile ? 28 : 40
   /** Keep bars clear of axis number chips on the plot edges */
   const plotPadX = isMobile ? 10 : 16
 
   const chartMax = useMemo(
-    () => Math.max(consumed, burned, goalHigh, bmrLine, 1) * 1.08,
-    [consumed, burned, goalHigh, bmrLine],
+    () => Math.max(consumed, burned, target, bmrLine, 1) * 1.08,
+    [consumed, burned, target, bmrLine],
   )
-
-  const goalLines: GoalLine[] = useMemo(
-    () => [
-      { key: 'high', label: 'High', value: goalHigh },
-      { key: 'target', label: 'Target', value: target, emphasis: true },
-      { key: 'low', label: 'Low', value: goalLow },
-    ],
-    [goalHigh, goalLow, target],
-  )
-
-  /** Spaced positions (px from top) for left-axis labels so they never overlap on mobile. */
-  const spacedLabelPositions = useMemo(() => {
-    const MIN_GAP = 26
-    const positions = goalLines.map((line) => ({
-      key: line.key,
-      rawPx: CHART_H - (pctOfMax(line.value, chartMax) / 100) * CHART_H,
-    }))
-    positions.sort((a, b) => a.rawPx - b.rawPx)
-    const adjusted: { key: string; px: number }[] = []
-    for (const p of positions) {
-      const last = adjusted[adjusted.length - 1]
-      const minPx = last ? last.px + MIN_GAP : 0
-      adjusted.push({ key: p.key, px: Math.max(p.rawPx, minPx) })
-    }
-    return adjusted
-  }, [goalLines, chartMax])
 
   const status = ioStatusBadge(balance)
   const inputH = pctOfMax(consumed, chartMax)
   const outputH = pctOfMax(burned, chartMax)
+  const targetBottom = pctOfMax(target, chartMax)
   const bmrBottom = pctOfMax(bmrLine, chartMax)
 
   const ariaLabel = [
     `In versus out: ${consumed.toLocaleString()} kilocalories in, ${burned.toLocaleString()} out.`,
     status.label,
+    `Target ${target.toLocaleString()} kilocalories.`,
     `BMR reference ${bmrLine.toLocaleString()} kilocalories.`,
   ].join(' ')
 
@@ -216,55 +185,46 @@ export default function DailyIoCard({
             alignItems: 'stretch',
           }}
         >
-          {/* Left y-axis: High / Target / Low names (+ values on mobile) */}
+          {/* Left y-axis: Target only */}
           <div style={{ position: 'relative', height: CHART_H }}>
-            {goalLines.map((line) => {
-              const spaced = spacedLabelPositions.find((p) => p.key === line.key)
-              const bottomPx = spaced ? CHART_H - spaced.px : 0
-              return (
-                <div
-                  key={line.key}
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: bottomPx,
-                    transform: 'translateY(50%)',
-                    textAlign: 'right',
-                    paddingRight: 2,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 9,
-                      fontWeight: line.emphasis ? 700 : 600,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      color: line.emphasis ? ZONE_BLUE : neutrals.textFaint,
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    {line.label}
-                  </span>
-                  {isMobile && (
-                    <span
-                      style={{
-                        display: 'block',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        fontVariantNumeric: 'tabular-nums',
-                        color: line.emphasis ? ZONE_BLUE : neutrals.textMuted,
-                        marginTop: 1,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {Math.round(line.value).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              )
-            })}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: `${targetBottom}%`,
+                transform: 'translateY(50%)',
+                textAlign: 'right',
+                paddingRight: 4,
+              }}
+            >
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: ZONE_BLUE,
+                  lineHeight: 1.15,
+                }}
+              >
+                Target
+              </span>
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: isMobile ? 10 : 11,
+                  fontWeight: 700,
+                  fontVariantNumeric: 'tabular-nums',
+                  color: ZONE_BLUE,
+                  marginTop: 1,
+                  lineHeight: 1,
+                }}
+              >
+                {target.toLocaleString()}
+              </span>
+            </div>
           </div>
 
           {/* Plot */}
@@ -278,56 +238,22 @@ export default function DailyIoCard({
               borderBottom: `1px solid ${neutrals.borderStrong}`,
             }}
           >
-            {/* Goal dashed lines; desktop shows kcal just right of the line */}
-            {goalLines.map((line) => {
-              const bottom = pctOfMax(line.value, chartMax)
-              return (
-                <div
-                  key={line.key}
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    bottom: `${bottom}%`,
-                    transform: 'translateY(50%)',
-                    pointerEvents: 'none',
-                    zIndex: 1,
-                  }}
-                >
-                  <div
-                    title={`${line.label}: ${Math.round(line.value).toLocaleString()} kcal`}
-                    style={{
-                      borderTop: line.emphasis
-                        ? `2px solid ${ZONE_BLUE}`
-                        : `1px dashed ${neutrals.borderStrong}`,
-                      opacity: line.emphasis ? 0.95 : 0.75,
-                    }}
-                  />
-                  {!isMobile && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        left: 6,
-                        top: 0,
-                        transform: 'translateY(-50%)',
-                        fontSize: 10,
-                        fontWeight: line.emphasis ? 700 : 600,
-                        fontVariantNumeric: 'tabular-nums',
-                        color: line.emphasis ? ZONE_BLUE : neutrals.textMuted,
-                        background: 'rgba(255,255,255,0.92)',
-                        padding: '0 3px',
-                        borderRadius: 2,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {Math.round(line.value).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              )
-            })}
+            {/* Target line */}
+            <div
+              title={`Target: ${target.toLocaleString()} kcal`}
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: `${targetBottom}%`,
+                borderTop: `2px solid ${ZONE_BLUE}`,
+                opacity: 0.95,
+                pointerEvents: 'none',
+                zIndex: 1,
+              }}
+            />
 
-            {/* BMR dashed line (label + value on right axis) */}
+            {/* BMR dashed line */}
             <div
               title={`BMR: ${bmrLine.toLocaleString()} kcal`}
               style={{
@@ -384,7 +310,7 @@ export default function DailyIoCard({
             </div>
           </div>
 
-          {/* Right y-axis: desktop = value left of "BMR"; mobile = BMR then value below (like left axis) */}
+          {/* Right y-axis: BMR */}
           <div style={{ position: 'relative', height: CHART_H }}>
             <div
               style={{
@@ -396,69 +322,32 @@ export default function DailyIoCard({
                 paddingLeft: isMobile ? 3 : 4,
               }}
             >
-              {isMobile ? (
-                <>
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 9,
-                      fontWeight: 600,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      color: neutrals.textFaint,
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    BMR
-                  </span>
-                  <span
-                    style={{
-                      display: 'block',
-                      fontSize: 10,
-                      fontWeight: 700,
-                      fontVariantNumeric: 'tabular-nums',
-                      color: neutrals.textMuted,
-                      marginTop: 1,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {bmrLine.toLocaleString()}
-                  </span>
-                </>
-              ) : (
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'baseline',
-                    gap: 5,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      fontVariantNumeric: 'tabular-nums',
-                      color: neutrals.textSecondary,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {bmrLine.toLocaleString()}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 9,
-                      fontWeight: 600,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                      color: neutrals.textFaint,
-                      lineHeight: 1,
-                    }}
-                  >
-                    BMR
-                  </span>
-                </span>
-              )}
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: 9,
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                  color: neutrals.textFaint,
+                  lineHeight: 1.15,
+                }}
+              >
+                BMR
+              </span>
+              <span
+                style={{
+                  display: 'block',
+                  fontSize: isMobile ? 10 : 11,
+                  fontWeight: 700,
+                  fontVariantNumeric: 'tabular-nums',
+                  color: neutrals.textMuted,
+                  marginTop: 1,
+                  lineHeight: 1,
+                }}
+              >
+                {bmrLine.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
