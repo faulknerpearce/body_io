@@ -70,10 +70,12 @@ export default function DeviceTotalControl({
           alignItems: 'center',
           justifyContent: 'space-between',
           margin: 0,
-          padding: '10px 14px',
-          borderRadius: radius.md,
-          background: neutrals.surfaceMuted,
-          border: `1px solid ${neutrals.border}`,
+          padding: '4px 0',
+          borderRadius: 0,
+          background: 'transparent',
+          border: 'none',
+          boxShadow: 'none',
+          outline: 'none',
           cursor: dayLoading ? 'default' : 'pointer',
           textAlign: 'left',
           opacity: dayLoading ? 0.55 : 1,
@@ -103,10 +105,11 @@ export default function DeviceTotalControl({
   return (
     <div
       style={{
-        padding: '12px 14px',
-        borderRadius: radius.md,
-        background: neutrals.surfaceMuted,
-        border: `1px solid ${neutrals.border}`,
+        padding: '4px 0',
+        borderRadius: 0,
+        background: 'transparent',
+        border: 'none',
+        boxShadow: 'none',
         opacity: dayLoading ? 0.55 : 1,
       }}
     >
@@ -132,14 +135,17 @@ export default function DeviceTotalControl({
           placeholder={`${bmr}`}
           style={{
             width: 90,
-            padding: '6px 8px',
-            borderRadius: radius.sm,
-            border: `1px solid ${neutrals.borderStrong}`,
+            padding: '4px 0',
+            borderRadius: 0,
+            border: 'none',
+            borderBottom: `1px solid ${neutrals.borderStrong}`,
+            outline: 'none',
             fontSize: 14,
             fontWeight: 600,
             fontVariantNumeric: 'tabular-nums',
             color: neutrals.textPrimary,
-            background: neutrals.surface,
+            background: 'transparent',
+            boxShadow: 'none',
           }}
         />
         <span style={{ fontSize: 12, color: neutrals.textMuted }}>kcal</span>
@@ -170,8 +176,8 @@ export default function DeviceTotalControl({
               style={{
                 padding: '6px 10px',
                 borderRadius: radius.sm,
-                border: `1px solid ${neutrals.borderStrong}`,
-                background: neutrals.surface,
+                border: 'none',
+                background: 'transparent',
                 color: neutrals.textMuted,
                 fontSize: 12,
                 fontWeight: 600,
@@ -187,8 +193,8 @@ export default function DeviceTotalControl({
               style={{
                 padding: '6px 10px',
                 borderRadius: radius.sm,
-                border: `1px solid ${neutrals.borderStrong}`,
-                background: neutrals.surface,
+                border: 'none',
+                background: 'transparent',
                 color: neutrals.textMuted,
                 fontSize: 12,
                 fontWeight: 600,

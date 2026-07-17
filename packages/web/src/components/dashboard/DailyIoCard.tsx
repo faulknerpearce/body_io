@@ -5,8 +5,8 @@ import {
   radius,
   type as typeScale,
   ZONE_BLUE,
-  ZONE_CORAL,
-  ZONE_GREEN,
+  ZONE_INPUT,
+  ZONE_OUTPUT,
 } from '../../lib/design-tokens'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import DayNavigator from '../layout/DayNavigator'
@@ -29,14 +29,13 @@ interface DailyIoCardProps {
 }
 
 const CHART_H = 200
-const INPUT_AHEAD_RED = '#E11D48'
 
 function pctOfMax(value: number, max: number): number {
   if (max <= 0) return 0
   return Math.min(100, Math.max(0, (value / max) * 100))
 }
 
-/** Badge: net in goal → blue; else I vs O comparison. */
+/** Badge: net in goal → blue; else I vs O comparison (zone colors). */
 function ioStatusBadge(balance: NetBalance): {
   label: string
   color: string
@@ -46,21 +45,21 @@ function ioStatusBadge(balance: NetBalance): {
     return {
       label: 'I/O in Range',
       color: ZONE_BLUE,
-      background: 'rgba(86, 143, 235, 0.16)',
+      background: 'rgba(12, 65, 151, 0.16)',
     }
   }
   if (balance.burned > balance.consumed) {
     return {
       label: 'Output > Input',
-      color: ZONE_GREEN,
-      background: 'rgba(19, 165, 97, 0.14)',
+      color: ZONE_OUTPUT,
+      background: 'rgba(232, 152, 48, 0.16)',
     }
   }
   if (balance.consumed > balance.burned) {
     return {
       label: 'Input > Output',
-      color: INPUT_AHEAD_RED,
-      background: 'rgba(225, 29, 72, 0.12)',
+      color: ZONE_INPUT,
+      background: 'rgba(0, 137, 87, 0.14)',
     }
   }
   return {
@@ -288,8 +287,8 @@ export default function DailyIoCard({
                     height: `${inputH}%`,
                     minHeight: consumed > 0 ? 4 : 0,
                     borderRadius: `${radius.sm}px ${radius.sm}px 0 0`,
-                    background: `linear-gradient(180deg, ${ZONE_GREEN}ee 0%, ${ZONE_GREEN} 100%)`,
-                    boxShadow: `0 2px 8px ${ZONE_GREEN}33`,
+                    background: `linear-gradient(180deg, ${ZONE_INPUT}ee 0%, ${ZONE_INPUT} 100%)`,
+                    boxShadow: `0 2px 8px ${ZONE_INPUT}33`,
                     transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 />
@@ -301,8 +300,8 @@ export default function DailyIoCard({
                     height: `${outputH}%`,
                     minHeight: burned > 0 ? 4 : 0,
                     borderRadius: `${radius.sm}px ${radius.sm}px 0 0`,
-                    background: `linear-gradient(180deg, ${ZONE_CORAL}ee 0%, ${ZONE_CORAL} 100%)`,
-                    boxShadow: `0 2px 8px ${ZONE_CORAL}33`,
+                    background: `linear-gradient(180deg, ${ZONE_OUTPUT}ee 0%, ${ZONE_OUTPUT} 100%)`,
+                    boxShadow: `0 2px 8px ${ZONE_OUTPUT}33`,
                     transition: 'height 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 />
@@ -371,8 +370,8 @@ export default function DailyIoCard({
               paddingRight: plotPadX,
             }}
           >
-            <BarCaption label="Input" value={consumed} color={ZONE_GREEN} width={barW} />
-            <BarCaption label="Output" value={burned} color={ZONE_CORAL} width={barW} />
+            <BarCaption label="Input" value={consumed} color={ZONE_INPUT} width={barW} />
+            <BarCaption label="Output" value={burned} color={ZONE_OUTPUT} width={barW} />
           </div>
           <div />
         </div>

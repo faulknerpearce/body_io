@@ -1,53 +1,48 @@
 import { parseISODate, type DailyEnergySnapshot } from '@body-io/shared'
 import { useMemo } from 'react'
-import { neutrals } from '../../lib/design-tokens'
+import { neutrals, ZONE_BLUE, ZONE_INPUT, ZONE_OUTPUT } from '../../lib/design-tokens'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 
 interface TrendsChartProps {
   rows: DailyEnergySnapshot[]
+  /** Midpoint of daily net calorie goal band — thin blue reference (same as In vs Out). */
+  targetCalories: number
 }
 
 type MarkerStyle = 'hollow' | 'filled' | 'none'
 
 interface ChartSeries {
-  key: 'intake' | 'output' | 'net'
+  key: 'intake' | 'output'
   label: string
   color: string
-  /** SVG stroke-dasharray; undefined = solid */
-  dash?: string
   /** Point style when dots are shown */
   marker: MarkerStyle
   pick: (row: DailyEnergySnapshot) => number
 }
 
 /**
- * Series colors follow zone language: fuel green, burn coral, net sky blue.
- * Non-color cues: Intake solid + hollow · Output dashed + filled · Net bold + filled.
+ * Series colors follow zone language: deep input green, output amber.
+ * Green is darker than amber so 30-day (line-only) charts stay clear in grayscale.
+ * Target: thin blue (DailyIoCard).
  */
 const SERIES: ChartSeries[] = [
   {
     key: 'intake',
     label: 'Intake',
-    color: '#13A561',
+    color: ZONE_INPUT,
     marker: 'hollow',
     pick: (row) => row.intakeCalories,
   },
   {
     key: 'output',
     label: 'Output',
-    color: '#EA4E2E',
-    dash: '7 5',
+    color: ZONE_OUTPUT,
     marker: 'filled',
     pick: (row) => row.totalOutput,
   },
-  {
-    key: 'net',
-    label: 'Net',
-    color: '#568FEB',
-    marker: 'filled',
-    pick: (row) => row.net,
-  },
 ]
+
+const TARGET_COLOR = ZONE_BLUE
 
 /** Hide per-day dots for ~30-day (and longer) ranges — all viewports. */
 const HIDE_DOTS_MIN_DAYS = 15
@@ -93,9 +88,8 @@ interface ChartLayout {
   axisFontSize: number
   labelFontSize: number
   lineWidth: number
-  netLineWidth: number
+  targetLineWidth: number
   pointRadius: number
-  netPointRadius: number
   maxXLabels: number
 }
 
@@ -106,9 +100,8 @@ const DESKTOP_LAYOUT: ChartLayout = {
   axisFontSize: 12,
   labelFontSize: 11,
   lineWidth: 2.5,
-  netLineWidth: 3.5,
+  targetLineWidth: 1.5,
   pointRadius: 4.5,
-  netPointRadius: 4.5,
   maxXLabels: 10,
 }
 
@@ -120,23 +113,23 @@ const MOBILE_LAYOUT: ChartLayout = {
   axisFontSize: 13,
   labelFontSize: 12,
   lineWidth: 3,
-  netLineWidth: 4,
+  targetLineWidth: 1.75,
   pointRadius: 6,
-  netPointRadius: 6,
   maxXLabels: 5,
 }
 
-export default function TrendsChart({ rows }: TrendsChartProps) {
+export default function TrendsChart({ rows, targetCalories }: TrendsChartProps) {
   const isMobile = useMediaQuery('(max-width: 639px)')
   const layout = isMobile ? MOBILE_LAYOUT : DESKTOP_LAYOUT
+  const target = Math.max(0, Math.round(targetCalories))
 
   const chart = useMemo(() => {
     if (rows.length === 0) return null
 
     const { width, height, padding, maxXLabels } = layout
-    const values = rows.flatMap((row) => [row.intakeCalories, row.totalOutput, row.net])
+    const values = rows.flatMap((row) => [row.intakeCalories, row.totalOutput])
     const rawMin = Math.min(...values, 0)
-    const rawMax = Math.max(...values, 0)
+    const rawMax = Math.max(...values, target, 0)
     const paddedMin = rawMin < 0 ? -niceAxisMax(Math.abs(rawMin)) : 0
     const paddedMax = niceAxisMax(rawMax * 1.1)
     const yMin = paddedMin
@@ -170,8 +163,22 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
       return { series, points, line }
     })
 
-    return { yMin, yMax, yTicks, paths, labelStride, scaleX, scaleY, width, height, padding }
-  }, [rows, layout])
+    const targetY = scaleY(target)
+
+    return {
+      yMin,
+      yMax,
+      yTicks,
+      paths,
+      labelStride,
+      scaleX,
+      scaleY,
+      targetY,
+      width,
+      height,
+      padding,
+    }
+  }, [rows, layout, target])
 
   if (!chart || rows.length === 0) {
     return (
@@ -188,7 +195,7 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
     <div className={isMobile ? 'trends-chart trends-chart-mobile' : 'trends-chart'}>
       <div
         role="img"
-        aria-label="Line chart of daily intake (solid), output (dashed), and net calories"
+        aria-label={`Line chart of daily intake and output calories with target ${target.toLocaleString()} kilocalories`}
         className="trends-chart-canvas"
       >
         <svg
@@ -225,10 +232,27 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
             )
           })}
 
+          {/* Target reference — thin blue, under series so I/O lines stay on top */}
+          {target > 0 && (
+            <g>
+              <line
+                x1={chart.padding.left}
+                x2={chart.width - chart.padding.right}
+                y1={chart.targetY}
+                y2={chart.targetY}
+                stroke={TARGET_COLOR}
+                strokeWidth={layout.targetLineWidth}
+                strokeLinecap="round"
+                opacity={0.95}
+              >
+                <title>{`Target: ${target.toLocaleString()} kcal`}</title>
+              </line>
+            </g>
+          )}
+
           {chart.paths.map(({ series, points, line }) => {
             const drawMarkers = showPoints && series.marker !== 'none'
-            // Output and Net share the larger radius; Intake (hollow) matches that size too
-            const radius = layout.netPointRadius
+            const radius = layout.pointRadius
             const hollow = series.marker === 'hollow'
             // Thin white rim on filled dots so color fill stays prominent
             const filledStroke = isMobile ? 1 : 0.75
@@ -239,10 +263,9 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
                   d={line}
                   fill="none"
                   stroke={series.color}
-                  strokeWidth={series.key === 'net' ? layout.netLineWidth : layout.lineWidth}
-                  strokeDasharray={series.dash}
+                  strokeWidth={layout.lineWidth}
                   strokeLinejoin="round"
-                  strokeLinecap={series.dash ? 'butt' : 'round'}
+                  strokeLinecap="round"
                 >
                   {!drawMarkers && (
                     <title>{`${series.label} trend over ${rows.length} days`}</title>
@@ -293,24 +316,10 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
         {SERIES.map((series) => (
           <span key={series.key} className="trends-chart-legend-item">
             <span className="trends-chart-legend-mark" aria-hidden="true">
-              {/* Line segment */}
               <span
-                className={
-                  series.dash
-                    ? 'trends-chart-legend-line trends-chart-legend-line-dashed'
-                    : series.key === 'net'
-                      ? 'trends-chart-legend-line trends-chart-legend-line-net'
-                      : 'trends-chart-legend-line'
-                }
-                style={
-                  series.dash
-                    ? {
-                        backgroundImage: `repeating-linear-gradient(90deg, ${series.color} 0 5px, transparent 5px 9px)`,
-                      }
-                    : { backgroundColor: series.color }
-                }
+                className="trends-chart-legend-line"
+                style={{ backgroundColor: series.color }}
               />
-              {/* Marker: hollow intake / filled net / none for dashed output */}
               {series.marker === 'hollow' && (
                 <span
                   className="trends-chart-legend-dot trends-chart-legend-dot-hollow"
@@ -327,18 +336,28 @@ export default function TrendsChart({ rows }: TrendsChartProps) {
             {series.label}
           </span>
         ))}
+        {target > 0 && (
+          <span className="trends-chart-legend-item">
+            <span className="trends-chart-legend-mark" aria-hidden="true">
+              <span
+                className="trends-chart-legend-line trends-chart-legend-line-target"
+                style={{ backgroundColor: TARGET_COLOR }}
+              />
+            </span>
+            Target
+          </span>
+        )}
       </div>
 
       {rows.length > 0 && !showPoints && (
         <p className="trends-chart-mobile-hint">
-          Longer ranges show lines only (no day dots). Intake solid · Output dashed · Net bold
+          Longer ranges show lines only (no day dots). Intake · Output · thin blue Target
           {isMobile ? '. Y-axis k = thousands.' : '.'}
         </p>
       )}
       {isMobile && rows.length > 0 && showPoints && (
         <p className="trends-chart-mobile-hint">
-          Intake: open green circles · Output: dashed + coral dots · Net: solid filled. Tap a point
-          for exact kcal.
+          Intake: open green · Output: filled amber · Target: thin blue. Tap a point for exact kcal.
         </p>
       )}
     </div>

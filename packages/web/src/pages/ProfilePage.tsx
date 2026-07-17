@@ -434,7 +434,7 @@ function ProfileForm({ profile, updateProfile, onSignOut }: ProfileFormProps) {
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: 'pointer',
-                      background: unitSystem === opt.id ? 'var(--zone-accent, #13A561)' : '#fff',
+                      background: unitSystem === opt.id ? 'var(--zone-accent, #008957)' : '#fff',
                       color: unitSystem === opt.id ? '#fff' : '#52525b',
                     }}
                   >
