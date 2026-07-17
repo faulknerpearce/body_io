@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  entryMacrosPerServing,
   formatPortionLabel,
   portionScaleFactor,
+  scaleEntryToPortion,
   scaleMacrosByPortion,
   validatePortionInput,
 } from '../portionScaling.js'
@@ -100,5 +102,67 @@ describe('portionScaling', () => {
         referenceWeightGrams: 100,
       }),
     ).toEqual({ ok: false, error: 'portionUnit must be servings or grams' })
+  })
+
+  it('derives per-serving macros from a multi-serving log', () => {
+    const { perServing, allowsGrams } = entryMacrosPerServing({
+      ...base,
+      calories: 400,
+      protein: 40,
+      carbs: 20,
+      fat: 10,
+      fiber: 4,
+      portionUnit: 'servings',
+      portionQuantity: 2,
+      referenceWeightGrams: 100,
+    })
+    expect(perServing).toEqual(base)
+    expect(allowsGrams).toBe(true)
+  })
+
+  it('re-logs half a serving without changing original scale basis', () => {
+    const source = {
+      ...base,
+      calories: 400,
+      protein: 40,
+      carbs: 20,
+      fat: 10,
+      fiber: 4,
+      portionUnit: 'servings' as const,
+      portionQuantity: 2,
+      referenceWeightGrams: 100,
+    }
+    const result = scaleEntryToPortion(source, {
+      portionUnit: 'servings',
+      portionQuantity: 0.5,
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.totals).toEqual({
+      calories: 100,
+      protein: 10,
+      carbs: 5,
+      fat: 3,
+      fiber: 1,
+      caffeine: 0,
+    })
+    expect(result.meta.portionQuantity).toBe(0.5)
+  })
+
+  it('re-logs by grams from a servings-based entry', () => {
+    const source = {
+      ...base,
+      portionUnit: 'servings' as const,
+      portionQuantity: 1,
+      referenceWeightGrams: 100,
+    }
+    const result = scaleEntryToPortion(source, {
+      portionUnit: 'grams',
+      portionQuantity: 50,
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.totals.calories).toBe(100)
+    expect(result.meta.portionUnit).toBe('grams')
   })
 })

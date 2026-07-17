@@ -306,6 +306,7 @@ export default function InputsPage({
             onLogRecipe={isToday ? persistLogRecipe : undefined}
             onEdit={persistUpdate}
             onDelete={persistDelete}
+            onRelog={persistAdd}
             collapsible={false}
             showActions={false}
             showEntryStats={false}
