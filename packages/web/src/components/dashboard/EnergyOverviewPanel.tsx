@@ -37,15 +37,15 @@ const GOAL_GREEN_SOFT = 'rgba(91, 168, 138, 0.28)'
 const GOAL_GREEN_BORDER = '#4A9A7A'
 
 const statusColor: Record<NetBalance['status'], string> = {
-  under: '#568FEB', // dashboard blue (chroma-matched family)
+  under: '#0C4197', // dashboard blue
   in_range: GOAL_GREEN,
-  over: '#EA4E2E', // outputs red-orange
+  over: '#E89830', // outputs yellow
 }
 
 const statusBadgeBg: Record<NetBalance['status'], string> = {
-  under: 'rgba(107, 141, 181, 0.18)',
+  under: 'rgba(12, 65, 151, 0.16)',
   in_range: 'rgba(91, 168, 138, 0.18)',
-  over: 'rgba(232, 106, 60, 0.16)',
+  over: 'rgba(232, 152, 48, 0.18)',
 }
 
 /** Net position on a track with the goal low–high band and a Target mark. */

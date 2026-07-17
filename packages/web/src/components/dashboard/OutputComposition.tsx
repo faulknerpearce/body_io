@@ -1,5 +1,5 @@
 import type { NetBalance } from '@body-io/shared'
-import { neutrals, ZONE_CORAL } from '../../lib/design-tokens'
+import { neutrals, ZONE_OUTPUT } from '../../lib/design-tokens'
 
 interface OutputCompositionProps {
   balance: NetBalance
@@ -11,7 +11,7 @@ const STROKE = 10
 
 /** Muted gray — base burn (BMR or device total). */
 const BASE_RING = '#C7C7CC'
-const ACTIVITY_COLOR = ZONE_CORAL
+const ACTIVITY_COLOR = ZONE_OUTPUT
 
 function compositionPercents(baseBurn: number, burned: number) {
   if (burned <= 0) {

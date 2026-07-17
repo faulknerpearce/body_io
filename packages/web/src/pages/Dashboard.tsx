@@ -297,6 +297,9 @@ export default function Dashboard() {
       <section style={{ marginBottom: 28 }}>
         <TrendsPanel
           rows={trendRows}
+          targetCalories={Math.round(
+            (nutritionGoals.calories.low + nutritionGoals.calories.high) / 2,
+          )}
           preset={trendsPreset}
           customStart={customStart}
           customEnd={customEnd}
