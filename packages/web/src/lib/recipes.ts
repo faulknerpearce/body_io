@@ -226,33 +226,44 @@ export async function logRecipe(options: {
   const entryDate =
     options.entryDate ?? todayISOInTimeZone(options.timeZone ?? detectBrowserTimeZone())
 
-  const { data, error } = await supabase
+  const baseRow = {
+    id: crypto.randomUUID(),
+    user_id: userId,
+    icon: recipe.icon,
+    icon_bg: recipe.iconBg,
+    icon_color: recipe.iconColor,
+    name: recipe.name,
+    description: recipe.description,
+    calories: totals.calories,
+    protein: totals.protein,
+    carbs: totals.carbs,
+    fat: totals.fat,
+    fiber: totals.fiber,
+    caffeine: totals.caffeine,
+    entry_date: entryDate,
+    servings_logged: portionUnit === 'servings' ? portionQuantity : null,
+    portion_unit: portionUnit,
+    portion_quantity: portionQuantity,
+    reference_weight_grams: referenceWeightGrams,
+    ...(options.loggedAt ? { created_at: options.loggedAt } : {}),
+  }
+
+  // Prefer linking recipe_id. For shared (non-owned) recipes some policies may reject
+  // the foreign key; fall back to a snapshotted entry without the link.
+  const withRecipe = await supabase
     .from('food_entries')
-    .insert({
-      id: crypto.randomUUID(),
-      user_id: userId,
-      icon: recipe.icon,
-      icon_bg: recipe.iconBg,
-      icon_color: recipe.iconColor,
-      name: recipe.name,
-      description: recipe.description,
-      calories: totals.calories,
-      protein: totals.protein,
-      carbs: totals.carbs,
-      fat: totals.fat,
-      fiber: totals.fiber,
-      caffeine: totals.caffeine,
-      entry_date: entryDate,
-      recipe_id: recipe.id,
-      servings_logged: portionUnit === 'servings' ? portionQuantity : null,
-      portion_unit: portionUnit,
-      portion_quantity: portionQuantity,
-      reference_weight_grams: referenceWeightGrams,
-      ...(options.loggedAt ? { created_at: options.loggedAt } : {}),
-    })
+    .insert({ ...baseRow, recipe_id: recipe.id })
     .select()
     .single()
 
-  if (error) throw new Error(error.message)
-  return mapRow(data)
+  if (!withRecipe.error) return mapRow(withRecipe.data)
+
+  const withoutRecipe = await supabase
+    .from('food_entries')
+    .insert({ ...baseRow, recipe_id: null })
+    .select()
+    .single()
+
+  if (withoutRecipe.error) throw new Error(withRecipe.error.message)
+  return mapRow(withoutRecipe.data)
 }
