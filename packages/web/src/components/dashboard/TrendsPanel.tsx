@@ -5,7 +5,13 @@ import {
   type TrendsRangePreset,
 } from '@body-io/shared'
 import { useState } from 'react'
-import { neutrals, radius, status } from '../../lib/design-tokens'
+import {
+  neutrals,
+  radius,
+  status,
+  ZONE_INPUT,
+  ZONE_OUTPUT,
+} from '../../lib/design-tokens'
 import { inputBase, labelBase } from '../../lib/styles'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import Card from '../ui/Card'
@@ -13,6 +19,8 @@ import TrendsChart from './TrendsChart'
 
 interface TrendsPanelProps {
   rows: DailyEnergySnapshot[]
+  /** Midpoint of daily net calorie goal band for the chart target line. */
+  targetCalories: number
   preset: TrendsRangePreset
   customStart: string
   customEnd: string
@@ -36,9 +44,9 @@ const VIEW_OPTIONS: { value: TrendsView; label: string }[] = [
   { value: 'chart', label: 'Chart' },
 ]
 
-/** Theme: surplus (more fuel left) green, deficit/burn-heavy coral. */
-const DELTA_SURPLUS = '#13A561'
-const DELTA_DEFICIT = '#EA4E2E'
+/** Theme: surplus (fuel left) input green, deficit/burn-heavy output amber. */
+const DELTA_SURPLUS = ZONE_INPUT
+const DELTA_DEFICIT = ZONE_OUTPUT
 
 function formatDelta(value: number | null): string {
   if (value === null) return '—'
@@ -59,37 +67,9 @@ function netColor(value: number): string {
   return neutrals.textMuted
 }
 
-function TrendSummaryCards({
-  summary,
-  summaryId,
-}: {
-  summary: ReturnType<typeof summarizeDailyEnergyPeriod>
-  summaryId: string
-}) {
-  return (
-    <div id={summaryId} className="trends-summary-cards" aria-label="Period summary">
-      <div className="trends-summary-card trends-summary-card-total">
-        <p className="trends-summary-card-label">Period total</p>
-        <p className="trends-summary-card-value">{summary.netTotal.toLocaleString()} kcal net</p>
-        <p className="trends-summary-card-meta">
-          {summary.intakeTotal.toLocaleString()} intake · {summary.totalOutputTotal.toLocaleString()}{' '}
-          output
-        </p>
-      </div>
-      <div className="trends-summary-card trends-summary-card-average">
-        <p className="trends-summary-card-label">Daily average</p>
-        <p className="trends-summary-card-value">{summary.netAverage.toLocaleString()} kcal net</p>
-        <p className="trends-summary-card-meta">
-          {summary.intakeAverage.toLocaleString()} intake ·{' '}
-          {summary.totalOutputAverage.toLocaleString()} output
-        </p>
-      </div>
-    </div>
-  )
-}
-
 export default function TrendsPanel({
   rows,
+  targetCalories,
   preset,
   customStart,
   customEnd,
@@ -110,7 +90,27 @@ export default function TrendsPanel({
       <div className="trends-panel-header">
         <div>
           <p className="trends-panel-eyebrow">Trends</p>
-          <h3 className="trends-panel-title">Net energy history</h3>
+          <h3 className="trends-panel-title">I/O History</h3>
+          {rows.length > 0 && !loading && (
+            <p id={summaryId} className="trends-panel-summary" aria-label="Period summary">
+              Period total{' '}
+              <span className="trends-panel-summary-em">
+                {summary.netTotal.toLocaleString()} kcal net
+              </span>
+              <span className="trends-panel-summary-sep" aria-hidden="true">
+                ·
+              </span>
+              Daily avg{' '}
+              <span className="trends-panel-summary-em">
+                {summary.netAverage.toLocaleString()} kcal net
+              </span>
+              <span className="trends-panel-summary-meta">
+                {' '}
+                ({summary.intakeAverage.toLocaleString()} in ·{' '}
+                {summary.totalOutputAverage.toLocaleString()} out)
+              </span>
+            </p>
+          )}
         </div>
 
         <div className="trends-controls">
@@ -202,135 +202,103 @@ export default function TrendsPanel({
       {loading ? (
         <p style={{ color: neutrals.textMuted, fontSize: 13, margin: 0 }}>Loading trends…</p>
       ) : view === 'chart' ? (
-        <>
-          <TrendsChart rows={rows} />
-          {rows.length > 0 && <TrendSummaryCards summary={summary} summaryId={summaryId} />}
-        </>
+        <TrendsChart rows={rows} targetCalories={targetCalories} />
       ) : isMobile ? (
-        <>
-          <div className="trends-mobile-cards" role="list" aria-label="Daily energy breakdown">
-            {displayRows.map((row) => (
-              <article
-                key={row.date}
-                className="trends-mobile-card"
-                role="listitem"
-                aria-label={`${formatDayLabel(row.date)}: Net ${row.net.toLocaleString()} kilocalories`}
-              >
-                <div className="trends-mobile-card-header">
-                  <h4 className="trends-mobile-card-date">{formatDayLabel(row.date)}</h4>
-                  <span className="trends-mobile-card-net" style={{ color: netColor(row.net) }}>
-                    {row.net >= 0 ? '+' : ''}
-                    {row.net.toLocaleString()} kcal
+        <div className="trends-mobile-cards" role="list" aria-label="Daily energy breakdown">
+          {displayRows.map((row) => (
+            <article
+              key={row.date}
+              className="trends-mobile-card"
+              role="listitem"
+              aria-label={`${formatDayLabel(row.date)}: Net ${row.net.toLocaleString()} kilocalories`}
+            >
+              <div className="trends-mobile-card-header">
+                <h4 className="trends-mobile-card-date">{formatDayLabel(row.date)}</h4>
+                <span className="trends-mobile-card-net" style={{ color: netColor(row.net) }}>
+                  {row.net >= 0 ? '+' : ''}
+                  {row.net.toLocaleString()} kcal
+                </span>
+              </div>
+              <div className="trends-mobile-card-fields">
+                <div className="trends-mobile-card-field">
+                  <p className="trends-mobile-card-field-label">Intake</p>
+                  <p className="trends-mobile-card-field-value">
+                    {row.intakeCalories.toLocaleString()} kcal
+                  </p>
+                </div>
+                <div className="trends-mobile-card-field">
+                  <p className="trends-mobile-card-field-label">
+                    {row.baseSource === 'device' ? 'Device' : 'BMR'}
+                  </p>
+                  <p className="trends-mobile-card-field-value">
+                    {row.baseBurn.toLocaleString()} kcal
+                  </p>
+                </div>
+                <div className="trends-mobile-card-field">
+                  <p className="trends-mobile-card-field-label">Activity</p>
+                  <p className="trends-mobile-card-field-value">
+                    {row.activityCalories.toLocaleString()} kcal
+                  </p>
+                </div>
+                <div className="trends-mobile-card-field">
+                  <p className="trends-mobile-card-field-label">Total Output</p>
+                  <p className="trends-mobile-card-field-value">
+                    {row.totalOutput.toLocaleString()} kcal
+                  </p>
+                </div>
+                <div className="trends-mobile-card-delta">
+                  <p className="trends-mobile-card-delta-label">Δ Net</p>
+                  <span
+                    className="trends-mobile-card-delta-value"
+                    style={{ color: deltaColor(row.netDelta) }}
+                  >
+                    {formatDelta(row.netDelta)}
                   </span>
                 </div>
-                <div className="trends-mobile-card-fields">
-                  <div className="trends-mobile-card-field">
-                    <p className="trends-mobile-card-field-label">Intake</p>
-                    <p className="trends-mobile-card-field-value">
-                      {row.intakeCalories.toLocaleString()} kcal
-                    </p>
-                  </div>
-                  <div className="trends-mobile-card-field">
-                    <p className="trends-mobile-card-field-label">
-                      {row.baseSource === 'device' ? 'Device' : 'BMR'}
-                    </p>
-                    <p className="trends-mobile-card-field-value">
-                      {row.baseBurn.toLocaleString()} kcal
-                    </p>
-                  </div>
-                  <div className="trends-mobile-card-field">
-                    <p className="trends-mobile-card-field-label">Activity</p>
-                    <p className="trends-mobile-card-field-value">
-                      {row.activityCalories.toLocaleString()} kcal
-                    </p>
-                  </div>
-                  <div className="trends-mobile-card-field">
-                    <p className="trends-mobile-card-field-label">Total Output</p>
-                    <p className="trends-mobile-card-field-value">
-                      {row.totalOutput.toLocaleString()} kcal
-                    </p>
-                  </div>
-                  <div className="trends-mobile-card-delta">
-                    <p className="trends-mobile-card-delta-label">Δ Net</p>
-                    <span
-                      className="trends-mobile-card-delta-value"
-                      style={{ color: deltaColor(row.netDelta) }}
-                    >
-                      {formatDelta(row.netDelta)}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-          {rows.length > 0 && <TrendSummaryCards summary={summary} summaryId={summaryId} />}
-        </>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : (
-        <>
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              className="trends-table"
-              aria-describedby={rows.length > 0 ? summaryId : undefined}
-            >
-              <caption className="trends-table-caption">
-                Daily net energy breakdown with period totals and averages
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Intake</th>
-                  <th scope="col">Base</th>
-                  <th scope="col">Activity</th>
-                  <th scope="col">Total Output</th>
-                  <th scope="col">Net</th>
-                  <th scope="col">Δ Net</th>
+        <div style={{ overflowX: 'auto' }}>
+          <table
+            className="trends-table"
+            aria-describedby={rows.length > 0 ? summaryId : undefined}
+          >
+            <caption className="trends-table-caption">Daily input and output breakdown</caption>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Intake</th>
+                <th scope="col">Base</th>
+                <th scope="col">Activity</th>
+                <th scope="col">Total Output</th>
+                <th scope="col">Net</th>
+                <th scope="col">Δ Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayRows.map((row) => (
+                <tr key={row.date}>
+                  <th scope="row">{formatDayLabel(row.date)}</th>
+                  <td>{row.intakeCalories.toLocaleString()}</td>
+                  <td title={row.baseSource === 'device' ? 'Device total' : 'BMR'}>
+                    {row.baseBurn.toLocaleString()}
+                    {row.baseSource === 'device' ? ' · D' : ''}
+                  </td>
+                  <td>{row.activityCalories.toLocaleString()}</td>
+                  <td>{row.totalOutput.toLocaleString()}</td>
+                  <td style={{ color: netColor(row.net), fontWeight: 600 }}>
+                    {row.net.toLocaleString()}
+                  </td>
+                  <td style={{ color: deltaColor(row.netDelta), fontWeight: 600 }}>
+                    {formatDelta(row.netDelta)}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {displayRows.map((row) => (
-                  <tr key={row.date}>
-                    <th scope="row">{formatDayLabel(row.date)}</th>
-                    <td>{row.intakeCalories.toLocaleString()}</td>
-                    <td title={row.baseSource === 'device' ? 'Device total' : 'BMR'}>
-                      {row.baseBurn.toLocaleString()}
-                      {row.baseSource === 'device' ? ' · D' : ''}
-                    </td>
-                    <td>{row.activityCalories.toLocaleString()}</td>
-                    <td>{row.totalOutput.toLocaleString()}</td>
-                    <td style={{ color: netColor(row.net), fontWeight: 600 }}>
-                      {row.net.toLocaleString()}
-                    </td>
-                    <td style={{ color: deltaColor(row.netDelta), fontWeight: 600 }}>
-                      {formatDelta(row.netDelta)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              {rows.length > 0 && (
-                <tfoot id={summaryId} aria-label="Period summary">
-                  <tr className="trends-table-summary trends-table-summary-total">
-                    <th scope="row">Period total</th>
-                    <td>{summary.intakeTotal.toLocaleString()}</td>
-                    <td>{summary.baseBurnTotal.toLocaleString()}</td>
-                    <td>{summary.activityTotal.toLocaleString()}</td>
-                    <td>{summary.totalOutputTotal.toLocaleString()}</td>
-                    <td>{summary.netTotal.toLocaleString()}</td>
-                    <td aria-hidden="true">—</td>
-                  </tr>
-                  <tr className="trends-table-summary trends-table-summary-average">
-                    <th scope="row">Daily average</th>
-                    <td>{summary.intakeAverage.toLocaleString()}</td>
-                    <td>{summary.baseBurnAverage.toLocaleString()}</td>
-                    <td>{summary.activityAverage.toLocaleString()}</td>
-                    <td>{summary.totalOutputAverage.toLocaleString()}</td>
-                    <td>{summary.netAverage.toLocaleString()}</td>
-                    <td aria-hidden="true">—</td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
-        </>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </Card>
   )
