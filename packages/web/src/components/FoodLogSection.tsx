@@ -6,6 +6,7 @@ import { neutrals, radius } from '../lib/design-tokens'
 import AddEntryModal from './AddEntryModal'
 import BarcodeScannerModal from './BarcodeScannerModal'
 import FoodLogEntryStats from './FoodLogEntryStats'
+import RelogEntryModal from './RelogEntryModal'
 import ShareModal from './ShareModal'
 import { Button, Card, EmptyState } from './ui'
 
@@ -34,6 +35,11 @@ interface FoodLogSectionProps {
   ) => Promise<void>
   onEdit?: (id: string, entry: FoodEntryWrite) => Promise<void>
   onDelete?: (id: string) => Promise<void>
+  /** Re-log a prior entry as a new row (does not mutate the source). Uses onAdd when set. */
+  onRelog?: (
+    entry: FoodEntryWrite,
+    options: { entryDate: string },
+  ) => Promise<void>
   readOnly?: boolean
   title?: string
   subtitle?: string
@@ -72,8 +78,10 @@ function FoodLogEntryRow({
   readOnly,
   canEdit,
   canDelete,
+  canRelog,
   onShare,
   onEdit,
+  onRelog,
   onRemove,
 }: {
   item: FoodEntry
@@ -81,8 +89,10 @@ function FoodLogEntryRow({
   readOnly: boolean
   canEdit: boolean
   canDelete: boolean
+  canRelog: boolean
   onShare: () => void
   onEdit: () => void
+  onRelog: () => void
   onRemove: () => void
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -158,10 +168,21 @@ function FoodLogEntryRow({
         </div>
       </div>
 
-      {(canEdit || !readOnly) && (
+      {(canEdit || canRelog || !readOnly) && (
         <>
           <div style={{ borderTop: `1px solid ${neutrals.border}`, marginTop: 16, paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ display: 'flex', gap: 2 }}>
+              {canRelog && (
+                <button
+                  type="button"
+                  className="delicate-icon-action"
+                  onClick={onRelog}
+                  aria-label="Log again"
+                  title="Log again"
+                >
+                  <i className="fa-solid fa-rotate-right" />
+                </button>
+              )}
               {!readOnly && (
                 <button
                   type="button"
@@ -247,6 +268,7 @@ export default function FoodLogSection({
   onLogRecipe,
   onEdit,
   onDelete,
+  onRelog,
   readOnly = false,
   title = "Today's Food Log",
   subtitle,
@@ -266,8 +288,11 @@ export default function FoodLogSection({
   const [internalShowScanner, setInternalShowScanner] = useState(false)
   const [internalPrefillEntry, setInternalPrefillEntry] = useState<FoodEntryWrite | null>(null)
   const [editingEntry, setEditingEntry] = useState<FoodEntry | null>(null)
+  const [reloggingEntry, setReloggingEntry] = useState<FoodEntry | null>(null)
   const [sharingEntry, setSharingEntry] = useState<FoodEntry | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+
+  const relogHandler = onRelog ?? onAdd
 
   const expanded = collapsible ? internalExpanded : true
   const showAddForm = addFormOpen ?? internalShowAddForm
@@ -311,8 +336,10 @@ export default function FoodLogSection({
               readOnly={readOnly}
               canEdit={Boolean(onEdit)}
               canDelete={Boolean(onDelete)}
+              canRelog={Boolean(relogHandler) && !readOnly}
               onShare={() => setSharingEntry(item)}
               onEdit={() => setEditingEntry(item)}
+              onRelog={() => setReloggingEntry(item)}
               onRemove={() => void removeEntry(item.id)}
             />
           ))}
@@ -366,6 +393,18 @@ export default function FoodLogSection({
             setEditingEntry(null)
           }}
           onClose={() => setEditingEntry(null)}
+        />
+      )}
+      {reloggingEntry && relogHandler && (
+        <RelogEntryModal
+          entry={reloggingEntry}
+          logDate={logDate}
+          timeZone={timeZone}
+          onLog={async (entry, options) => {
+            await relogHandler(entry, options)
+            setReloggingEntry(null)
+          }}
+          onClose={() => setReloggingEntry(null)}
         />
       )}
       {sharingEntry && (
