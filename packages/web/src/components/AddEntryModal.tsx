@@ -20,11 +20,12 @@ import { sortRecipesByName } from '../lib/recipeFilters'
 import { fetchRecipeSummaries } from '../lib/recipes'
 import BarcodeScannerModal from './BarcodeScannerModal'
 import RecipeCombobox from './RecipeCombobox'
-import RecipeLogFields, {
+import RecipeLogFields from './RecipeLogFields'
+import {
   defaultRecipeLogFieldValues,
   validateRecipeLogFields,
   type RecipeLogFieldValues,
-} from './RecipeLogFields'
+} from '../lib/recipeLogForm'
 import { inputBase, labelBase } from '../lib/styles'
 import Modal from './Modal'
 

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { RecipeSummary } from '@body-io/shared'
 import { focusIfDesktop } from '../lib/device'
 import Modal from './Modal'
-import RecipeLogFields, {
+import RecipeLogFields from './RecipeLogFields'
+import {
   defaultRecipeLogFieldValues,
   validateRecipeLogFields,
   type RecipeLogFieldValues,
   type RecipeLogSubmitOptions,
-} from './RecipeLogFields'
+} from '../lib/recipeLogForm'
 
 interface LogRecipeModalProps {
   recipe: RecipeSummary
