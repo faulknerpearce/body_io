@@ -333,7 +333,7 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
         </div>
         <div>
           <label htmlFor="recipe-serving-weight" style={labelBase}>
-            Serving weight (g)
+            Weight of one serving (g)
           </label>
           <input
             id="recipe-serving-weight"
@@ -348,7 +348,8 @@ export default function RecipeEditorModal({ recipe, onSave, onClose }: RecipeEdi
         </div>
       </div>
       <p style={{ fontSize: 12, color: '#a1a1aa', margin: '-8px 0 20px 0' }}>
-        Add a serving weight to enable logging this recipe by grams later.
+        How many grams is one serving of this recipe? Enables logging by grams (e.g. ate 300g of the
+        meal) instead of only by servings.
       </p>
 
       <CatalogListSection

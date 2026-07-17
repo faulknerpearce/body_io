@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { todayISOInTimeZone, type RecipeSummary, type RecipeWithIngredients } from '@body-io/shared'
+import type { RecipeSummary, RecipeWithIngredients } from '@body-io/shared'
 import CatalogRow from '../components/layout/CatalogRow'
 import { PageLoading } from '../components/layout/PageState'
 import ZoneButton from '../components/layout/ZoneButton'
 import { EmptyState } from '../components/ui'
 import LogRecipeModal from '../components/LogRecipeModal'
+import type { RecipeLogSubmitOptions } from '../lib/recipeLogForm'
 import RecipeEditorModal from '../components/RecipeEditorModal'
 import RecipeViewModal from '../components/RecipeViewModal'
 import ShareModal from '../components/ShareModal'
@@ -66,18 +67,17 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
     onOpenCreateReady?.(openCreate)
   }, [onOpenCreateReady, openCreate])
 
-  const handleLogRecipe = async (options: {
-    portionUnit: import('@body-io/shared').PortionUnit
-    portionQuantity: number
-  }) => {
+  const handleLogRecipe = async (options: RecipeLogSubmitOptions) => {
     if (!loggingRecipe) return
     await logRecipe({
       recipeId: loggingRecipe.id,
       portionUnit: options.portionUnit,
       portionQuantity: options.portionQuantity,
-      entryDate: todayISOInTimeZone(profile.timeZone),
+      servingWeightGrams: options.servingWeightGrams,
+      entryDate: options.entryDate,
+      loggedAt: options.loggedAt,
     })
-    setLogSuccess(`Added ${loggingRecipe.name} to today's food log.`)
+    setLogSuccess(`Added ${loggingRecipe.name} to your food log.`)
     setLoggingRecipe(null)
   }
 
@@ -345,6 +345,7 @@ export default function RecipesPage({ onOpenCreateReady }: RecipesPageProps) {
       {loggingRecipe && (
         <LogRecipeModal
           recipe={loggingRecipe}
+          timeZone={profile.timeZone}
           onLog={handleLogRecipe}
           onClose={() => setLoggingRecipe(null)}
         />
