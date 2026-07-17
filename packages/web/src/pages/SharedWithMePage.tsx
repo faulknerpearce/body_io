@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 import CatalogRow from '../components/layout/CatalogRow'
 import PageHeader from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageState'
+import LogRecipeModal from '../components/LogRecipeModal'
+import type { RecipeLogSubmitOptions } from '../components/RecipeLogFields'
+import Modal from '../components/Modal'
 import RecipeViewModal from '../components/RecipeViewModal'
 import SharedActivityViewModal from '../components/SharedActivityViewModal'
 import SharedEntryViewModal from '../components/SharedEntryViewModal'
@@ -11,7 +14,7 @@ import { useProfile } from '../context/useProfile'
 import { iconForActivityType } from '../lib/activityIcons'
 import { forkActivity } from '../lib/activities'
 import { forkEntry } from '../lib/entries'
-import { forkRecipe } from '../lib/recipes'
+import { forkRecipe, logRecipe } from '../lib/recipes'
 import { getSharedSeenAt, isShareNew, markSharedAsSeen } from '../lib/sharedNotifications'
 import {
   dismissActivityShare,
@@ -146,6 +149,9 @@ export default function SharedWithMePage() {
   const [workouts, setWorkouts] = useState<SharedWorkoutItem[]>([])
   const [viewingEntry, setViewingEntry] = useState<SharedEntryItem | null>(null)
   const [viewingRecipe, setViewingRecipe] = useState<SharedRecipeItem | null>(null)
+  /** Choice sheet: save to library vs log to meals (list primary action). */
+  const [recipeActionItem, setRecipeActionItem] = useState<SharedRecipeItem | null>(null)
+  const [loggingRecipe, setLoggingRecipe] = useState<SharedRecipeItem | null>(null)
   const [viewingActivity, setViewingActivity] = useState<SharedActivityItem | null>(null)
   const [viewingWorkout, setViewingWorkout] = useState<SharedWorkoutItem | null>(null)
   const [savingEntryId, setSavingEntryId] = useState<string | null>(null)
@@ -156,6 +162,7 @@ export default function SharedWithMePage() {
   const [dismissingRecipeId, setDismissingRecipeId] = useState<string | null>(null)
   const [dismissingActivityId, setDismissingActivityId] = useState<string | null>(null)
   const [dismissingWorkoutId, setDismissingWorkoutId] = useState<string | null>(null)
+  const [logSuccess, setLogSuccess] = useState<string | null>(null)
   const [seenAtBaseline] = useState(() => getSharedSeenAt())
 
   const loadShared = async () => {
@@ -209,18 +216,46 @@ export default function SharedWithMePage() {
     }
   }
 
-  const handleSaveSharedRecipe = async (item: SharedRecipeItem) => {
+  const handleSaveSharedRecipe = async (item: SharedRecipeItem): Promise<boolean> => {
     setSavingRecipeId(item.share.id)
+    setError(null)
     try {
-      await forkRecipe(item.recipe.id, item.share.id)
-      await dismissRecipeShare(item.share.id)
-      setRecipes((prev) => prev.filter((r) => r.share.id !== item.share.id))
-      setViewingRecipe(null)
+      const saved = await forkRecipe(item.recipe.id, item.share.id)
+      // Keep the share visible so the user can still log to meals independently.
+      setRecipes((prev) =>
+        prev.map((r) =>
+          r.share.id === item.share.id
+            ? { ...r, share: { ...r.share, savedCopyId: saved.id } }
+            : r,
+        ),
+      )
+      setViewingRecipe((current) =>
+        current?.share.id === item.share.id
+          ? { ...current, share: { ...current.share, savedCopyId: saved.id } }
+          : current,
+      )
+      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe')
+      return false
     } finally {
       setSavingRecipeId(null)
     }
+  }
+
+  const handleLogSharedRecipe = async (options: RecipeLogSubmitOptions) => {
+    if (!loggingRecipe) return
+    setError(null)
+    await logRecipe({
+      recipeId: loggingRecipe.recipe.id,
+      portionUnit: options.portionUnit,
+      portionQuantity: options.portionQuantity,
+      servingWeightGrams: options.servingWeightGrams,
+      entryDate: options.entryDate,
+      loggedAt: options.loggedAt,
+    })
+    setLogSuccess(`Added ${loggingRecipe.recipe.name} to your food log.`)
+    setLoggingRecipe(null)
   }
 
   const handleAddSharedActivity = async (item: SharedActivityItem) => {
@@ -318,6 +353,22 @@ export default function SharedWithMePage() {
         description="Meals, recipes, activities, and workouts that other people have shared with you."
       />
 
+      {logSuccess && (
+        <div
+          role="status"
+          style={{
+            marginBottom: 16,
+            padding: '12px 16px',
+            background: '#ecfdf5',
+            color: '#065f46',
+            borderRadius: 12,
+            fontSize: 13,
+          }}
+        >
+          {logSuccess}
+        </div>
+      )}
+
       {error && (
         <div
           role="alert"
@@ -380,17 +431,46 @@ export default function SharedWithMePage() {
                 iconBg={item.recipe.iconBg}
                 iconColor={item.recipe.iconColor}
                 title={item.recipe.name}
-                subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.recipe.ingredientCount} ingredients`}
+                subtitle={`Shared by ${item.share.ownerDisplayName} · ${item.recipe.ingredientCount} ingredients${
+                  item.share.savedCopyId ? ' · In your library' : ''
+                }`}
                 onView={() => setViewingRecipe(item)}
                 actions={
-                  <SharedCatalogActions
-                    resourceLabel="recipe"
-                    onView={() => setViewingRecipe(item)}
-                    onAccept={() => handleSaveSharedRecipe(item)}
-                    acceptLoading={savingRecipeId === item.share.id}
-                    onDecline={() => handleDismissRecipe(item)}
-                    declining={dismissingRecipeId === item.share.id}
-                  />
+                  <>
+                    <button
+                      type="button"
+                      className="delicate-icon-action"
+                      onClick={() => setViewingRecipe(item)}
+                      aria-label="View recipe"
+                      title="View recipe"
+                    >
+                      <i className="fa-regular fa-eye" />
+                    </button>
+                    <button
+                      type="button"
+                      className="delicate-icon-action"
+                      onClick={() => handleDismissRecipe(item)}
+                      disabled={dismissingRecipeId === item.share.id || savingRecipeId === item.share.id}
+                      aria-label="Decline shared recipe"
+                      title="Decline shared recipe"
+                    >
+                      <i className="fa-solid fa-xmark" />
+                    </button>
+                    {/* Primary: choose library vs log — never silent-log or silent-accept */}
+                    <button
+                      type="button"
+                      className="catalog-add-log-button"
+                      onClick={() => {
+                        setLogSuccess(null)
+                        setError(null)
+                        setRecipeActionItem(item)
+                      }}
+                      aria-label="Add shared recipe — choose library or food log"
+                      title="Add to library or log to meals"
+                    >
+                      <i className="fa-solid fa-plus" />
+                    </button>
+                  </>
                 }
               />
             ))}
@@ -492,6 +572,129 @@ export default function SharedWithMePage() {
           savedCopyId={viewingRecipe.share.savedCopyId}
           savingCopy={savingRecipeId === viewingRecipe.share.id}
           onSaveCopy={async () => handleSaveSharedRecipe(viewingRecipe)}
+          onLogToMeals={() => {
+            setLogSuccess(null)
+            setLoggingRecipe(viewingRecipe)
+            setViewingRecipe(null)
+          }}
+        />
+      )}
+
+      {recipeActionItem && (
+        <Modal titleId="shared-recipe-action-title" onClose={() => setRecipeActionItem(null)}>
+          <h3
+            id="shared-recipe-action-title"
+            style={{
+              fontFamily: "'Space Grotesk','Inter',sans-serif",
+              fontSize: 22,
+              fontWeight: 600,
+              margin: '0 0 4px 0',
+            }}
+          >
+            {recipeActionItem.recipe.name}
+          </h3>
+          <p style={{ fontSize: 13, color: '#71717a', margin: '0 0 20px 0' }}>
+            Shared by {recipeActionItem.share.ownerDisplayName}. Choose what you want to do — these
+            are independent.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              type="button"
+              disabled={
+                !!recipeActionItem.share.savedCopyId ||
+                savingRecipeId === recipeActionItem.share.id
+              }
+              onClick={async () => {
+                const item = recipeActionItem
+                const ok = await handleSaveSharedRecipe(item)
+                if (ok) {
+                  setRecipeActionItem(null)
+                  setLogSuccess(`Saved ${item.recipe.name} to your recipes.`)
+                }
+              }}
+              style={{
+                padding: '12px 16px',
+                borderRadius: 14,
+                border: '1px solid #e4e4e7',
+                background: recipeActionItem.share.savedCopyId ? '#f4f4f5' : 'white',
+                color: '#18181b',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: recipeActionItem.share.savedCopyId ? 'default' : 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>
+                {recipeActionItem.share.savedCopyId
+                  ? 'Already in my recipes'
+                  : savingRecipeId === recipeActionItem.share.id
+                    ? 'Saving…'
+                    : 'Save to my recipes'}
+              </div>
+              <div style={{ fontSize: 12, color: '#71717a', marginTop: 4 }}>
+                Copy into your recipe library. Does not log a meal.
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLoggingRecipe(recipeActionItem)
+                setRecipeActionItem(null)
+              }}
+              style={{
+                padding: '12px 16px',
+                borderRadius: 14,
+                border: 'none',
+                background: 'var(--zone-accent)',
+                color: 'white',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>Log to my meals</div>
+              <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                Choose date, time, servings or grams — does not require saving to your library.
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRecipeActionItem(null)}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 9999,
+                border: '1px solid #e4e4e7',
+                background: 'white',
+                color: '#52525b',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: 'pointer',
+                alignSelf: 'flex-end',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {loggingRecipe && (
+        <LogRecipeModal
+          recipe={loggingRecipe.recipe}
+          timeZone={profile.timeZone}
+          subtitle={
+            <>
+              Log <strong style={{ color: '#18181b' }}>{loggingRecipe.recipe.name}</strong> to your
+              food log
+              {loggingRecipe.share.ownerDisplayName
+                ? ` (shared by ${loggingRecipe.share.ownerDisplayName})`
+                : ''}
+              .
+            </>
+          }
+          onLog={handleLogSharedRecipe}
+          onClose={() => setLoggingRecipe(null)}
         />
       )}
 

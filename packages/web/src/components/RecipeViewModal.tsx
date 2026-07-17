@@ -21,6 +21,8 @@ interface RecipeViewModalProps {
   onShare?: (recipe: RecipeWithIngredients) => void
   onEdit?: (recipe: RecipeWithIngredients) => void
   onSaveCopy?: () => void
+  /** Shared mode: log this recipe to the food log without forking to library. */
+  onLogToMeals?: () => void
 }
 
 function formatMacro(value: number, unit: string): string {
@@ -37,6 +39,7 @@ export default function RecipeViewModal({
   onShare,
   onEdit,
   onSaveCopy,
+  onLogToMeals,
 }: RecipeViewModalProps) {
   const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
   const [loading, setLoading] = useState(true)
@@ -94,6 +97,7 @@ export default function RecipeViewModal({
               <>
                 {mode === 'shared' && ownerDisplayName ? `Shared by ${ownerDisplayName} · ` : ''}
                 {recipe.defaultServings} servings per batch · {recipe.ingredients.length} ingredients
+                {recipe.servingWeightGrams ? ` · 1 serving = ${recipe.servingWeightGrams}g` : ''}
               </>
             }
             description={recipe.description || undefined}
@@ -145,19 +149,30 @@ export default function RecipeViewModal({
             Share
           </button>
         )}
+        {mode === 'shared' && onLogToMeals && (
+          <button
+            type="button"
+            onClick={onLogToMeals}
+            style={{
+              ...modalPrimaryButton,
+              background: 'var(--zone-accent)',
+            }}
+          >
+            Log to meals
+          </button>
+        )}
         {mode === 'shared' && onSaveCopy && (
           <button
             type="button"
             onClick={onSaveCopy}
             disabled={!!savedCopyId || savingCopy}
             style={{
-              ...modalPrimaryButton,
-              background: savedCopyId ? '#e4e4e7' : savingCopy ? '#6b7280' : 'var(--zone-accent)',
+              ...modalFooterButton,
+              color: savedCopyId ? '#71717a' : 'var(--zone-accent)',
               cursor: savedCopyId ? 'default' : 'pointer',
-              color: savedCopyId ? '#71717a' : 'white',
             }}
           >
-            {savedCopyId ? 'Already saved' : savingCopy ? 'Saving...' : 'Save to my library'}
+            {savedCopyId ? 'Already in library' : savingCopy ? 'Saving...' : 'Save to my library'}
           </button>
         )}
         <button type="button" onClick={onClose} style={modalFooterButton}>

@@ -301,6 +301,10 @@ export const tools: Tool[] = [
         type: 'number',
         description: 'How many servings the ingredient batch yields',
       },
+      servingWeightGrams: {
+        type: 'number',
+        description: 'Weight in grams of one serving (enables logging by grams)',
+      },
       icon: { type: 'string' },
       iconBg: { type: 'string' },
       iconColor: { type: 'string' },
@@ -332,11 +336,23 @@ export const tools: Tool[] = [
   {
     name: 'log_recipe',
     description:
-      'Body IO: log one food entry from a saved recipe with servings scaling. Creates a single aggregated food log row.',
+      'Body IO: log one food entry from a saved recipe. Scale by servings or by grams eaten (requires recipe serving weight). Creates a single aggregated food log row.',
     inputSchema: objectSchema(
       {
         recipeId: { type: 'string', description: 'Recipe id to log' },
-        servings: { type: 'number', description: 'Number of servings to log (default 1)' },
+        servings: {
+          type: 'number',
+          description: 'Number of servings to log (default 1). Alias for portionQuantity when logging by servings.',
+        },
+        portionUnit: {
+          type: 'string',
+          enum: ['servings', 'grams'],
+          description: 'Log by recipe servings or by grams eaten (default servings)',
+        },
+        portionQuantity: {
+          type: 'number',
+          description: 'Servings count or grams eaten depending on portionUnit',
+        },
         date: dateProperty,
       },
       ['recipeId'],
