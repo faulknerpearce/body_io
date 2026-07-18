@@ -201,8 +201,7 @@ export default function TrendsChart({ rows, targetCalories }: TrendsChartProps) 
         <svg
           viewBox={`0 0 ${chart.width} ${chart.height}`}
           width="100%"
-          height="auto"
-          style={{ display: 'block', maxWidth: '100%' }}
+          style={{ display: 'block', width: '100%', height: 'auto', maxWidth: '100%' }}
           preserveAspectRatio="xMidYMid meet"
         >
           {chart.yTicks.map((tick) => {
